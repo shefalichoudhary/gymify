@@ -20,11 +20,11 @@ const MainLayout = () => {
   useEffect(() => {
     if (typeof isAuthenticated === "undefined") return;
 
-    const inApp = segments[0] === "(tabs)"; // Checking if inside the app
+    const inApp = segments[0] === "(tabs)"; // Checking if inside the tabs
 
     if (isAuthenticated && !inApp) {
-      // Redirect to home if authenticated and not in the app
-      router.replace("/home");
+      // Redirect to home if authenticated and not in the tabs
+      router.replace("/(tabs)/home");
     } else if (isAuthenticated === false) {
       // Redirect to sign-in if not authenticated
       router.replace("/");
