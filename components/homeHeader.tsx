@@ -1,7 +1,6 @@
-import { View, Text, Platform, Button, TouchableOpacity } from "react-native";
+import { View, Text, Platform, TouchableOpacity, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/context/authContext";
-import { useRouter } from "expo-router";
 
 const ios = Platform.OS == "ios";
 
@@ -16,19 +15,26 @@ export default function HomeHeader() {
   return (
     <View
       style={{ paddingTop: ios ? top : top + 11 }}
-      className="flex-row justify-between px-5 bg-slate-950 pb-7 rounded-b-3xl shadow"
+      className="flex-row justify-between items-center px-5 bg-zinc-900  pb-5 shadow"
     >
-      <View>
-        <Text className="font-medium, text-white">Gymify</Text>
+      {/* Left side: Logo + Name */}
+      <View className="flex-row items-center">
+        <Image
+          source={require("../assets/images/logo.png")}
+          style={{ height: 60, width: 30 }} // Adjust logo size & spacing
+        />
+        <Text className="text-xl font-bold tracking-[.18em] text-white">
+          GYMIFY
+        </Text>
       </View>
-      <View>
-        <TouchableOpacity
-          className="bg-zinc-900 rounded-xl justify-center items-center p-2 w-full"
-          onPress={handleLogout}
-        >
-          <Text className="font-bold text-white tracking-wider">Logout</Text>
-        </TouchableOpacity>
-      </View>
+
+      {/* Right side: Logout Button */}
+      <TouchableOpacity
+        className="bg-zinc-900 rounded-xl px-4 py-2"
+        onPress={handleLogout}
+      >
+        <Text className="font-bold text-white tracking-wider">Logout</Text>
+      </TouchableOpacity>
     </View>
   );
 }

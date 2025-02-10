@@ -1,29 +1,35 @@
-import React, { ReactNode } from "react";
 import {
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
+  Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  View,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
-const CustomKeyboard = ({ children }: { children: ReactNode }): JSX.Element => {
+const ios = Platform.OS === "ios";
+
+export default function CustomKeyboard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       style={{ flex: 1 }}
+      behavior={ios ? "padding" : "height"}
+      keyboardVerticalOffset={ios ? 80 : 10} // Dynamic offset
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {children}
+          <View style={{ flex: 1 }}>{children}</View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
-};
-export default CustomKeyboard;
+}

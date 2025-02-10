@@ -18,15 +18,13 @@ const MainLayout = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof isAuthenticated === "undefined") return;
+    if (typeof isAuthenticated == "undefined") return;
 
-    const inApp = segments[0] === "(tabs)"; // Checking if inside the tabs
+    const inApp = segments[0] == "(tabs)"; // Checking if inside the tabs
 
     if (isAuthenticated && !inApp) {
-      // Redirect to home if authenticated and not in the tabs
-      router.replace("/(tabs)/home");
-    } else if (isAuthenticated === false) {
-      // Redirect to sign-in if not authenticated
+      router.replace("/home");
+    } else if (isAuthenticated == false) {
       router.replace("/");
     }
   }, [isAuthenticated]);
@@ -39,13 +37,9 @@ export default function RootLayout() {
   const [isReady, setIsReady] = useState(false);
 
   useDrizzleStudio(expo_sqlite);
-  console.log("DB Initialized:", db);
 
   useEffect(() => {
-    if (migrationError) {
-      console.error("Migration error:", migrationError);
-    } else if (success) {
-      console.log("Migration Success:", success);
+    if (migrationError || success) {
       setIsReady(true);
       SplashScreen.hideAsync();
     }
@@ -69,7 +63,7 @@ export default function RootLayout() {
         useSuspense
       >
         <AuthProvider>
-          <MainLayout></MainLayout>
+          <MainLayout />
         </AuthProvider>
       </SQLiteProvider>
     </Suspense>
