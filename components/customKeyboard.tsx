@@ -19,7 +19,7 @@ export default function CustomKeyboard({
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={ios ? "padding" : "height"}
-      keyboardVerticalOffset={ios ? 80 : 10} // Dynamic offset
+      keyboardVerticalOffset={ios ? 80 : 0} // Dynamic offset
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <ScrollView

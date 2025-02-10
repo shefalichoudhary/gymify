@@ -4,6 +4,7 @@ import { useAuth } from "../context/authContext";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import CustomKeyboard from "@/components/customKeyboard";
+import CustomButton from "@/components/customeButton";
 
 interface FormState {
   email: string;
@@ -120,14 +121,11 @@ export default function ForgotPassword() {
         </View>
 
         {/* Reset Password Button */}
-        <TouchableOpacity
-          className="bg-zinc-900 rounded-xl justify-center items-center p-4 w-full"
+        <CustomButton
+          bgColor="bg-zinc-900"
           onPress={handleForgotPassword}
-        >
-          <Text className="font-bold text-white tracking-wider">
-            Reset Password
-          </Text>
-        </TouchableOpacity>
+          text="Reset Password"
+        />
 
         {/* Navigation to Sign In */}
       </View>

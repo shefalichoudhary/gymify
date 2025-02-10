@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import CustomKeyboard from "@/components/customKeyboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GoogleAuthButton from "@/components/googleAuthButton";
+import CustomButton from "@/components/customeButton";
 
 interface FormState {
   username: string;
@@ -198,14 +199,12 @@ function SignUp(): JSX.Element {
           </View>
 
           {/* Sign Up Button */}
-          <TouchableOpacity
+          <CustomButton
             onPress={handleRegister}
-            className="bg-zinc-900 rounded-xl justify-center items-center p-4 w-full mt-4"
-          >
-            <Text className="font-bold text-white tracking-wider">
-              {loading ? <ActivityIndicator color="white" /> : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
+            text="Sign Up"
+            bgColor="bg-zinc-900"
+            loading={loading}
+          />
           <GoogleAuthButton label="Sign up with Google" />
         </View>
 

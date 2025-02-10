@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, Pressable, TouchableOpacity } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "@/context/authContext";
+
 WebBrowser.maybeCompleteAuthSession();
 
 interface GoogleAuthButtonProps {
-  label: string; // Dynamic label for SignIn / SignUp
+  label: string;
 }
 export default function GoogleAuthButton({ label }: GoogleAuthButtonProps) {
   const { googleAuth } = useAuth();
@@ -30,13 +31,11 @@ export default function GoogleAuthButton({ label }: GoogleAuthButtonProps) {
         onPress={() => promptAsync()}
         className="bg-zinc-900 rounded-xl flex-row items-center p-4 w-full mt-4 relative"
       >
-        {/* Google Icon on the Left */}
         <Image
           className="h-7 w-10 absolute left-4"
           source={require("../assets/images/google-icon.png")}
         />
 
-        {/* Centered Text */}
         <Text className="flex-1 font-bold text-white tracking-wider text-center">
           {label}
         </Text>

@@ -3,8 +3,12 @@ import React, { useState } from "react";
 import { useNavigation } from "expo-router";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { KeyboardAvoidingScrollView } from "react-native-keyboard-avoiding-scroll-view";
+import { useRouter } from "expo-router"; // Use router for navigation
+import CustomButton from "@/components/customeButton";
+
 export default function CreateRoutine() {
   const [routineTitle, setRoutineTitle] = useState("");
+  const router = useRouter();
 
   return (
     <KeyboardAvoidingScrollView>
@@ -19,15 +23,11 @@ export default function CreateRoutine() {
         />
 
         {/* Add Exercise Button */}
-        <TouchableOpacity
-          onPress={() => console.log("Add Exercise Pressed")}
-          className="bg-blue-600 rounded-xl justify-center items-center p-4 w-full mt-4 flex-row space-x-3"
-        >
-          <FontAwesome6 name="plus" size={20} color="white" />
-          <Text className="font-bold text-white tracking-wider">
-            Add Exercise
-          </Text>
-        </TouchableOpacity>
+        <CustomButton
+          onPress={() => router.push("/addExercise")}
+          text="Add Exercise"
+          icon="plus"
+        />
       </View>
     </KeyboardAvoidingScrollView>
   );

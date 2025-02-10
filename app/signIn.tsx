@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 import GoogleAuthButton from "@/components/googleAuthButton";
 import CustomKeyboard from "@/components/customKeyboard";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CustomButton from "@/components/customeButton";
 
 interface FormState {
   email: string;
@@ -163,14 +164,12 @@ function SignIn(): JSX.Element {
           </Pressable>
 
           {/* Sign In Button */}
-          <TouchableOpacity
+          <CustomButton
             onPress={handleSignIn}
-            className="bg-zinc-900 rounded-xl justify-center items-center p-4 w-full mt-4"
-          >
-            <Text className="font-bold text-white tracking-wider">
-              {loading ? <ActivityIndicator color="white" /> : "Sign In"}
-            </Text>
-          </TouchableOpacity>
+            text="Sign In"
+            bgColor="bg-zinc-900"
+            loading={loading}
+          />
           <GoogleAuthButton label="Sign in with Google" />
         </View>
 
