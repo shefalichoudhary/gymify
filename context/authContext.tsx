@@ -156,7 +156,6 @@ export const AuthProvider = ({
     newPassword: string
   ): Promise<void> => {
     try {
-      console.log(email, newPassword, "gort");
       const foundUser = await db
         .select()
         .from(users)

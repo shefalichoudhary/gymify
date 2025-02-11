@@ -10,7 +10,7 @@ export default function Workout() {
       <Text className="text-2xl font-bold text-center mb-4">Routines</Text>
 
       <CustomButton
-        onPress={() => router.push("/signUp")}
+        onPress={() => router.push("/createRoutine")}
         text="New Routine"
         icon="clipboard-list"
         bgColor="bg-zinc-900"

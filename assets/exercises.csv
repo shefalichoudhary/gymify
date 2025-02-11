@@ -1,0 +1,21 @@
+name,category,equipment,muscle_group
+Squat,Strength,Barbell,Legs
+Deadlift,Strength,Barbell,Back
+Bench Press,Strength,Barbell,Chest
+Pull-up,Strength,Bodyweight,Back
+Push-up,Strength,Bodyweight,Chest
+Plank,Core,Bodyweight,Core
+Lunges,Strength,Bodyweight,Legs
+Overhead Press,Strength,Barbell,Shoulders
+Barbell Row,Strength,Barbell,Back
+Dumbbell Curl,Strength,Dumbbell,Biceps
+Tricep Dips,Strength,Bodyweight,Triceps
+Lat Pulldown,Strength,Machine,Back
+Leg Press,Strength,Machine,Legs
+Calf Raises,Strength,Bodyweight,Calves
+Russian Twists,Core,Bodyweight,Obliques
+Mountain Climbers,Cardio,Bodyweight,Full Body
+Burpees,Cardio,Bodyweight,Full Body
+Jump Rope,Cardio,Jump Rope,Full Body
+Kettlebell Swing,Strength,Kettlebell,Hips
+Side Plank,Core,Bodyweight,Obliques
