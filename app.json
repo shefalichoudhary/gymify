@@ -45,7 +45,8 @@
         }
       ],
       "expo-sqlite",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
@@ -64,6 +65,9 @@
     "updates": {
       "url": "https://u.expo.dev/abb235c2-482a-4cc1-8a0e-3f8d39e63fb7"
     },
-    "owner": "shefali_choudhary"
+    "owner": "shefali_choudhary",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
   }
 }

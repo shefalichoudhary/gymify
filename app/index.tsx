@@ -5,12 +5,19 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import initDB from "../utils/importExercises";
 
 export default function LandingPage() {
   const router = useRouter();
+
+  // Path to the file containing the above code
+
+  useEffect(() => {
+    initDB();
+  }, []);
 
   return (
     <ImageBackground

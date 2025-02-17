@@ -47,44 +47,49 @@ export default function ForgotPassword() {
   };
 
   // Live Validation on Input Change (with manual debounce)
-  const handleChange = (name: keyof FormState, value: string) => {
+  const handleChange = async (name: keyof FormState, value: string) => {
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
 
-    setErrors((prevErrors) => {
-      let newErrors = { ...prevErrors };
+    let newErrors = { ...errors };
 
-      if (name === "email") {
-        if (!value.trim()) {
-          newErrors.email = "Email is required.";
-        } else if (!/\S+@\S+\.\S+/.test(value)) {
-          newErrors.email = "Invalid email format.";
-        } else {
-          delete newErrors.email;
+    if (name === "email") {
+      if (!value.trim()) {
+        newErrors.email = "Please enter your email.";
+      } else if (!/\S+@\S+\.\S+/.test(value)) {
+        newErrors.email = "Invalid email format.";
+      } else {
+        // ✅ Perform the check asynchronously and update errors later
+        setCheckingEmail(true);
+        try {
+          const foundUser = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, value.trim()))
+            .get();
 
-          // Check if user exists after delay (debounce)
-          if (emailCheckTimeout) clearTimeout(emailCheckTimeout);
-          emailCheckTimeout = setTimeout(async () => {
-            const exists = await checkUserExists(value);
-            setErrors((prev) => ({
-              ...prev,
-              email: exists ? undefined : "No account found with this email.",
-            }));
-          }, 500);
+          if (!foundUser) {
+            newErrors.email = "Email not found. Please sign up.";
+          } else {
+            delete newErrors.email;
+          }
+        } catch (error) {
+          console.error("Error checking email:", error);
         }
+        setCheckingEmail(false);
       }
+    }
 
-      if (name === "password") {
-        if (!value.trim()) {
-          newErrors.password = "Password is required.";
-        } else if (value.length < 6) {
-          newErrors.password = "Password must be at least 6 characters.";
-        } else {
-          delete newErrors.password;
-        }
+    if (name === "password") {
+      if (!value.trim()) {
+        newErrors.password = "Password is required.";
+      } else if (value.length < 6) {
+        newErrors.password = "Password must be at least 6 characters.";
+      } else {
+        delete newErrors.password;
       }
+    }
 
-      return newErrors;
-    });
+    setErrors(newErrors);
   };
 
   const handleForgotPassword = async () => {
@@ -118,7 +123,7 @@ export default function ForgotPassword() {
       </Text>
 
       {/* Email Input */}
-      <View className="w-full mb-2">
+      <View className="w-full mb-3">
         <TextInput
           className="w-full p-3 border border-gray-300 rounded-lg mb-2 text-gray-700"
           placeholder="example@gmail.com"

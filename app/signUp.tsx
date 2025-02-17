@@ -44,7 +44,7 @@ function SignUp(): JSX.Element {
   const [loading, setLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  const togglePassword = () => {
+  const togglePasswordVisibility = () => {
     setIsPasswordVisible((prev) => !prev);
   };
 
@@ -90,47 +90,31 @@ function SignUp(): JSX.Element {
 
   const checkExistingUser = async (key: keyof FormState, value: string) => {
     try {
-      if (key === "username" && value.trim().length > 2) {
-        const existingUsername = await db
-          .select()
-          .from(users)
-          .where(eq(users.username, value.trim()))
-          .get();
+      if (value.trim().length === 0) return;
 
-        if (existingUsername) {
-          setErrors((prev) => ({
-            ...prev,
-            username: "This username is already taken.",
-          }));
-        } else {
-          setErrors((prev) => {
-            const { username, ...rest } = prev;
-            return rest;
-          });
-        }
+      // Fetch user by email or username
+      const foundUser = await db
+        .select()
+        .from(users)
+        .where(eq(users[key], value.trim()))
+        .get();
+
+      if (foundUser) {
+        setErrors((prev) => ({
+          ...prev,
+          [key]:
+            key === "username"
+              ? "This username is already taken."
+              : "This email is already in use.",
+        }));
+      } else {
+        setErrors((prev) => {
+          const { [key]: removedError, ...rest } = prev; // Remove error if it was set before
+          return rest;
+        });
       }
-
-      if (key === "email" && value.trim().length > 5) {
-        const existingEmail = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, value.trim()))
-          .get();
-
-        if (existingEmail) {
-          setErrors((prev) => ({
-            ...prev,
-            email: "This email is already in use.",
-          }));
-        } else {
-          setErrors((prev) => {
-            const { email, ...rest } = prev;
-            return rest;
-          });
-        }
-      }
-    } catch (error: any) {
-      throw new Error(error);
+    } catch (error) {
+      console.error(`Error checking existing ${key}:`, error);
     }
   };
 
@@ -169,114 +153,113 @@ function SignUp(): JSX.Element {
   };
 
   return (
-    <CustomKeyboard>
-      <SafeAreaView className="flex-1 bg-white">
-        <StatusBar style="dark" />
-        <View className="flex-1 justify-center items-center px-4">
-          <Text className="text-4xl font-bold text-black text-center mb-8">
-            Create Account
-          </Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <StatusBar style="dark" />
+      <View className="flex-1 justify-center items-center px-4">
+        <Text className="text-4xl font-bold text-black text-center mb-8">
+          Create Account
+        </Text>
 
-          {/* Form Container */}
-          <View className="w-full max-w-md gap-4">
-            {/* Username Input */}
-            <View>
-              <Text className="font-semibold text-lg tracking-wider text-neutral-700 mb-1 ml-2">
-                Username
-              </Text>
-              <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
-                <TextInput
-                  value={form.username}
-                  onChangeText={(text) => handleChange("username", text)}
-                  className="flex-1 ml-1 font-medium text-gray-800"
-                  placeholder="Username"
-                  placeholderTextColor="gray"
-                />
-              </View>
-              {errors.username && (
-                <Text className="text-red-500 text-sm ml-2">
-                  {errors.username}
-                </Text>
-              )}
+        {/* Form Container */}
+        <View className="w-full max-w-md gap-4">
+          {/* Username Input */}
+          <View>
+            <Text className="font-semibold text-lg tracking-wider text-neutral-700 mb-1 ml-2">
+              Username
+            </Text>
+            <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
+              <TextInput
+                value={form.username}
+                onChangeText={(text) => handleChange("username", text)}
+                className="flex-1 ml-1 font-medium text-gray-800"
+                placeholder="Username"
+                placeholderTextColor="gray"
+              />
             </View>
-
-            {/* Email Input */}
-            <View>
-              <Text className="font-semibold tracking-wider text-lg text-neutral-700 mb-1 ml-2">
-                Email
+            {errors.username && (
+              <Text className="text-red-500 text-sm ml-2">
+                {errors.username}
               </Text>
-              <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
-                <TextInput
-                  value={form.email}
-                  onChangeText={(text) => handleChange("email", text)}
-                  className="flex-1 ml-1 font-medium text-gray-800"
-                  placeholder="example@gmail.com"
-                  placeholderTextColor="gray"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-              </View>
-              {errors.email && (
-                <Text className="text-red-500 text-sm ml-2">
-                  {errors.email}
-                </Text>
-              )}
-            </View>
-
-            {/* Password Input */}
-            <View>
-              <Text className="font-semibold tracking-wider text-lg text-neutral-700 mb-1 ml-2">
-                Password
-              </Text>
-              <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
-                <TextInput
-                  value={form.password}
-                  onChangeText={(text) => handleChange("password", text)}
-                  className="flex-1 ml-1 font-medium text-gray-800"
-                  placeholder="Minimum 6
-                   characters"
-                  placeholderTextColor="gray"
-                  secureTextEntry={!isPasswordVisible}
-                />
-                <TouchableOpacity onPress={togglePassword}>
-                  <Feather
-                    name={isPasswordVisible ? "eye-off" : "eye"}
-                    size={24}
-                    color="gray"
-                  />
-                </TouchableOpacity>
-              </View>
-              {errors.password && (
-                <Text className="text-red-500 text-sm ml-2">
-                  {errors.password}
-                </Text>
-              )}
-            </View>
+            )}
           </View>
 
-          {/* Sign Up Button */}
+          {/* Email Input */}
+          <View>
+            <Text className="font-semibold tracking-wider text-lg text-neutral-700 mb-1 ml-2">
+              Email
+            </Text>
+            <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
+              <TextInput
+                value={form.email}
+                onChangeText={(text) => handleChange("email", text)}
+                className="flex-1 ml-1 font-medium text-gray-800"
+                placeholder="example@gmail.com"
+                placeholderTextColor="gray"
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+            {errors.email && (
+              <Text className="text-red-500 text-sm ml-2">{errors.email}</Text>
+            )}
+          </View>
 
-          <CustomButton
-            text="Sign Up"
-            loading={loading}
-            bgColor="bg-zinc-900"
-            onPress={handleRegister}
-          />
-
-          <GoogleAuthButton label="Sign up with Google" />
+          {/* Password Input */}
+          <View>
+            <Text className="font-semibold tracking-wider text-lg text-neutral-700 mb-1 ml-2">
+              Password
+            </Text>
+            <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
+              <TextInput
+                value={form.password}
+                onChangeText={(text) => handleChange("password", text)}
+                className="flex-1 font-medium text-neutral-700 pr-2"
+                placeholder="minimum 6 characters"
+                placeholderTextColor="gray"
+                autoCapitalize="none"
+                secureTextEntry={!isPasswordVisible}
+              />
+              <TouchableOpacity
+                onPress={togglePasswordVisibility}
+                className="p-2"
+              >
+                <Feather
+                  name={isPasswordVisible ? "eye-off" : "eye"}
+                  size={24}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password && (
+              <Text className="text-red-500 text-sm ml-2">
+                {errors.password}
+              </Text>
+            )}
+          </View>
         </View>
 
-        {/* Footer - Positioned at the bottom */}
-        <View className="absolute bottom-8 flex-row justify-center items-center w-full">
-          <Text className="font-semibold text-neutral-500">
-            Already have an account?{" "}
-          </Text>
-          <Pressable onPress={() => router.replace("/signIn")}>
-            <Text className="text-sm font-bold text-indigo-500">Sign In</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    </CustomKeyboard>
+        {/* Sign Up Button */}
+
+        <CustomButton
+          text="Sign Up"
+          loading={loading}
+          bgColor="bg-zinc-900"
+          onPress={handleRegister}
+        />
+
+        <GoogleAuthButton label="Sign up with Google" />
+      </View>
+
+      {/* Footer - Positioned at the bottom */}
+      <View className="absolute bottom-8 flex-row justify-center items-center w-full">
+        <Text className="font-semibold text-neutral-500">
+          Already have an account?{" "}
+        </Text>
+        <Pressable onPress={() => router.replace("/signIn")}>
+          <Text className="text-sm font-bold text-indigo-500">Sign In</Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
 

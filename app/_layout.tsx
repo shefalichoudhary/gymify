@@ -1,5 +1,4 @@
 import { Slot, useRouter, useSegments } from "expo-router";
-
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { db, expo_sqlite } from "../db/db";
 import migrations from "@/drizzle/migrations";
@@ -39,6 +38,16 @@ export default function RootLayout() {
   useDrizzleStudio(expo_sqlite);
 
   useEffect(() => {
+    if (migrationError) {
+      console.error("Migration error:", migrationError); // Log migration error for debugging
+    }
+
+    if (success) {
+      console.log("Migrations completed successfully.");
+      setIsReady(true);
+      SplashScreen.hideAsync();
+    }
+
     if (migrationError || success) {
       setIsReady(true);
       SplashScreen.hideAsync();
@@ -49,7 +58,9 @@ export default function RootLayout() {
     return (
       <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
         <Text>
-          {migrationError ? "Error initializing database" : "Loading..."}
+          {migrationError
+            ? `Error initializing database: ${migrationError}`
+            : "Loading..."}
         </Text>
       </Suspense>
     );
@@ -58,7 +69,7 @@ export default function RootLayout() {
   return (
     <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
       <SQLiteProvider
-        databaseName="mydatabase.db"
+        databaseName="gymify.db"
         options={{ enableChangeListener: true }}
         useSuspense
       >

@@ -8,6 +8,41 @@
       "when": 1737992078939,
       "tag": "0000_magenta_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1739820225406,
+      "tag": "0001_ordinary_hiroim",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1739821893605,
+      "tag": "0002_zippy_christian_walker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1739823187198,
+      "tag": "0003_mighty_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1739823832347,
+      "tag": "0004_clean_tombstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1739823847503,
+      "tag": "0005_chief_zaran",
+      "breakpoints": true
     }
   ]
 }

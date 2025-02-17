@@ -1,52 +1,78 @@
-// import * as FileSystem from "expo-file-system";
-// import { Asset } from "expo-asset";
-// import Papa from "papaparse";
-// import { db } from "../db/db"; // Your Drizzle DB instance
-// import { exercises, Exercise } from "../db/schema"; // Import schema type
+import * as FileSystem from "expo-file-system";
 
-// const importExercises = async () => {
-//   try {
-//     // Load the asset from the bundle
-//     const asset = Asset.fromModule(require("../assets/exercises.csv"));
-//     await asset.downloadAsync(); // Ensure it's downloaded
+import { Asset } from "expo-asset";
+import { expo_sqlite } from "../db/db";
 
-//     // Get the correct file URI
-//     const assetUri = asset.localUri;
-//     if (!assetUri) {
-//       console.error("Failed to load CSV file.");
-//       return;
-//     }
+// Open SQLite database
 
-//     // Read the CSV file content as a string
-//     const fileContent = await FileSystem.readAsStringAsync(assetUri);
+// Function to copy CSV file from assets to the document directory
+const copyCSVToDocuments = async () => {
+  try {
+    // ✅ Ensure the correct path
+    const asset = Asset.fromModule(require("../assets/exercises.csv")); // Adjust if needed
 
-//     // Parse CSV using PapaParse
-//     const results = Papa.parse<Exercise>(fileContent, {
-//       header: true, // Use first row as headers
-//       skipEmptyLines: true, // Ignore empty lines
-//     });
+    // ✅ Ensure asset is downloaded
+    await asset.downloadAsync();
 
-//     if (results.errors.length > 0) {
-//       console.error("CSV Parsing Errors:", results.errors);
-//       return;
-//     }
+    // ✅ Check if `localUri` is valid
+    if (!asset.localUri) {
+      throw new Error("Failed to load asset: exercises.csv");
+    }
 
-//     const parsedData = results.data as Exercise[];
+    const fileUri = `${FileSystem.documentDirectory}exercises.csv`;
+    console.log("Trying to read:", fileUri);
 
-//     // Insert parsed data into SQLite
-//     for (const row of parsedData) {
-//       if (!row.name || !row.category || !row.equipment || !row.muscle_group) {
-//         console.warn("Skipping invalid row:", row);
-//         continue;
-//       }
+    const fileExists = await FileSystem.getInfoAsync(fileUri);
+    if (!fileExists.exists) {
+      await FileSystem.copyAsync({
+        from: asset.localUri, // Guaranteed to be a string now
+        to: fileUri,
+      });
+      console.log("CSV file copied successfully.");
+    }
 
-//       await db.insert(exercises).values(row);
-//     }
+    return fileUri;
+  } catch (error) {
+    console.error("Error copying CSV file:", error);
+  }
+};
 
-//     console.log("Exercises imported successfully!");
-//   } catch (error) {
-//     console.error("Error importing exercises:", error);
-//   }
-// };
+// Function to read CSV file and insert data into SQLite
+const importCSVData = async () => {
+  try {
+    const fileUri = await copyCSVToDocuments();
+    // ✅ Ensure fileUri is a valid string before reading
+    if (!fileUri) {
+      throw new Error("File URI is undefined. Cannot read CSV.");
+    }
+    const csvString = await FileSystem.readAsStringAsync(fileUri);
 
-// export default importExercises;
+    // Parse CSV data
+    const rows = csvString.split("\n").slice(1); // Remove headers
+    const insertQueries = rows
+      .map((row) => {
+        const columns = row.split(",");
+        if (columns.length < 6) return null; // Ensure valid row
+
+        const name = columns[1]?.trim();
+        const category = columns[2]?.trim();
+        const equipment = columns[3]?.trim();
+        const primary_muscle = columns[4]?.trim();
+        const secondary_muscle = columns[5]?.trim();
+
+        return `INSERT INTO exercises (name, category, equipment, primary_muscle, secondary_muscle) 
+                VALUES ('${name}', '${category}', '${equipment}', '${primary_muscle}', '${secondary_muscle}');`;
+      })
+      .filter(Boolean)
+      .join(" ");
+
+    if (insertQueries) {
+      expo_sqlite.execSync(insertQueries);
+      console.log("CSV data imported successfully");
+    }
+  } catch (error) {
+    console.error("Error importing CSV:", error);
+  }
+};
+
+export default importCSVData;

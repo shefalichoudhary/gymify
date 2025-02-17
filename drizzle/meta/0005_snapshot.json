@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "5b400939-24cc-485a-9303-d74c73426044",
-  "prevId": "fc661252-304e-442f-8deb-35e18b4db9f5",
+  "id": "51b08263-0a96-4d8d-b376-a8bcc8ed8aec",
+  "prevId": "78ffa6cd-c175-44f1-ab9a-81d062964c89",
   "tables": {
     "exercises": {
       "name": "exercises",
@@ -40,14 +40,16 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'Unknown'"
         },
         "secondary_muscle": {
           "name": "secondary_muscle",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'Unknown'"
         }
       },
       "indexes": {

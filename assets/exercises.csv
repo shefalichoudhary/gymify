@@ -1,21 +1,21 @@
-name,category,equipment,muscle_group
-Squat,Strength,Barbell,Legs
-Deadlift,Strength,Barbell,Back
-Bench Press,Strength,Barbell,Chest
-Pull-up,Strength,Bodyweight,Back
-Push-up,Strength,Bodyweight,Chest
-Plank,Core,Bodyweight,Core
-Lunges,Strength,Bodyweight,Legs
-Overhead Press,Strength,Barbell,Shoulders
-Barbell Row,Strength,Barbell,Back
-Dumbbell Curl,Strength,Dumbbell,Biceps
-Tricep Dips,Strength,Bodyweight,Triceps
-Lat Pulldown,Strength,Machine,Back
-Leg Press,Strength,Machine,Legs
-Calf Raises,Strength,Bodyweight,Calves
-Russian Twists,Core,Bodyweight,Obliques
-Mountain Climbers,Cardio,Bodyweight,Full Body
-Burpees,Cardio,Bodyweight,Full Body
-Jump Rope,Cardio,Jump Rope,Full Body
-Kettlebell Swing,Strength,Kettlebell,Hips
-Side Plank,Core,Bodyweight,Obliques
+ID,Name,Category,Equipment,Primary Muscle,Secondary Muscle
+1,Squat,Strength,Barbell,Legs,Glutes
+2,Deadlift,Strength,Barbell,Back,Hamstrings
+3,Bench Press,Strength,Barbell,Chest,Triceps/Shoulders
+4,Pull-up,Strength,Bodyweight,Back,Biceps
+5,Push-up,Strength,Bodyweight,Chest,Triceps/Shoulders
+6,Plank,Core,Bodyweight,Core,None
+7,Lunges,Strength,Bodyweight,Legs,Glutes
+8,Overhead Press,Strength,Barbell,Shoulders,Triceps
+9,Barbell Row,Strength,Barbell,Back,Rear Delts/Biceps
+10,Dumbbell Curl,Strength,Dumbbell,Biceps,None
+11,Tricep Dips,Strength,Bodyweight,Triceps,Chest/Shoulders
+12,Lat Pulldown,Strength,Machine,Back,Biceps
+13,Leg Press,Strength,Machine,Legs,Glutes/Hamstrings
+14,Calf Raises,Strength,Bodyweight,Calves,None
+15,Russian Twists,Core,Bodyweight,Obliques,Abdominals
+16,Mountain Climbers,Cardio,Bodyweight,Full Body,Core
+17,Burpees,Cardio,Bodyweight,Full Body,None
+18,Jump Rope,Cardio,Jump Rope,Full Body,Legs
+19,Kettlebell Swing,Strength,Kettlebell,Hips,Glutes/Core
+20,Side Plank,Core,Bodyweight,Obliques,None

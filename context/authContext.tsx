@@ -33,28 +33,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}): JSX.Element => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthContextType["user"]>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const isAuthenticated = !!user;
   const saveUserToStorage = async (user: AuthContextType["user"]) => {
     try {
       await SecureStore.setItemAsync("user", JSON.stringify(user));
     } catch (error) {
-      console.error("Error saving user:", error);
+      console.error("Error saving user to storage:", error);
     }
   };
 
   const getUserFromStorage = async () => {
     try {
-      const user = await SecureStore.getItemAsync("user");
-      return user ? JSON.parse(user) : null;
+      const storedUser = await SecureStore.getItemAsync("user");
+      return storedUser ? JSON.parse(storedUser) : null;
     } catch (error) {
-      console.error("Error loading user:", error);
+      console.error("Error getting user from storage:", error);
       return null;
     }
   };
@@ -64,6 +60,7 @@ export const AuthProvider = ({
       const storedUser = await getUserFromStorage();
       if (storedUser) {
         setUser(storedUser);
+        setIsAuthenticated(true);
       }
     };
     loadUser();
@@ -102,11 +99,15 @@ export const AuthProvider = ({
         .get();
       if (!foundUser) throw new Error("User not found after registration.");
 
-      setUser({
+      const newUser = {
         id: foundUser.id.toString(),
         username: foundUser.username,
         email: foundUser.email,
-      });
+      };
+      setUser(newUser);
+
+      setIsAuthenticated(true);
+      await saveUserToStorage(newUser);
       alert("Registration successful!");
     } catch (error) {
       throw new Error("Registration failed. Please try again.");
@@ -143,40 +144,11 @@ export const AuthProvider = ({
       };
 
       setUser(loggedInUser);
+      setIsAuthenticated(true);
+
       await saveUserToStorage(loggedInUser);
     } catch (error) {
       throw new Error("Login failed. Please try again.");
-    }
-  };
-
-  // Reset Password functionality
-
-  const resetPassword = async (
-    email: string,
-    newPassword: string
-  ): Promise<void> => {
-    try {
-      const foundUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .get();
-      if (!foundUser) throw new Error("No user found with this email.");
-
-      const hashedPassword = await bcrypt.hashSync(
-        newPassword,
-        bcrypt.genSaltSync(10)
-      );
-
-      await db
-        .update(users)
-        .set({ password: hashedPassword })
-        .where(eq(users.email, email))
-        .execute();
-      alert("Password reset successful!");
-    } catch (error) {
-      console.error(error);
-      throw new Error("Password reset failed. Please try again.");
     }
   };
 
@@ -219,11 +191,14 @@ export const AuthProvider = ({
       if (!existingUser)
         throw new Error("User not found after Google sign-in.");
 
-      setUser({
+      const loggedInUser = {
         id: existingUser.id.toString(),
         username: existingUser.username,
         email: existingUser.email,
-      });
+      };
+      setUser(loggedInUser);
+      setIsAuthenticated(true);
+      await saveUserToStorage(loggedInUser);
 
       alert("Google Sign-In Successful!");
     } catch (error) {
@@ -231,8 +206,46 @@ export const AuthProvider = ({
     }
   };
 
-  const logout = (): void => {
-    setUser(null);
+  // Reset Password functionality
+
+  const resetPassword = async (
+    email: string,
+    newPassword: string
+  ): Promise<void> => {
+    try {
+      const foundUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .get();
+      if (!foundUser) throw new Error("No user found with this email.");
+
+      const hashedPassword = await bcrypt.hashSync(
+        newPassword,
+        bcrypt.genSaltSync(10)
+      );
+
+      await db
+        .update(users)
+        .set({ password: hashedPassword })
+        .where(eq(users.email, email))
+        .execute();
+      alert("Password reset successful!");
+    } catch (error) {
+      throw new Error("Password reset failed. Please try again.");
+    }
+  };
+
+  //  Logout functionality
+
+  const logout = async () => {
+    try {
+      await SecureStore.deleteItemAsync("user");
+      setUser(null);
+      setIsAuthenticated(false);
+    } catch (error: any) {
+      throw new Error(error);
+    }
   };
 
   return (

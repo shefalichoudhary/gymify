@@ -12,6 +12,10 @@ import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import CustomButton from "@/components/customeButton";
 import GoogleAuthButton from "@/components/googleAuthButton";
+import { eq } from "drizzle-orm";
+import { users } from "../db/schema";
+import bcrypt from "react-native-bcrypt";
+import { db } from "../db/db";
 
 interface FormState {
   email: string;
@@ -30,7 +34,9 @@ function SignIn(): JSX.Element {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const router = useRouter();
 
-  const validateField = (key: keyof FormState, value: string) => {
+  const validateField = async (key: keyof FormState, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+
     let newErrors: ErrorState = { ...errors };
 
     if (key === "email") {
@@ -39,17 +45,47 @@ function SignIn(): JSX.Element {
       } else if (!/\S+@\S+\.\S+/.test(value)) {
         newErrors.email = "Invalid email format.";
       } else {
-        delete newErrors.email;
+        try {
+          const foundUser = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, value.trim()))
+            .get();
+
+          if (!foundUser) {
+            newErrors.email = "Email not found. Please sign up.";
+          } else {
+            delete newErrors.email;
+          }
+        } catch (error) {
+          console.error("Error checking email:", error);
+        }
       }
     }
 
     if (key === "password") {
       if (!value) {
         newErrors.password = "Please enter your password.";
-      } else if (value.length < 6) {
-        newErrors.password = "Password must be at least 6 characters.";
+        console.log(newErrors.password);
       } else {
-        delete newErrors.password;
+        try {
+          // Fetch the user using the email
+          const foundUser = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, form.email.trim()))
+            .get();
+
+          if (!foundUser) {
+            newErrors.email = "Email not found. Please sign up.";
+          } else if (!bcrypt.compareSync(value, foundUser.password)) {
+            newErrors.password = "Incorrect password. Try again.";
+          } else {
+            delete newErrors.password;
+          }
+        } catch (error) {
+          console.error("Error checking password:", error);
+        }
       }
     }
 
@@ -130,17 +166,20 @@ function SignIn(): JSX.Element {
             <Text className="font-semibold tracking-wider text-lg text-neutral-700 mb-1 ml-2">
               Password
             </Text>
-            <View className="flex-row p-2 bg-neutral-100 items-center rounded-xl">
+            <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
               <TextInput
                 value={form.password}
                 onChangeText={(text) => handleChange("password", text)}
-                className="flex-1 font-medium text-neutral-700"
+                className="flex-1 font-medium text-neutral-700 pr-2"
                 placeholder="minimum 6 characters"
                 placeholderTextColor="gray"
                 autoCapitalize="none"
                 secureTextEntry={!isPasswordVisible}
               />
-              <TouchableOpacity onPress={togglePasswordVisibility}>
+              <TouchableOpacity
+                onPress={togglePasswordVisibility}
+                className="p-2"
+              >
                 <Feather
                   name={isPasswordVisible ? "eye-off" : "eye"}
                   size={24}
