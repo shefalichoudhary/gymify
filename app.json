@@ -9,19 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-         
-      },
-      "bundleIdentifier": "com.shefaliChoudhary.gymify"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-         "package": "com.shefaliChoudhary.gymify"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -37,12 +31,6 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
-        }
-      ],
-         [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.756288749216-529bum5cvvnun17tasuge88ibgrsuu1l"
         }
       ],
       "expo-sqlite"
@@ -63,7 +51,6 @@
     },
     "updates": {
       "url": "https://u.expo.dev/abb235c2-482a-4cc1-8a0e-3f8d39e63fb7"
-    },
-    "owner": "shefali_choudhary"
+    }
   }
 }

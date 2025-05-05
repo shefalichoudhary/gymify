@@ -3,7 +3,7 @@ import React from "react";
 
 export default function Home() {
   return (
-    <View className="items-center">
+    <View>
       <Text>Welcome to home page</Text>
     </View>
   );

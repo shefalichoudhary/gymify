@@ -5,9 +5,6 @@ module.exports = function (api) {
       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
       "nativewind/babel",
     ],
-    plugins: [
-      ["inline-import", { extensions: [".sql"] }],
-      ["module:react-native-dotenv"], // Add this line
-    ],
+    plugins: [["inline-import", { extensions: [".sql"] }]],
   };
 };
