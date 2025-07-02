@@ -1,8 +1,15 @@
-import { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView } from "react-native";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import React, { useState } from "react";
+import {
+  Box,
+  Text,
+  Pressable,
+  HStack,
+  VStack,
+  ScrollView,
+  Icon,
+} from "@gluestack-ui/themed";
 import Modal from "react-native-modal";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 
 interface ExerciseFilterProps {
   selectedEquipment: string;
@@ -48,40 +55,45 @@ export default function Category({
 
   return (
     <>
-      <View className="p-4">
-        <View className="flex-row items-center">
-          <TouchableOpacity
+      <Box p="$4">
+        <HStack space="sm" alignItems="center">
+          <Pressable
+            flex={1}
+            px="$4"
+            py="$3"
+            bg="$gray900"
+            borderRadius="$md"
             onPress={() => openFilterModal("equipment")}
-            className="flex-1 p-3 bg-gray-900 rounded-md shadow-md mx-1"
           >
-            <Text className="text-center text-lg text-white">
+            <Text color="$white" textAlign="center" size="md">
               {selectedEquipment}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
-          <TouchableOpacity
+          <Pressable
+            flex={1}
+            px="$4"
+            py="$3"
+            bg="$gray900"
+            borderRadius="$md"
             onPress={() => openFilterModal("muscle")}
-            className="flex-1 p-3 bg-gray-900 rounded-md shadow-md mx-1"
           >
-            <Text className="text-center text-lg text-white">
+            <Text color="$white" textAlign="center" size="md">
               {selectedMuscle}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {shouldShowReset && (
-            <TouchableOpacity
-              onPress={() => {
-                onSelectEquipment("All Equipment");
-                onSelectMuscle("All Muscle");
-              }}
-            >
-              <MaterialIcons name="cancel" size={30} color="white" />
-            </TouchableOpacity>
+            <Pressable onPress={() => {
+              onSelectEquipment("All Equipment");
+              onSelectMuscle("All Muscle");
+            }}>
+              <MaterialIcons name="cancel" size={24} color="white" />
+            </Pressable>
           )}
-        </View>
-      </View>
+        </HStack>
+      </Box>
 
-      {/* Swipeable Modal with custom styles */}
       <Modal
         isVisible={isModalVisible}
         onBackdropPress={() => setModalVisible(false)}
@@ -91,41 +103,36 @@ export default function Category({
         backdropOpacity={0.8}
         backdropColor="black"
       >
-        <View className="bg-zinc-800 rounded-t-2xl pb-4 max-h-[75%] w-full">
-          {/* Handle and Header */}
-          <View className="items-center py-2  my-1">
-            <View className="w-12 h-1.5 bg-gray-400 rounded-full mb-2" />
-            <Text className="text-white text-xl font-bold py-2">
+        <Box bg="$zinc800" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" pb="$4" maxHeight="75%" w="100%">
+          <VStack alignItems="center" py="$2" mt="$2">
+            <Box w={48} h={1.5} bg="$gray400" borderRadius="$full" mb="$2" />
+            <Text color="$white" size="xl" fontWeight="$bold" py="$2">
               Select {modalType === "equipment" ? "Equipment" : "Muscle"}
             </Text>
-          </View>
+          </VStack>
 
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            className="bg-zinc-600 m-3 py-1 rounded-lg "
-          >
-            {(modalType === "equipment" ? allEquipment : allMuscle).map(
-              (item, index, array) => (
-                <TouchableOpacity
-                  key={item.id}
-                  className={`py-6 px-4 ${
-                    index !== array.length - 1 ? "border-b border-gray-40" : ""
-                  }`}
-                  onPress={() => handleSelectFilter(item.name)}
-                >
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-white text-lg tracking-wider font-semibold">
-                      {item.name}
-                    </Text>
-                    {item.name === currentSelected && (
-                      <AntDesign name="check" size={24} color="#3B82F9" />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              )
-            )}
+          <ScrollView showsVerticalScrollIndicator={false} px="$3" py="$2">
+            {(modalType === "equipment" ? allEquipment : allMuscle).map((item, index, array) => (
+              <Pressable
+                key={item.id}
+                py="$4"
+                px="$3"
+                borderBottomWidth={index !== array.length - 1 ? 1 : 0}
+                borderColor="$gray500"
+                onPress={() => handleSelectFilter(item.name)}
+              >
+                <HStack justifyContent="space-between" alignItems="center">
+                  <Text color="$white" size="lg" fontWeight="$semibold" letterSpacing={1}>
+                    {item.name}
+                  </Text>
+                  {item.name === currentSelected && (
+                    <AntDesign name="check" size={24} color="blue" />
+                  )}
+                </HStack>
+              </Pressable>
+            ))}
           </ScrollView>
-        </View>
+        </Box>
       </Modal>
     </>
   );

@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import { useAuth } from "../context/authContext";
+// import { useAuth } from "../context/authContext";
 import { useRouter } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface FormState {
   email: string;
@@ -16,7 +17,7 @@ interface FormState {
 }
 
 function SignIn(): JSX.Element {
-  const { login } = useAuth();
+  // const { login } = useAuth();
   const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [error, setError] = useState<string>("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -27,8 +28,8 @@ function SignIn(): JSX.Element {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const togglePasswordVisibility = () => {
-    setIsPasswordVisible((prevState) => !prevState);
+ const togglePassword = () => {
+    setIsPasswordVisible((prevState: any) => !prevState);
   };
 
   const handleSignIn = async (): Promise<void> => {
@@ -38,12 +39,21 @@ function SignIn(): JSX.Element {
         throw new Error("Email and password are required.");
       }
 
-      await login(email.trim(), password);
+      // await login(email.trim(), password);
       setError("");
       setForm({ email: "", password: "" });
     } catch (err) {
       if (err instanceof Error) setError(err.message);
     }
+ const routineData = await AsyncStorage.getItem("unsavedRoutine");
+
+  if (routineData) {
+    const { title, exerciseData } = JSON.parse(routineData);
+    await AsyncStorage.removeItem("unsavedRoutine");
+    router.replace("/workout");
+  } else {
+    router.replace("/home");
+  }
   };
 
   return (
@@ -88,13 +98,13 @@ function SignIn(): JSX.Element {
                 autoCapitalize="none"
                 secureTextEntry={!isPasswordVisible}
               />
-              <TouchableOpacity onPress={togglePasswordVisibility}>
-                <Feather
-                  name={isPasswordVisible ? "eye-off" : "eye"}
-                  size={24}
-                  color="gray"
-                />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={togglePassword}>
+                                <Feather
+                                  name={isPasswordVisible ? "eye-off" : "eye"}
+                                  size={24}
+                                  color="gray"
+                                />
+                              </TouchableOpacity>
             </View>
           </View>
 

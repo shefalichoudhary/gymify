@@ -1,74 +1,242 @@
-import {
-  View,
-  Text,
-  ImageBackground,
-  Image,
-  TouchableOpacity,
-} from "react-native";
 import React from "react";
+
+import { ImageBackground, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import {
+  Box,
+  VStack,
+  HStack,
+  Text,
+ 
+  Image,
+  Center,
+} from "@gluestack-ui/themed";
+import { useFonts, Inter_400Regular, Inter_700Bold, Inter_900Black } from "@expo-google-fonts/inter";
+import CustomButton from "@/components/customButton";
+import { useSeedExercises } from "../db/seed";
 export default function LandingPage() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width > 768;
+  
+    useSeedExercises(); // seed only on native
+  
 
-  return (
-    <ImageBackground
-      source={require("../assets/images/hero-image.jpg")}
-      style={{ flex: 1 }}
-      className="w-full h-full"
-      resizeMode="cover"
-    >
-      {/* Overlay for opacity */}
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "black",
-          opacity: 0.3,
-        }}
-      />
+  // Load Inter font
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_700Bold,
+    Inter_900Black,
+    Inter: Inter_400Regular,
+    InterBold: Inter_700Bold,
+    InterBlack: Inter_900Black,
+  });
+  if (!fontsLoaded) return null;
 
-      <View className="flex-1 justify-center items-center px-2">
-        {/* Logo and Name */}
-        <View className="absolute top-1 flex-row items-center">
-          <Image
-            source={require("../assets/images/logo.png")}
-            style={{ height: 150, width: 60 }}
-          />
-          <Text className="text-4xl font-sans font-black tracking-[.18em] text-white">
-            GYMIFY
-          </Text>
-        </View>
+  const fontSizeTitle =
+    width > 1400 ? "$3xl"
+    : width > 1200 ? "$2xl"
+    : width > 900 ? "$xl"
+    : "$xl";
 
-        {/* Description and Button */}
-        <View className="absolute bottom-9 ">
-          <Text className="font-bold text-4xl tracking-lighter text-white ">
-            Unleash Your Potential with Gymify
-          </Text>
-          <Text className="text-sm tracking-wider text-white  mb-6 mt-3">
-            Discover personalized fitness plans and home workouts designed to
-            help you build strength, improve...
-          </Text>
-          <TouchableOpacity
-            className=" p-4 mx-1 rounded bg-yellow-400"
-            onPress={() => {
-              router.replace("/signUp");
+
+  if (isLargeScreen) {
+    // SPLIT LAYOUT FOR LARGE SCREENS
+    return (
+      <HStack flex={1} w="100%" h="100%">
+        {/* Left: Background Image */}
+        <Box flex={2} h="100%" backgroundColor="$black">
+          <ImageBackground
+            source={require("../assets/images/hero-image.jpg")}
+            style={{
+              flex: 1,
+              width: "100%",
+              height: "100%",
+              justifyContent: "center",
+              alignItems: "center",
             }}
+            resizeMode="cover"
           >
-            <View className=" flex-row items-center mx-auto gap-2">
-              <Text className="text-md font-bold text-black text-center ">
-                Get Started
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              right={0}
+              bottom={0}
+              bg="$black"
+              opacity={0.3}
+              zIndex={1}
+            />
+         
+          </ImageBackground>
+        </Box>
+        {/* Right: Content */}
+        <Center flex={1} px="$8" bg="$black">
+          <VStack
+            flex={1}
+            w="100%"
+            maxWidth={420}
+            justifyContent="space-between"
+            alignItems="center"
+            alignSelf="center"
+            py="$12"
+          >
+            {/* Top: Logo and Name */}
+            <HStack alignItems="center" space="lg" mt="$6">
+              <Image
+                source={require("../assets/images/logo.png")}
+                alt="Gymify Logo"
+                style={{
+                  height: 100,
+                  width: 26,
+                }}
+              />
+              <Text
+                fontSize={fontSizeTitle}
+                fontWeight="$black"
+                color="$white"
+                letterSpacing={7}
+                fontFamily="Inter"
+              >
+                GYMIFY
               </Text>
+            </HStack>
+            {/* Bottom: Content */}
+            <VStack
+              w="90%"
+              space="xl"
+              alignItems="center"
+              justifyContent="flex-end"
+              alignSelf="center"
+              pb="$4"
+            >
+              <Text
+                fontSize={fontSizeTitle}
+                fontWeight="$bold"
+                color="$white"
+                textAlign="left"
+                letterSpacing={1}
+                fontFamily="Inter"
+              >
+                Unleash Your Potential with Gymify
+              </Text>
+              <Text
+              fontSize={width > 1200 ? "$sm" : "$xs"}
 
-              <AntDesign name="arrowright" size={20} color="black" />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ImageBackground>
+                color="$white"
+                textAlign="left"
+                px="$2"
+                fontFamily="Inter"
+                
+              >
+                Discover personalized fitness plans and home workouts designed to help
+                you build strength, improve flexibility, and stay motivated.
+              </Text>
+              <CustomButton
+  onPress={() => router.replace("/home")}
+>
+  Get Started
+</CustomButton>
+            </VStack>
+          </VStack>
+        </Center>
+      </HStack>
+    );
+  }
+
+  // STACKED LAYOUT FOR SMALL SCREENS
+  return (
+    <Box flex={1}>
+      <ImageBackground
+        source={require("../assets/images/hero-image.jpg")}
+        style={{
+          width: "100%",
+          height: "100%",
+          flex: 1,
+        }}
+        resizeMode="cover"
+      >
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="$black"
+          opacity={0.6} // Increased opacity for better text visibility
+          zIndex={1}
+        />
+        <VStack flex={1} justifyContent="space-between" zIndex={2} px="$2" py="$8" alignItems="center">
+          {/* Top: Logo and Name */}
+          <HStack alignItems="center" space="lg" mt="$4">
+            <Image
+              source={require("../assets/images/logo.png")}
+              alt="Gymify Logo"
+              style={{
+                height: 120,
+                width: 28,
+              }}
+            />
+            <Text
+              fontSize="$4xl"
+              fontWeight="$black"
+              color="$white"
+              letterSpacing={4}
+              fontFamily="Inter"
+            >
+              GYMIFY
+            </Text>
+          </HStack>
+          {/* Bottom: Content */}
+          <VStack
+            w="100%"
+            maxWidth={360}
+            space="lg"
+            px="$2"
+            alignItems="center"
+            justifyContent="flex-end"
+            alignSelf="center"
+            // more padding at the bottom
+          >
+            <Text
+              fontSize={width > 600 ? "$2xl" : width > 400 ? "$xl" : "$2xl"}
+              fontWeight="$bold"
+              color="$white"
+              textAlign="left"
+              letterSpacing={1}
+              fontFamily="Inter"
+            >
+              Unleash Your Potential with Gymify
+            </Text>
+            <Text
+              fontSize={width > 600 ? "$sm" : "$sm"}
+              color="$white"
+              textAlign="left"
+              fontFamily="Inter"
+              lineHeight={17}
+              letterSpacing={0.4}
+            >
+              Discover personalized fitness plans and home workouts designed to help
+              you build strength, improve flexibility, and stay motivated.
+            </Text>
+          <CustomButton
+  onPress={() => router.replace("/home")}
+  iconPosition="right"
+  icon={
+    <AntDesign
+      name="arrowright"
+      size={20}
+      color="white"
+      style={{ marginLeft: 8 }}
+    />
+  }
+>
+  Get Started
+</CustomButton>
+          </VStack>
+        </VStack>
+      </ImageBackground>
+    </Box>
   );
 }

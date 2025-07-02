@@ -5,8 +5,36 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1737992078939,
-      "tag": "0000_magenta_golden_guardian",
+      "when": 1751278193032,
+      "tag": "0000_fuzzy_magneto",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1751288641890,
+      "tag": "0001_safe_millenium_guard",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1751288869715,
+      "tag": "0002_loud_stick",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1751432870154,
+      "tag": "0003_secret_nocturne",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1751433097081,
+      "tag": "0004_flimsy_meggan",
       "breakpoints": true
     }
   ]

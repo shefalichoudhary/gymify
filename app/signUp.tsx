@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/authContext";
 import {
   View,
   Text,
@@ -15,6 +14,14 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import CustomKeyboard from "@/components/customKeyboard";
 import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  FormControl,
+
+  FormControlLabel,
+  FormControlLabelText,
+
+} from "@/components/ui/form-control"
+import { Input, InputField,VStack } from  "@gluestack-ui/themed";
 
 interface FormState {
   username: string;
@@ -30,9 +37,10 @@ function SignUp(): JSX.Element {
     username: "",
   });
   const [loading, setLoading] = useState(false);
+    const [isInvalid, setIsInvalid] = React.useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null); // For showing email error
-  const { register } = useAuth();
+  // const { register } = useAuth();
 
   const togglePassword = () => {
     setIsPasswordVisible((prevState: any) => !prevState);
@@ -97,7 +105,7 @@ function SignUp(): JSX.Element {
       }
 
       setLoading(true);
-      await register(username.trim(), email.trim(), password);
+      // await register(username.trim(), email.trim(), password);
       setLoading(false);
       setForm({ username: "", email: "", password: "" });
     } catch (error: any) {
@@ -116,85 +124,96 @@ function SignUp(): JSX.Element {
     }));
   };
 
+  // Determine if the form is invalid (example: any field empty or email error)
+  
+
   return (
     <CustomKeyboard>
+
       <SafeAreaView className="flex-1 bg-white">
         <StatusBar style="dark" />
-        <View className="flex-1 justify-center items-center px-4">
+    <VStack className="w-full m-auto max-w-[600px]  p-4">
+      <FormControl
+        isInvalid={isInvalid}
+        size="md"
+        isDisabled={false}
+        isRequired={true}
+      >
           <Text className="text-5xl font-bold text-black text-center mb-8">
             Create Your Account
           </Text>
 
-          {/* Form Container */}
-          <View className="w-full max-w-md gap-4">
-            {/* Username Input */}
-            <View>
-              <Text className="font-semibold text-lg tracking-wider text-neutral-700 mb-1 ml-2">
-                Username
-              </Text>
-              <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
-                <TextInput
-                  value={form.username}
-                  onChangeText={(text) => handleChange("username", text)}
-                  className="flex-1 ml-1 ont-medium text-gray-800"
-                  placeholder="username"
-                  placeholderTextColor="gray"
-                />
-              </View>
-            </View>
+          <VStack space="md" className="w-full max-w-md">
+    {/* Username Input */}
+    <FormControlLabel>
+      <FormControlLabelText>Username</FormControlLabelText>
+    </FormControlLabel>
+    <Input>
+      <InputField
+        placeholder="username"
+        value={form.username}
+        onChangeText={(text) => handleChange("username", text)}
+        autoCapitalize="none"
+      />
+    </Input>
 
-            {/* Email Input */}
-            <View>
-              <Text className="font-semibold  tracking-wider text-lg text-neutral-700 mb-1 ml-2">
-                Email
-              </Text>
-              <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
-                <TextInput
-                  value={form.email}
-                  onChangeText={handleEmailChange} // Use the new handler
-                  className="flex-1 ml-1 ont-medium text-gray-800"
-                  placeholder="example@gmail.com"
-                  placeholderTextColor="gray"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-              </View>
-            </View>
-            {/* Password Input */}
-            <View>
-              <Text className="font-semibold tracking-wider text-lg text-neutral-700 mb-1 ml-2">
-                Password
-              </Text>
-              <View className="flex-row items-center p-2 bg-neutral-100 rounded-xl">
-                <TextInput
-                  value={form.password}
-                  onChangeText={(text) => handleChange("password", text)}
-                  className="flex-1 ml-1 ont-medium text-gray-800"
-                  placeholder="minimum 6 characters"
-                  placeholderTextColor="gray"
-                  secureTextEntry={!isPasswordVisible}
-                />
-                <TouchableOpacity onPress={togglePassword}>
-                  <Feather
-                    name={isPasswordVisible ? "eye-off" : "eye"}
-                    size={24}
-                    color="gray"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
+    {/* Email Input */}
+    <FormControlLabel>
+      <FormControlLabelText>Email</FormControlLabelText>
+    </FormControlLabel>
+    <Input>
+      <InputField
+        placeholder="example@gmail.com"
+        value={form.email}
+        onChangeText={handleEmailChange}
+        autoCapitalize="none"
+        keyboardType="email-address"
+      />
+    </Input>
 
-            {/* Sign Up Button */}
-            <TouchableOpacity
-              onPress={handleRegister}
-              className="bg-zinc-900 rounded-xl justify-center items-center p-4 w-full mt-4"
-            >
-              <Text className="font-bold text-white tracking-wider">
-                {loading ? <ActivityIndicator color="white" /> : "Sign Up"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+    {/* Password Input */}
+    <FormControlLabel>
+      <FormControlLabelText>Password</FormControlLabelText>
+    </FormControlLabel>
+    <Input>
+      <InputField
+        type={isPasswordVisible ? "text" : "password"}
+        placeholder="password"
+        value={form.password}
+        onChangeText={(text) => handleChange("password", text)}
+        autoCapitalize="none"
+      />
+      <TouchableOpacity
+        onPress={togglePassword}
+        style={{
+          position: "absolute",
+          right: 12,
+          top: 12,
+          zIndex: 1,
+        }}
+        hitSlop={10}
+      >
+        <Feather
+          name={isPasswordVisible ? "eye-off" : "eye"}
+          size={20}
+          color="gray"
+        />
+      </TouchableOpacity>
+    </Input>
+
+    {/* Sign Up Button */}
+    <TouchableOpacity
+      onPress={handleRegister}
+      className="bg-zinc-900 rounded-xl justify-center items-center p-4 w-full mt-4"
+      disabled={loading}
+    >
+      <Text className="font-bold text-white tracking-wider">
+        {loading ? <ActivityIndicator color="white" /> : "Sign Up"}
+      </Text>
+    </TouchableOpacity>
+  </VStack>
+          </FormControl>
+        </VStack >
 
         {/* Footer - Positioned at the bottom */}
         <View className="absolute bottom-8 flex-row justify-center items-center w-full">

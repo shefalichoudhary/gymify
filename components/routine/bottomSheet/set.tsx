@@ -49,40 +49,45 @@ const SetTypeModal: React.FC<SetTypeModalProps> = ({
     >
       <View className="bg-zinc-800 rounded-t-2xl pb-4 max-h-[75%] w-full">
         {/* Handle and Header */}
-        <View className="items-center py-2  my-1">
+        <View className="items-center py-2 my-1">
           <View className="w-12 h-1.5 bg-gray-400 rounded-full mb-2" />
           <Text className="text-white text-xl font-bold py-2">
-            Weight Units
+            Select Set Type
           </Text>
         </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          className="bg-zinc-600 m-3 py-1 rounded-lg "
+          className="bg-zinc-600 m-3 py-1 rounded-lg"
         >
           {setTypes.map((type, index, array) => (
             <TouchableOpacity
               key={type.key}
               onPress={() => {
-                onSelect(type.key); // Pass the key of the selected type
+                onSelect(type.key);
                 onClose();
               }}
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={`Select ${type.label}`}
               className={`py-6 px-4 ${
-                index !== array.length - 1 ? "border-b border-gray-40" : ""
+                index !== array.length - 1 ? "border-b border-gray-400" : ""
               }`}
             >
-              <View className="flex-row  justify-between items-center">
+              <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center">
                   <Text
                     className={`text-xl font-bold mr-2 ${
-                      iconColors[type.icon] || "text-gray-300"
+                      iconColors[type.icon] ?? "text-gray-300"
                     }`}
                   >
-                    {type.icon} {/* Display the icon */}
+                    {type.icon}
                   </Text>
                   <Text
                     className={`text-medium font-semibold ml-4 ${
-                      selectedType === type.key ? "text-white" : "text-gray-300"
+                      selectedType === type.key
+                        ? "text-white"
+                        : "text-gray-300"
                     }`}
                   >
                     {type.label}

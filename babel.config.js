@@ -3,8 +3,19 @@ module.exports = function (api) {
   return {
     presets: [
       ["babel-preset-expo", { jsxImportSource: "nativewind" }],
-      "nativewind/babel",
+      "nativewind/babel"
     ],
-    plugins: [["inline-import", { extensions: [".sql"] }]],
+    plugins: [
+      ["inline-import", { extensions: [".sql"] }],
+      ["module-resolver", {
+        root: ["./"],
+        alias: {
+          "@": "./",
+          "tailwind.config": "./tailwind.config.js"
+        }
+      }],
+      // ✅ MUST BE LAST
+      "react-native-reanimated/plugin"
+    ],
   };
 };

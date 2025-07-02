@@ -8,14 +8,24 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shefali.gymify",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.shefali_choudhary.gymify"
     },
     "web": {
       "bundler": "metro",
@@ -33,7 +43,9 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
@@ -43,14 +55,15 @@
         "origin": false
       },
       "eas": {
-        "projectId": "abb235c2-482a-4cc1-8a0e-3f8d39e63fb7"
+        "projectId": "867635d0-876f-4757-a778-75594b3b2532"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/abb235c2-482a-4cc1-8a0e-3f8d39e63fb7"
-    }
+      "url": "https://u.expo.dev/867635d0-876f-4757-a778-75594b3b2532"
+    },
+    "owner": "shefali_choudhary"
   }
 }

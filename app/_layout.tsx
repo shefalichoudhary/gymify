@@ -1,9 +1,10 @@
-import { Slot, useRouter, useSegments } from "expo-router";
-
+import "react-native-gesture-handler";
+import "react-native-reanimated";
+import "@/global.css";
+import { Slot, } from "expo-router";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { db, expo_sqlite } from "../db/db";
 import migrations from "@/drizzle/migrations";
-import { AuthProvider, useAuth } from "@/context/authContext";
 import { Suspense, useEffect, useState } from "react";
 import { ActivityIndicator, Text } from "react-native";
 import { SQLiteProvider } from "expo-sqlite";
@@ -11,27 +12,19 @@ import * as SplashScreen from "expo-splash-screen";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import "../global.css";
 SplashScreen.preventAutoHideAsync();
+import { GluestackUIProvider } from "@gluestack-ui/themed";
+import { config } from "@gluestack-ui/config";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 
 const MainLayout = () => {
-  const { isAuthenticated } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (typeof isAuthenticated === "undefined") return;
-
-    const inApp = segments[0] === "(tabs)"; // Checking if inside the tabs
-
-    if (isAuthenticated && !inApp) {
-      // Redirect to home if authenticated and not in the tabs
-      router.replace("/(tabs)/home");
-    } else if (isAuthenticated === false) {
-      // Redirect to sign-in if not authenticated
-      router.replace("/");
-    }
-  }, [isAuthenticated]);
-
-  return <Slot />;
+   return (
+       <GestureHandlerRootView style={{ flex: 1 }}>
+         <GluestackUIProvider config={config} >
+           <Slot />
+         </GluestackUIProvider>
+       </GestureHandlerRootView>
+   );
 };
 
 export default function RootLayout() {
@@ -64,13 +57,11 @@ export default function RootLayout() {
   return (
     <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
       <SQLiteProvider
-        databaseName="mydatabase.db"
+        databaseName="gymify.db"
         options={{ enableChangeListener: true }}
         useSuspense
       >
-        <AuthProvider>
-          <MainLayout></MainLayout>
-        </AuthProvider>
+       <MainLayout />
       </SQLiteProvider>
     </Suspense>
   );
