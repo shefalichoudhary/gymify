@@ -27,7 +27,7 @@ export default function CustomHeader({
   const insets = useSafeAreaInsets();
 
   return (
-    <Box w="100%" px="$4" pt={insets.top + 16} pb="$4"  bg="#29282a">
+    <Box w="100%" px="$4" pt={insets.top + 10} pb="$4"  bg="#1F1F1F">
       <HStack alignItems="center" justifyContent="space-between" w="100%" >
         {/* Left */}
         <Box>

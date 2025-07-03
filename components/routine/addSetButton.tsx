@@ -11,7 +11,7 @@ export default function AddSetButton({ onPress }: Props) {
   return (
     <CustomButton
       mt="$2"
-      bg="#29282a"
+      bg="#1F1F1F"
       onPress={onPress}
       icon={<Entypo name="plus" size={24} color="white" />}
       iconPosition="left"

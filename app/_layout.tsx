@@ -57,7 +57,7 @@ export default function RootLayout() {
   return (
     <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
       <SQLiteProvider
-        databaseName="gymify.db"
+        databaseName="Expo_gymify.db"
         options={{ enableChangeListener: true }}
         useSuspense
       >

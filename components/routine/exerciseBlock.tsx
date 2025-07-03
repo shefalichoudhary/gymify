@@ -5,13 +5,8 @@ import { Entypo } from "@expo/vector-icons";
 import SetRow from "./setRow";
 import AddSetButton from "./addSetButton";
 import { Exercise } from "@/db/schema";
+import { WorkoutSet as Set } from "@/types/workoutSet";
 
-type Set = {
-  lbs: string;
-  reps: string;
-  minReps?: number;
-  maxReps?: number;
-};
 
 type Props = {
   exercise: Exercise;
@@ -19,69 +14,103 @@ type Props = {
   onChange: (newData: { notes: string; restTimer: boolean; sets: Set[] }) => void;
   onOpenRepRange: (exerciseId: string, setIndex: number) => void;
     onHeaderPress: () => void;
+  showCheckIcon?: boolean; 
+   viewOnly?: boolean;
+
 };
 
-export default function ExerciseBlock({ exercise, data, onChange, onOpenRepRange }: Props) {
-  const handleSetChange = <T extends keyof Set>(index: number, key: T, value: Set[T]) => {
-    const updatedSets = [...data.sets];
-    updatedSets[index][key] = value;
-    onChange({ ...data, sets: updatedSets });
-  };
-
+export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly }: Props) {
+ const handleSetChange = <T extends keyof Set>(index: number, key: T, value: Set[T]) => {
+  const updatedSets = [...data.sets];
+  updatedSets[index] = { ...updatedSets[index], [key]: value };
+  onChange({ ...data, sets: updatedSets });
+};
   const handleAddSet = () => {
-    onChange({ ...data, sets: [...data.sets, { lbs: "", reps: "" }] });
+    onChange({
+      ...data,
+      sets: [...data.sets, { lbs: 0, reps: 0, isRangeReps: false }],
+    });
   };
 
   return (
     <Box w="$full">
-      <Text color="$blue500" fontWeight="bold" size="xl" pb="$2" ml="$1">
-        {exercise.exercise_name}
-      </Text>
-
-      <Input borderStyle="none" borderWidth={0} size="md" mb="$4">
-        <InputField
-          placeholder="Add routine notes here"
-          value={data.notes}
-          onChangeText={(text) => onChange({ ...data, notes: text })}
-          color="$white"
-          placeholderTextColor="$coolGray400"
-        />
-      </Input>
-
-      <Pressable onPress={() => onChange({ ...data, restTimer: !data.restTimer })}>
-        <Text color="$blue500" mb="$4" ml="$1">
-          ⏱ Rest Timer: {data.restTimer ? "ON" : "OFF"}
+      <HStack alignItems="center" ml="$1">
+        <Box
+          w={42}
+          h={42}
+          borderRadius={30}
+          bg="#1F1F1F"
+          mr="$3"
+          justifyContent="center"
+          alignItems="center"
+        >
+          {/* Optional icon or initials */}
+        </Box>
+        <Text color="$blue500" fontSize="$lg" fontWeight="$medium">
+          {exercise.exercise_name}
         </Text>
-      </Pressable>
+      </HStack>
 
-     <Pressable >
-     <HStack mb="$1" p="$3" alignItems="center">
-       <Box flex={1}>
-         <Text color="$coolGray400" fontWeight="$medium">SET</Text>
-       </Box>
-       <Box flex={1}>
-         <Text color="$coolGray400" fontWeight="$medium">LBS</Text>
-       </Box>
-       <Box flex={3}>
-         <HStack alignItems="center" space="xs">
-           <Text color="$coolGray400" fontWeight="$medium">REPS</Text>
-           <Entypo name="chevron-down" size={16} color="gray" />
-         </HStack>
-       </Box>
-     </HStack>
-     
-     </Pressable>
+      {!viewOnly && (
+        <Input borderStyle="none" borderWidth={0} size="md" mb="$2">
+          <InputField
+            placeholder="Add routine notes here"
+            value={data.notes}
+            onChangeText={(text) => onChange({ ...data, notes: text })}
+            color="$white"
+            placeholderTextColor="$coolGray400"
+          />
+        </Input>
+      )}
+
+      {!viewOnly && (
+        <Pressable onPress={() => onChange({ ...data, restTimer: !data.restTimer })}>
+          <Text size="md" color="$blue500" mb="$4" ml="$2">
+            ⏱ Rest Timer: {data.restTimer ? "ON" : "OFF"}
+          </Text>
+        </Pressable>
+      )}
+
+     <Pressable>
+  <HStack px="$3" alignItems="center">
+    <Box flex={1}>
+      <Text size="xs" color="$coolGray400" fontWeight="$small">SET</Text>
+    </Box>
+
+    {showCheckIcon && (
+      <Box flex={3}>
+        <Text size="xs" mr="$2" color="$coolGray400" fontWeight="$small">PREVIOUS</Text>
+      </Box>
+    )}
+
+    <Box flex={2}>
+      <Text size="xs" color="$coolGray400" fontWeight="$small">LBS</Text>
+    </Box>
+
+    <Box flex={4}>
+      <HStack alignItems="center" space="xs">
+        <Text size="xs" color="$coolGray400" fontWeight="$small">REPS</Text>
+        {!viewOnly && (
+          <Entypo name="chevron-down" size={12} color="gray" />
+        )}
+      </HStack>
+    </Box>
+  </HStack>
+</Pressable>
+
 
       {data.sets.map((set, index) => (
         <SetRow
           key={index}
           index={index}
           set={set}
-          onChange={(key, value) => handleSetChange(index, key, value)}
+          showCheckIcon={showCheckIcon}
+          editable={!viewOnly}
+         onChange={(key, value) => handleSetChange(index, key, value)}
         />
       ))}
 
-      <AddSetButton onPress={handleAddSet} />
+      {!viewOnly && <AddSetButton onPress={handleAddSet} />}
     </Box>
   );
 }

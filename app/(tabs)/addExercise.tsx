@@ -13,7 +13,6 @@ import CustomButton from "@/components/customButton";
 export default function AddExercise() {
   const router = useRouter();
 
-   const sheetRef = useRef<BottomSheetMethods | null>(null);
   const [exerciseList, setExerciseList] = useState<Exercise[]>([]);
   const [filteredList, setFilteredList] = useState<Exercise[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

@@ -1,29 +1,27 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { db } from "@/db/db";
-import { exercises } from "@/db/schema";
+import { exercises , Exercise } from "@/db/schema";
 import { inArray } from "drizzle-orm";
-import { Exercise } from "@/db/schema";
 import { BottomSheetMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import SetTypeModal from "@/components/routine/bottomSheet/set";
 import {
   VStack,
-  Button,
   Text,
   Input,
   InputField,
   Box,
   HStack,
   ScrollView,
-  Pressable,
 } from "@gluestack-ui/themed";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import CustomHeader from "@/components/customHeader";
 import CustomButton from "@/components/customButton";
 import ExerciseBlock from "@/components/routine/exerciseBlock";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-// import { SaveRoutine } from "@/components/routine/saveRoutine";
+  import { saveRoutineToDb } from "@/components/routine/saveRoutine";
+import { Pressable } from "react-native";
+
 
 export default function CreateRoutineScreen() {
   const router = useRouter();
@@ -31,22 +29,20 @@ export default function CreateRoutineScreen() {
   const selectedParam = Array.isArray(selected) ? selected[0] : selected;
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
   const [activeSetIndex, setActiveSetIndex] = useState<number | null>(null);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState<string >("");
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
   const [exerciseData, setExerciseData] = useState<Record<string, {
     notes: string;
     restTimer: boolean;
     sets: {
-      lbs: string;
-      reps: string;
+      lbs: number;
+      reps: number;
       minReps?: number;
       maxReps?: number;
     }[];
   }>>({});
     const [isModalVisible, setModalVisible] = useState(false);
   const [selectedType, setSelectedType] = useState("Normal");
-
-  
 
   const sheetRef = useRef<BottomSheetMethods>(null);
 
@@ -94,22 +90,10 @@ const handleSave = async () => {
     return;
   }
 
-  try {
-    // if (isLoggedIn) {
-    //   await SaveRoutine(title, exerciseData);
-    //   router.push("/workout");
-    // } else {
-      // Save to local storage
-      await AsyncStorage.setItem(
-        "unsavedRoutine",
-        JSON.stringify({ title, exerciseData })
-      );
-      router.push("/signIn");
-    
-  } catch (error) {
-    console.error("Error saving routine:", error);
-    alert("Failed to save routine. Try again.");
-  }
+ 
+     await saveRoutineToDb(title, selectedExercises, exerciseData);
+console.log("✅ Routine saved to SQLite DB");
+router.push("/workout");
 };
 
   const renderAddExerciseButton = () => (
@@ -135,7 +119,7 @@ const handleSave = async () => {
         onRightButtonPress={handleSave}
       />
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 48 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
         <Box pt="$6" px="$2">
           <Input variant="underlined" borderBottomWidth={0.5} size="xl">
             <InputField
@@ -144,9 +128,22 @@ const handleSave = async () => {
               onChangeText={setTitle}
               color="$white"
               placeholderTextColor="$coolGray400"
-              fontWeight="$medium"
-              className="text-2xl pb-5"
+              fontWeight="$small"
+              className="text-2xl pb-5 px-2"
             />
+            {title.length > 0 && (
+             <Pressable onPress={() => setTitle("")}>
+                           <Box
+                bg="$white"
+                p={5} // adjust for size
+                borderRadius={999} // full circle
+                alignItems="center"
+                justifyContent="center"
+              >
+                <MaterialIcons name="clear" size={10} color="black" />
+              </Box>
+                        </Pressable>
+              )}
           </Input>
         </Box>
 

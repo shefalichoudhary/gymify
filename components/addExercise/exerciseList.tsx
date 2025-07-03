@@ -23,7 +23,7 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
           py="$2"
           bg={isSelected ? "$gray800" : "transparent"}
           borderBottomWidth={0.6}
-          borderBottomColor="#2a2a2a"
+          borderBottomColor="#1F1F1F"
         >
           {/* Static left blue bar */}
           <Box
@@ -39,8 +39,8 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
             {/* Icon */}
             <Box
             w={56} // increased from 42
-  h={56}
-  borderRadius={30}
+           h={56}
+           borderRadius={30}
               bg="$coolGray600"
               mr="$4"
               justifyContent="center"

@@ -12,7 +12,7 @@ interface Props {
 export default function ExerciseSearchbar({ query, setQuery }: Props) {
   return (
     <Box px="$3" py="$4">
-      <Input borderRadius={12} size="sm" borderColor="#29282a" bg="#29282a">
+      <Input borderRadius={12} size="sm" borderColor="#1F1F1F" bg="#1F1F1F">
         <HStack alignItems="center" w="100%" px="$2">
           <AntDesign name="search1" size={26} color="gray" />
           <InputField
@@ -32,7 +32,7 @@ export default function ExerciseSearchbar({ query, setQuery }: Props) {
     alignItems="center"
     justifyContent="center"
   >
-    <MaterialIcons name="clear" size={14} color="black" />
+    <MaterialIcons name="clear" size={12} color="black" />
   </Box>
             </Pressable>
           )}

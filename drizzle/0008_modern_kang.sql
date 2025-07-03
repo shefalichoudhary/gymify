@@ -1,0 +1,1 @@
+ALTER TABLE `routine_sets` ADD `exercise_id` text NOT NULL REFERENCES exercises(id);

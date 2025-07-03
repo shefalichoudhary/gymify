@@ -221,7 +221,8 @@ export default function LandingPage() {
               you build strength, improve flexibility, and stay motivated.
             </Text>
           <CustomButton
-  onPress={() => router.replace("/home")}
+   onPress={() => router.replace("/addExercise")}
+
   iconPosition="right"
   icon={
     <AntDesign

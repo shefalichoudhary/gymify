@@ -77,12 +77,17 @@ export default function Layout() {
               );
             },
 
-            tabBarStyle: showTabBar
-              ? { backgroundColor: "#29282a" }
-              : { display: "none" },
+     tabBarStyle: showTabBar
+  ? {
+      backgroundColor: "#1F1F1F",
+      borderTopWidth: 0,
+      paddingBottom: 4,
+      height: 55,
+    }
+  : { display: "none" },
 
             tabBarLabelStyle: {
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: "600",
             },
 
@@ -104,6 +109,7 @@ export default function Layout() {
         <Tabs.Screen name="home" options={{ title: "Home" }} />
         <Tabs.Screen name="workout" options={{ title: "Workout" }} />
         <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+      
         <Tabs.Screen
           name="createRoutine"
           options={{ title: "CreateRoutine", href: null, headerShown: false }}
@@ -116,6 +122,26 @@ export default function Layout() {
           name="logWorkout"
           options={{ title: "LogWorkout", href: null, headerShown: false }}
         />
+        <Tabs.Screen
+  name="routine/[id]"
+  options={{
+    headerShown: false,
+    tabBarStyle: { display: "none" },
+    href: null, // 👈 this makes sure it's not listed in tabs
+  }}
+/>
+   <Tabs.Screen
+  name="routine/edit/[id]"
+  options={{
+    headerShown: false,
+    tabBarStyle: { display: "none" },
+    href: null, // 👈 this makes sure it's not listed in tabs
+  }}></Tabs.Screen>
+   <Tabs.Screen
+          name="saveWorkout"
+          options={{ title: "SaveWorkout", href: null, headerShown: false }}
+        />
+       
       </Tabs>
     </Box>
   );
