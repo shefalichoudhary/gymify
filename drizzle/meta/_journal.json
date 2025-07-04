@@ -92,6 +92,13 @@
       "when": 1751559504345,
       "tag": "0012_green_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1751605262437,
+      "tag": "0013_curly_sharon_carter",
+      "breakpoints": true
     }
   ]
 }

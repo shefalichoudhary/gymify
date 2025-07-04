@@ -33,7 +33,7 @@ useEffect(() => {
   const loadRoutinesWithExercises = async () => {
     try {
       const routineData = await db.select().from(routines).all();
-
+console.log("🧠 All routines:", routineData);
       const routinesWithExercises: RoutineWithExercises[] = [];
 
       for (const routine of routineData) {
@@ -61,6 +61,8 @@ useEffect(() => {
         });
 
       }
+  
+
 
       setRoutineList(routinesWithExercises);
     } catch (err) {

@@ -14,6 +14,7 @@ import m0009 from './0009_huge_mockingbird.sql';
 import m0010 from './0010_nasty_lady_ursula.sql';
 import m0011 from './0011_bored_banshee.sql';
 import m0012 from './0012_green_black_tarantula.sql';
+import m0013 from './0013_curly_sharon_carter.sql';
 
   export default {
     journal,
@@ -30,7 +31,8 @@ m0008,
 m0009,
 m0010,
 m0011,
-m0012
+m0012,
+m0013
     }
   }
   

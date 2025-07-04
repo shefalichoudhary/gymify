@@ -27,7 +27,7 @@ export const routines = sqliteTable("routines", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
   name: text("name").notNull(),
   createdBy: text("created_by"),
-createdAt: integer("created_at", { mode: "timestamp" }).default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`), 
 });
 export const routineExercises = sqliteTable("routine_exercises", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
