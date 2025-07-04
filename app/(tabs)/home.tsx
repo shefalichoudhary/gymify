@@ -16,6 +16,8 @@ import {
 } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { sql } from "drizzle-orm";
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 
 type Workout = {
   id: string;
@@ -33,7 +35,8 @@ type Workout = {
 export default function Home() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
 
-  useEffect(() => {
+ useFocusEffect(
+  useCallback(() => {
     const fetchWorkouts = async () => {
       try {
         const allRoutines = await db
@@ -44,7 +47,6 @@ export default function Home() {
         const workoutsWithExercises: Workout[] = [];
 
         for (const routine of allRoutines) {
-          // ✅ Fetch duration for this routine
           const workoutMeta = await db
             .select()
             .from(workoutsTable)
@@ -105,10 +107,11 @@ export default function Home() {
     };
 
     fetchWorkouts();
-  }, []);
+  }, []) // <- wrapped in useCallback correctly
+);
 
   return (
-    <Box flex={1} bg="#1F1F1F">
+    <Box flex={1} bg="#1F1F1F" py="$3">
       <ScrollView pt="$1">
         <VStack bg="#1F1F1F" >
           {workouts.map((workout) => (

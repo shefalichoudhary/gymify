@@ -7,6 +7,8 @@ import {
   Button,
   ScrollView,
 } from '@gluestack-ui/themed';
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 
 import { Feather,FontAwesome6 ,AntDesign } from '@expo/vector-icons';
 import CustomButton from '@/components/customButton';
@@ -29,55 +31,57 @@ export default function WorkoutScreen() {
 
 const [routineList, setRoutineList] = React.useState<RoutineWithExercises[]>([]);
 
-useEffect(() => {
-  const loadRoutinesWithExercises = async () => {
-    try {
-      const routineData = await db.select().from(routines).all();
-console.log("🧠 All routines:", routineData);
-      const routinesWithExercises: RoutineWithExercises[] = [];
+useFocusEffect(
+  useCallback(() => {
+    const loadRoutinesWithExercises = async () => {
+      try {
+        const routineData = await db.select().from(routines).all();
+        console.log("🧠 All routines:", routineData);
+        const routinesWithExercises: RoutineWithExercises[] = [];
 
-      for (const routine of routineData) {
-        const routineEx = await db
-          .select()
-          .from(routineExercises)
-          .where(eq(routineExercises.routineId, routine.id))
-          .all();
+        for (const routine of routineData) {
+          const routineEx = await db
+            .select()
+            .from(routineExercises)
+            .where(eq(routineExercises.routineId, routine.id))
+            .all();
 
-        const exerciseIds = routineEx.map((re) => re.exerciseId);
+          const exerciseIds = routineEx.map((re) => re.exerciseId);
 
-        const exDetails =
-          exerciseIds.length > 0
-            ? await db
-                .select({ id: exercises.id, name: exercises.exercise_name })
-                .from(exercises)
-                .where(inArray(exercises.id, exerciseIds))
-                .all()
-            : [];
+          const exDetails =
+            exerciseIds.length > 0
+              ? await db
+                  .select({ id: exercises.id, name: exercises.exercise_name })
+                  .from(exercises)
+                  .where(inArray(exercises.id, exerciseIds))
+                  .all()
+              : [];
 
-        routinesWithExercises.push({
-          id: routine.id,
-          name: routine.name,
-          exercises: exDetails,
-        });
+          routinesWithExercises.push({
+            id: routine.id,
+            name: routine.name,
+            exercises: exDetails,
+          });
+        }
 
+        setRoutineList(routinesWithExercises);
+      } catch (err) {
+        console.error("❌ Error loading routines:", err);
       }
-  
+    };
+
+    loadRoutinesWithExercises();
+  }, []) // empty dep array ensures it runs on every focus
+);
 
 
-      setRoutineList(routinesWithExercises);
-    } catch (err) {
-      console.error("❌ Error loading routines:", err);
-    }
-  };
-
-  loadRoutinesWithExercises();
-}, []);
+ 
 
 
 
 
   return (
-    <Box flex={1} bg="$black" pt="$5">
+    <Box flex={1} bg="$black" pt="$5" py="$6">
      
 
         {/* Routines */}

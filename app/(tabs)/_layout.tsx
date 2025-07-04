@@ -4,113 +4,125 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CustomHeader from "@/components/customHeader";
 import { Pressable, Text, Box, HStack } from "@gluestack-ui/themed";
 // import { useAuth } from "@/context/AuthContext"; // ✅ make sure you have this
+import { DevSettings } from "react-native";
 
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
 export default function Layout() {
   const router = useRouter();
-  // const { isLoggedIn, logout } = useAuth(); // ✅ inside component
+    const [reloadKey, setReloadKey] = useState(0);
 
   return (
-    <Box flex={1} bg="#29282a">
-      <Tabs
-        screenOptions={({ route }) => {
-          const showTabBar = ["home", "workout", "profile"].includes(route.name);
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }} edges={["bottom", "left", "right"]}>
+      <Box flex={1} bg="#1F1F1F">
+        <Tabs
+          screenOptions={({ route }) => {
+            const showTabBar = ["home", "workout", "profile"].includes(route.name);
 
-          return {
-            header: () => {
-              if (route.name === "home") {
+            return {
+              header: () => {
+                if (route.name === "home") {
+                  return (
+                    <CustomHeader
+                      isHome
+                      left={
+                        <Pressable onPress={() => router.replace("/")}>
+                          <Text
+                            color="$white"
+                            fontWeight="$xl"
+                            fontSize="$lg"
+                            $md-fontWeight="$bold"
+                            letterSpacing={3}
+                          >
+                            GYMIFY
+                          </Text>
+                        </Pressable>
+                      }
+                      right={
+                        <HStack space="md">
+                          <Pressable onPress={() => router.push("/signIn")}>
+                            <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
+                              Login
+                            </Text>
+                          </Pressable>
+                        </HStack>
+                      }
+                    />
+                  );
+                }
+
                 return (
                   <CustomHeader
-                    isHome
                     left={
-                      <Pressable onPress={() => router.replace("/")}>
-                        <Text
-                          color="$white"
-                          fontWeight="$xl"
-                          fontSize="$lg"
-                          $md-fontWeight="$bold"
-                          letterSpacing={3}
-                        >
-                          GYMIFY
-                        </Text>
+                      <Pressable onPress={() => router.push("/home")}>
+                        <AntDesign name="arrowleft" size={24} color="white" />
                       </Pressable>
                     }
+                    title={route.name.charAt(0).toUpperCase() + route.name.slice(1)}
                     right={
-                      <HStack space="md">
-                        <Pressable onPress={() => router.push("/signIn")}>
-                            <Text color="$white"  letterSpacing={0.5} fontWeight="$medium">
-                              Login
-                            </Text>
-                          </Pressable>
-                        {/* {isLoggedIn ? (
-                          <Pressable onPress={logout}>
-                            <Text color="$blue500" fontWeight="$bold">
-                              Logout
-                            </Text>
-                          </Pressable>
-                        ) : (
-                          <Pressable onPress={() => router.push("/signIn")}>
-                            <Text color="$blue500" fontWeight="$bold">
-                              Login
-                            </Text>
-                          </Pressable>
-                        )} */}
-                      </HStack>
+                     <Pressable onPress={() => setReloadKey(prev => prev + 1)}>
+  <AntDesign name="reload1" size={24} color="white" />
+</Pressable>
                     }
                   />
                 );
-              }
+              },
 
-              return (
-                <CustomHeader
-                  left={
-                    <Pressable onPress={() => router.back()}>
-                      <AntDesign name="arrowleft" size={24} color="white" />
-                    </Pressable>
-                  }
-                  title={route.name.charAt(0).toUpperCase() + route.name.slice(1)}
-                  right={
-                    <Pressable onPress={() => router.back()}>
-                      <AntDesign name="reload1" size={24} color="white" />
-                    </Pressable>
-                  }
-                />
-              );
-            },
-
-     tabBarStyle: showTabBar
-  ? {
-      backgroundColor: "#1F1F1F",
-      borderTopWidth: 0,
-      paddingBottom: 4,
-      height: 55,
-    }
+          tabBarStyle: showTabBar
+  ? route.name === "home"
+    ? {
+        backgroundColor: "#1F1F1F",
+        borderTopWidth: 0.2,
+        borderTopColor: "#1F1F1F", // customize this color as needed
+        paddingBottom: 1,
+        height: 60,
+      }
+    : {
+        backgroundColor: "#1F1F1F",
+        borderTopWidth: 0,
+        paddingBottom: 10,
+        height: 60,
+      }
   : { display: "none" },
 
-            tabBarLabelStyle: {
-              fontSize: 12,
-              fontWeight: "600",
-            },
 
-            tabBarIcon: ({ color }) => {
-              if (route.name === "home")
-                return <AntDesign name="home" size={22} color={color} />;
-              if (route.name === "workout")
-                return <FontAwesome6 name="dumbbell" size={22} color={color} />;
-              if (route.name === "profile")
-                return <AntDesign name="user" size={22} color={color} />;
-              return null;
-            },
+              tabBarLabelStyle: {
+                fontSize: 12,
+                fontWeight: "600",
+              },
 
-            tabBarActiveTintColor: "#3b82f8",
-            tabBarInactiveTintColor: "gray",
-          };
-        }}
-      >
-        <Tabs.Screen name="home" options={{ title: "Home" }} />
-        <Tabs.Screen name="workout" options={{ title: "Workout" }} />
-        <Tabs.Screen name="profile" options={{ title: "Profile" }} />
-      
-        <Tabs.Screen
+              tabBarIcon: ({ color }) => {
+                if (route.name === "home")
+                  return <AntDesign name="home" size={22} color={color} />;
+                if (route.name === "workout")
+                  return <FontAwesome6 name="dumbbell" size={22} color={color} />;
+                if (route.name === "profile")
+                  return <AntDesign name="user" size={22} color={color} />;
+                return null;
+              },
+
+              tabBarActiveTintColor: "#3b82f8",
+              tabBarInactiveTintColor: "gray",
+            };
+          }}
+        >
+          {/* your tab screens here */}
+  <Tabs.Screen
+    name="home"
+    options={{ title: "Home" }}
+    key={`home-${reloadKey}`}
+  />
+  <Tabs.Screen
+    name="workout"
+    options={{ title: "Workout" }}
+    key={`workout-${reloadKey}`}
+  />
+  <Tabs.Screen
+    name="profile"
+    options={{ title: "Profile" }}
+    key={`profile-${reloadKey}`}
+  />
+          <Tabs.Screen
           name="createRoutine"
           options={{ title: "CreateRoutine", href: null, headerShown: false }}
         />
@@ -142,7 +154,8 @@ export default function Layout() {
           options={{ title: "SaveWorkout", href: null, headerShown: false }}
         />
        
-      </Tabs>
-    </Box>
+        </Tabs>
+      </Box>
+    </SafeAreaView>
   );
 }

@@ -114,7 +114,7 @@ router.push("/workout");
       <CustomHeader
         title="Create Routine"
         left="Cancel"
-        onPress={() => router.back()}
+        onPress={() => router.push("/workout")}
         right="Save"
         onRightButtonPress={handleSave}
       />
