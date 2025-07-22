@@ -79,7 +79,7 @@ export default function Home() {
               );
 
             const totalSets = sets.length;
-            const exerciseVolume = sets.reduce((sum, set) => sum + (set.lbs ?? 0), 0);
+            const exerciseVolume = sets.reduce((sum, set) => sum + (set.weight ?? 0), 0);
             totalVolume += exerciseVolume;
 
             exerciseList.push({
@@ -111,9 +111,9 @@ export default function Home() {
 );
 
   return (
-    <Box flex={1} bg="#1F1F1F" py="$3">
-      <ScrollView pt="$1">
-        <VStack bg="#1F1F1F" >
+    <Box flex={1} bg="#1F1F1F" >
+      <ScrollView pt="$1" >
+        <VStack bg="#1F1F1F" pb="$4" >
           {workouts.map((workout) => (
             <Box
               key={workout.id}

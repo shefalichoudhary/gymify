@@ -1,11 +1,11 @@
 // types/workout.ts
 export type WorkoutSet = {
-  lbs: number;
-  reps: number;
+  weight?: number;
+  reps?: number;
   minReps?: number;
   maxReps?: number;
   isRangeReps?: boolean;
-  previousLbs?: number;
+  previousWeight?: number;
   previousReps?: number;
   previousMinReps?: number;
   previousMaxReps?: number;

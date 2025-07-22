@@ -15,6 +15,11 @@ import m0010 from './0010_nasty_lady_ursula.sql';
 import m0011 from './0011_bored_banshee.sql';
 import m0012 from './0012_green_black_tarantula.sql';
 import m0013 from './0013_curly_sharon_carter.sql';
+import m0014 from './0014_solid_epoch.sql';
+import m0015 from './0015_tired_ken_ellis.sql';
+import m0016 from './0016_certain_dark_beast.sql';
+import m0017 from './0017_typical_talos.sql';
+import m0018 from './0018_cultured_rachel_grey.sql';
 
   export default {
     journal,
@@ -32,7 +37,12 @@ m0009,
 m0010,
 m0011,
 m0012,
-m0013
+m0013,
+m0014,
+m0015,
+m0016,
+m0017,
+m0018
     }
   }
   

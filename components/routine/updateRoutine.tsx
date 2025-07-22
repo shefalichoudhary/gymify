@@ -51,11 +51,11 @@ await db.delete(routineSets)
       await db.insert(routineSets).values({
         routineId,
         exerciseId,
-        lbs: set.lbs,
-        reps: set.reps,
-        minReps: set.minReps ?? null,
-        maxReps: set.maxReps ?? null,
-        restTimer: data.restTimer ? 60 : 0, // example timer value
+         weight: set.weight ?? 0, 
+  reps: set.reps ?? 0,
+  minReps: set.minReps ?? 0,
+  maxReps: set.maxReps ?? 0,
+  restTimer: data.restTimer ? 60 : 0,
       });
     }
   }

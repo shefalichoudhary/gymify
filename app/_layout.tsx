@@ -15,15 +15,16 @@ SplashScreen.preventAutoHideAsync();
 import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "@gluestack-ui/config";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
-
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 const MainLayout = () => {
    return (
-       <GestureHandlerRootView style={{ flex: 1 }}>
-         <GluestackUIProvider config={config} >
-           <Slot />
-         </GluestackUIProvider>
-       </GestureHandlerRootView>
+ <GestureHandlerRootView style={{ flex: 1 }}>
+      <BottomSheetModalProvider>
+        <GluestackUIProvider config={config}>
+          <Slot />
+        </GluestackUIProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
    );
 };
 

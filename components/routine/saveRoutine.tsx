@@ -51,7 +51,7 @@ export const saveRoutineToDb = async (
       await db.insert(routineSets).values({
         routineId,
           exerciseId,
-        lbs: Number(set.lbs) || 0,
+        weight: Number(set.weight) || 0,
         reps: Number(set.reps) || 0,
         minReps: set.minReps ?? null,
         maxReps: set.maxReps ?? null,
@@ -59,7 +59,7 @@ export const saveRoutineToDb = async (
       });
 
       console.log(
-        `  ➕ Set ${i + 1} inserted: lbs=${set.lbs}, reps=${set.reps}, minReps=${set.minReps}, maxReps=${set.maxReps}`
+        `  ➕ Set ${i + 1} inserted: weight=${set.weight}, reps=${set.reps}, minReps=${set.minReps}, maxReps=${set.maxReps}`
       );
     }
   }

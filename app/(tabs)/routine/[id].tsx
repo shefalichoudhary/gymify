@@ -25,7 +25,7 @@ type RoutineWithExercises = {
     name: string;
     subtitle?: string;
     sets: {
-      lbs: number;
+      weight: number;
       reps: number;
     }[];
   }[];
@@ -89,7 +89,7 @@ const routineId = Array.isArray(id) ? id[0] : id;
   const sets = setEntries
     .filter((s: any) => s.exerciseId === ex.id)
     .map((s) => ({
-      lbs: s.lbs ?? 0,
+      weight: s.weight ?? 0,
       reps: s.reps ?? 0,
     }));
   return {
@@ -220,7 +220,7 @@ const routineId = Array.isArray(id) ? id[0] : id;
           <Text color="$white">{setIndex + 1}</Text>
         </Box>
         <Box flex={3}>
-          <Text color="$white">{set.lbs}</Text>
+          <Text color="$white">{set.weight}</Text>
         </Box>
         <Box flex={5}>
           <Text color="$white">{set.reps}</Text>

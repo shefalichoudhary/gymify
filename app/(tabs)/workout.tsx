@@ -1,4 +1,4 @@
-import React,{useEffect} from 'react';
+ import React,{useEffect,useRef,useState} from 'react';
 import {
   Box,
   VStack,
@@ -7,8 +7,12 @@ import {
   Button,
   ScrollView,
 } from '@gluestack-ui/themed';
+import { Vibration } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";
+import DraggableFlatList, {
+  RenderItemParams,
+} from "react-native-draggable-flatlist";
 
 import { Feather,FontAwesome6 ,AntDesign } from '@expo/vector-icons';
 import CustomButton from '@/components/customButton';
@@ -17,6 +21,10 @@ import { Pressable } from '@/components/ui/pressable';
 import { useRouter } from 'expo-router';
  import { routines, routineExercises, exercises } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import WorkoutRoutineSheet,{WorkoutRoutineSheetRef} from '@/components/workout/bottomSheet/workoutRoutine';
+
+const sheetRef = useRef<WorkoutRoutineSheetRef>(null);
+
 type RoutineWithExercises = {
   id: string;
   name: string;
@@ -36,7 +44,6 @@ useFocusEffect(
     const loadRoutinesWithExercises = async () => {
       try {
         const routineData = await db.select().from(routines).all();
-        console.log("🧠 All routines:", routineData);
         const routinesWithExercises: RoutineWithExercises[] = [];
 
         for (const routine of routineData) {
@@ -73,10 +80,6 @@ useFocusEffect(
     loadRoutinesWithExercises();
   }, []) // empty dep array ensures it runs on every focus
 );
-
-
- 
-
 
 
 
@@ -130,56 +133,92 @@ useFocusEffect(
 </HStack>
         </Box>
 
-     <ScrollView px="$4">
-<HStack alignItems="center" mb="$3" space="sm">
-  {/* Dropdown Icon on the left */}
-  <AntDesign name="caretdown" size={14} color="#a1a1aa" />
+        <Box px="$5">
+       {routineList.length > 0 && (
+  <HStack alignItems="center" mb="$3" space="md">
+    <AntDesign name="caretdown" size={12} color="#a1a1aa" />
+    <Text color="$coolGray400" letterSpacing={0.5}>
+      My Routines ({routineList.reduce((count, routine) => count + routine.exercises.length, 0)})
+    </Text>
+  </HStack>
+)}
+  </Box>
 
-  {/* Label with count */}
-  <Text color="$coolGray400" letterSpacing={0.5}>
-    My Routines ({routineList.reduce((count, routine) => count + routine.exercises.length, 0)})
+
+    <DraggableFlatList
+  data={routineList}
+   onDragEnd={({ data }) => {
+    setRoutineList(data);
+    Vibration.vibrate(30); // Vibrate after drag ends
+  }}
+  keyExtractor={(item) => item.id}
+  contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
+  renderItem={({ item, drag, isActive }: RenderItemParams<RoutineWithExercises>) => (
+    <Box
+      bg="#1F1F1F"
+      p="$4"
+      mb="$4"
+      rounded="$xl"
+      style={{
+        opacity: isActive ? 0.9 : 1,
+        transform: [{ scale: isActive ? 1.02 : 1 }],
+      }}
+     
+    >
+      <Pressable
+  onLongPress={() => {
+    Vibration.vibrate(50); // 50ms vibration
+    drag(); // Start dragging
+  }}
+    onPress={() => {
+    router.push({
+      pathname: "/routine/[id]",
+      params: { id: item.id },
+    });
+  }}
+>
+       <HStack justifyContent="space-between" alignItems="center">
+  <Text color="$white" fontSize="$lg" fontWeight="$semibold">
+    {item.name}
   </Text>
+   <Pressable
+  onPress={() => {
+    sheetRef.current?.open(item);
+  }}
+>
+    <Feather name="more-horizontal" size={22} color="white" />
+  </Pressable>
 </HStack>
+        <Text color="$coolGray400" fontSize="$sm" mt="$0.5" mb="$4">
+          {item.exercises.length > 0
+            ? item.exercises.map((ex) => ex.name).join(", ")
+            : "No exercises added"}
+        </Text>
+      </Pressable>
 
-  <VStack space="lg">
-    {routineList.length === 0 ? (
-      <Text color="$coolGray400">No routines found.</Text>
-    ) : (
-      routineList.map((routine) => (
-        <Box key={routine.id} bg="#1F1F1F" p="$4" rounded="$xl">
-          {/* Pressable title navigates to details */}
-         <Pressable onPress={() => router.push({ pathname: "/routine/[id]", params: { id: routine.id } })}>
-            <Text color="$white" fontSize="$lg" fontWeight="$semibold">
-              {routine.name}
-            </Text>
-
-            <Text color="$coolGray400" fontSize="$sm" mt="$0.5" mb="$4">
-              {routine.exercises.length > 0
-                ? routine.exercises.map((ex) => ex.name).join(", ")
-                : "No exercises added"}
-            </Text>
-          </Pressable>
-
-          {/* Single Start Routine Button */}
-          <CustomButton
-            onPress={() => router.push({
-  pathname: "/logWorkout",
-  params: {
-    routineId: routine.id,
-    routineTitle: routine.name,
-  }
-})
-            }
-            bg="$blue500"
-          >
-            Start Routine
-          </CustomButton>
-        </Box>
-      ))
-    )}
-  </VStack>
-</ScrollView>
-
+      <CustomButton
+        onPress={() =>
+          router.push({
+            pathname: "/logWorkout",
+            params: {
+              routineId: item.id,
+              routineTitle: item.name,
+            },
+          })
+        }
+        bg="$blue500"
+      >
+        Start Routine
+      </CustomButton>
+    </Box>
+  )}
+/>
+<WorkoutRoutineSheet
+  ref={sheetRef}
+  onRoutineDeleted={(id) => {
+    setRoutineList((prev) => prev.filter((r) => r.id !== id));
+  }}
+/>
 
     </Box>
   );

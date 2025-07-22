@@ -1,36 +1,49 @@
 // components/routine/ExerciseBlock.tsx
-import React from "react";
 import { Box, Text, Input, InputField, Pressable, HStack } from "@gluestack-ui/themed";
 import { Entypo } from "@expo/vector-icons";
 import SetRow from "./setRow";
 import AddSetButton from "./addSetButton";
 import { Exercise } from "@/db/schema";
 import { WorkoutSet as Set } from "@/types/workoutSet";
-
-
+import React from "react";
 type Props = {
-  exercise: Exercise;
-  data: { notes: string; restTimer: boolean; sets: Set[] };
-  onChange: (newData: { notes: string; restTimer: boolean; sets: Set[] }) => void;
+  exercise: {
+    id: string;
+    exercise_name: string;
+  };
+data: { notes: string; restTimer: boolean; restTimeInSeconds?: number; sets: Set[],  unit: "lbs" | "kg"; repsType: "reps" | "rep range"; };
+ onChange: (
+  newData: {
+    notes: string;
+    restTimer: boolean;
+    restTimeInSeconds?: number;
+    sets: Set[];
+     unit: "lbs" | "kg";
+    repsType: "reps" | "rep range"; // Add repsType to the data structure
+  }
+) => void;
   onOpenRepRange: (exerciseId: string, setIndex: number) => void;
-    onHeaderPress: () => void;
   showCheckIcon?: boolean; 
    viewOnly?: boolean;
-
+   onOpenWeight?: (exerciseId: string, ) => void;
+onOpenRepsType?: (exerciseId: string) => void; // Optional, if you want to use a ref for the reps type sheet
+  onOpenRestTimer: (exerciseId: string) => void; // Optional, if you want to use a ref for the rest timer sheet
 };
 
-export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly }: Props) {
+export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly , onOpenRestTimer, onOpenWeight,onOpenRepsType, }: Props) {
  const handleSetChange = <T extends keyof Set>(index: number, key: T, value: Set[T]) => {
   const updatedSets = [...data.sets];
   updatedSets[index] = { ...updatedSets[index], [key]: value };
   onChange({ ...data, sets: updatedSets });
 };
+
   const handleAddSet = () => {
     onChange({
       ...data,
-      sets: [...data.sets, { lbs: 0, reps: 0, isRangeReps: false }],
+      sets: [...data.sets, { weight: 0, reps: 0, isRangeReps: false }],
     });
   };
+
 
   return (
     <Box w="$full">
@@ -64,9 +77,11 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
       )}
 
       {!viewOnly && (
-        <Pressable onPress={() => onChange({ ...data, restTimer: !data.restTimer })}>
+   <Pressable onPress={() => onOpenRestTimer(exercise.id)}>
+
+
           <Text size="md" color="$blue500" mb="$4" ml="$2">
-            ⏱ Rest Timer: {data.restTimer ? "ON" : "OFF"}
+            ⏱ Rest Timer: {data.restTimer ? `${data.restTimeInSeconds ?? 60}s` : "OFF"}
           </Text>
         </Pressable>
       )}
@@ -78,23 +93,26 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
     </Box>
 
     {showCheckIcon && (
-      <Box flex={3}>
-        <Text size="xs" mr="$2" color="$coolGray400" fontWeight="$small">PREVIOUS</Text>
+      <Box flex={3} ml="$4" >
+        <Text size="xs"  color="$coolGray400" fontWeight="$small" >PREVIOUS</Text>
       </Box>
     )}
-
-    <Box flex={2}>
-      <Text size="xs" color="$coolGray400" fontWeight="$small">LBS</Text>
-    </Box>
-
-    <Box flex={4}>
+  {!viewOnly && (
+   <Pressable flex={showCheckIcon ? 2 : 1}     ml={showCheckIcon ? undefined : "$3"} onPress={() => onOpenWeight?.(exercise.id)}>
+  <Text size="xs" color="$coolGray400" fontWeight="$small">
+    {data.unit.toUpperCase()}
+  </Text>
+</Pressable>
+    )}
+      {!viewOnly && (
+    <Pressable flex={showCheckIcon ? 4 : 1} onPress={() => onOpenRepsType?.(exercise.id)}>
       <HStack alignItems="center" space="xs">
-        <Text size="xs" color="$coolGray400" fontWeight="$small">REPS</Text>
-        {!viewOnly && (
+        <Text size="xs" color="$coolGray400" fontWeight="$small">{data.repsType.toUpperCase()}</Text>
           <Entypo name="chevron-down" size={12} color="gray" />
-        )}
       </HStack>
-    </Box>
+    </Pressable>
+        )}
+
   </HStack>
 </Pressable>
 
@@ -103,7 +121,7 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
         <SetRow
           key={index}
           index={index}
-          set={set}
+            set={{ ...set, isRangeReps: data.repsType === "rep range" }}
           showCheckIcon={showCheckIcon}
           editable={!viewOnly}
          onChange={(key, value) => handleSetChange(index, key, value)}
@@ -111,6 +129,8 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
       ))}
 
       {!viewOnly && <AddSetButton onPress={handleAddSet} />}
+     
     </Box>
+    
   );
 }

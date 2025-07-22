@@ -1,6 +1,5 @@
 // app/editRoutine.tsx
-
-import React, { useState,useEffect } from "react";
+import React, { useState,useEffect,useRef } from "react";
 import { exercises } from "@/db/schema"
 import {
   Box,
@@ -10,12 +9,8 @@ import {
   InputField,
   Pressable,
   ScrollView,
-  Button,
-  InputSlot,
- 
 } from "@gluestack-ui/themed";
 import ExerciseBlock from "@/components/routine/exerciseBlock";
-import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "@/components/customButton";
 import { useRouter } from "expo-router";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
@@ -30,16 +25,25 @@ import { eq, inArray  } from "drizzle-orm";
 import { updateRoutineInDb } from "@/components/routine/updateRoutine"; 
 import { WorkoutSet as Set } from "@/types/workoutSet";
 import {  useLocalSearchParams } from "expo-router";
+import RestTimerSheet, { RestTimerSheetRef } from "@/components/routine/bottomSheet/timer";
+import RepsTypeSheet, { RepsTypeSheetRef } from "@/components/routine/bottomSheet/repsType";
+import WeightSheet, { WeightSheetRef } from "@/components/routine/bottomSheet/weight";
+
 
 type ExerciseUpdateData = {
   notes: string;
   restTimer: boolean;
   sets: Set[];
+    unit: "lbs" | "kg";
+  repsType: "reps" | "rep range";
 };
-type ExerciseMap = Record<string, ExerciseUpdateData>;
 export default function EditRoutineScreen() {
-   const { id } = useLocalSearchParams<{ id: string }>();
-  const routineId = Array.isArray(id) ? id[0] : id;
+  const { id: rawId, addedExerciseIds } = useLocalSearchParams<{
+  id: string | string[];
+  addedExerciseIds?: string;
+}>();
+
+const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   const router = useRouter();
 
   const [routineTitle, setRoutineTitle] = useState("Loading...");
@@ -51,6 +55,88 @@ export default function EditRoutineScreen() {
     equipment: string;
     type: string;
   }>>({});
+
+  const restSheetRef = useRef<RestTimerSheetRef>(null);
+const weightSheetRef = useRef<WeightSheetRef>(null);
+const repsSheetRef = useRef<RepsTypeSheetRef>(null);
+const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
+
+const handleRestDurationSelect = (duration: number) => {
+  if (!activeExerciseId) return;
+
+  setExerciseData((prev:any) => {
+    const updated = { ...prev };
+    const exercise = updated[activeExerciseId];
+
+    if (exercise) {
+      exercise.restTimer = true;
+      exercise.restTimeInSeconds = duration;
+    }
+
+    return updated;
+  });
+};
+const handleWeightSelect = (unit: string) => {
+  if (!activeExerciseId) return;
+  setExerciseData((prev:any) => ({
+    ...prev,
+    [activeExerciseId]: {
+      ...prev[activeExerciseId],
+      unit,
+    },
+  }));
+};
+const handleRepsTypeSelect = (type: "reps" | "rep range") => {
+  if (!activeExerciseId) return;
+  setExerciseData((prev: any) => ({
+    ...prev,
+    [activeExerciseId]: {
+      ...prev[activeExerciseId],
+      repsType: type,
+    },
+  }));
+};
+const openRestTimer = (exerciseId: string) => {
+  setActiveExerciseId(exerciseId);
+  restSheetRef.current?.open();
+};
+
+
+
+useEffect(() => {
+  if (addedExerciseIds) {
+    const addedIds = JSON.parse(addedExerciseIds) as string[];
+
+    const loadNewExercises = async () => {
+      const newExercises = await db
+        .select()
+        .from(exercises)
+        .where(inArray(exercises.id, addedIds));
+
+      const updatedData = { ...exerciseData };
+      const updatedMeta = { ...exerciseMeta };
+
+      for (const ex of newExercises) {
+        if (!updatedData[ex.id]) {
+          updatedData[ex.id] = {
+            notes: "",
+            restTimer: false,
+            sets: [],
+            unit: "kg",
+            repsType: "reps",
+          };
+          updatedMeta[ex.id] = ex;
+        }
+      }
+
+      setExerciseData(updatedData);
+      setExerciseMeta(updatedMeta);
+    };
+
+    loadNewExercises();
+  }
+}, [addedExerciseIds]);
+
 
  useEffect(() => {
     const fetchRoutineData = async () => {
@@ -95,18 +181,22 @@ export default function EditRoutineScreen() {
   const sets = allSets
     .filter((s) => s.exerciseId === ex.id)
     .map((s) => ({
-      lbs: s.lbs,
+      weight: s.weight ?? 0,
       reps: s.reps ?? 0, // ✅ ensure number
       minReps: s.minReps ?? undefined,
       maxReps: s.maxReps ?? undefined,
       restTimer: s.restTimer ?? 0, // ✅ added
     }));
 
-  updatedExerciseData[ex.id] = {
-    notes: matchingRoutineEx?.notes || "",
-    restTimer: sets.some((s) => s.restTimer > 0), // ✅ safer logic
-    sets,
-  };
+
+    updatedExerciseData[ex.id] = {
+  notes: matchingRoutineEx?.notes || "",
+  restTimer: sets.some((s) => s.restTimer > 0),
+  unit: matchingRoutineEx?.unit || "kg", // or "lbs" if you prefer
+  repsType: matchingRoutineEx?.repsType || "reps",
+  sets,
+};
+
 
   updatedMeta[ex.id] = ex;
 }
@@ -177,24 +267,39 @@ const handleSave = async () => {
         {Object.entries(exerciseData).map(([id, data]) => (
           <ExerciseBlock
             key={id}
-            exercise={{
-              id,
-              exercise_name: "Bench Press",
-              exercise_type: "Strength",
-              equipment: "Barbell",
-              type: "Weighted",
-            }}
-            data={data}
+            exercise={exerciseMeta[id]}
+           data={{
+  ...data,
+  unit: data.unit || "kg",
+  repsType: data.repsType || "reps",
+}}
             onChange={(newData) => handleExerciseChange(id, newData)}
-            onOpenRepRange={() => {}}
-            onHeaderPress={() => {}}
-          />
-        ))}
+             onOpenRepsType={(exerciseId) => {
+  setActiveExerciseId(exerciseId);
+  repsSheetRef.current?.open();
+}}
+                 onOpenWeight={(exerciseId) => {
+  setActiveExerciseId(exerciseId);
+  weightSheetRef.current?.open();
+}}
+
+    onOpenRestTimer={(exerciseId) => openRestTimer(exerciseId)}
+  onOpenRepRange={() => handleRepsTypeSelect("rep range")}
+
+                />
+              
+              ))}
 
         <Box mt="$6">
           <HStack space="lg" alignItems="center">
-            <CustomButton
-              onPress={() => router.push("./addExercise")}
+           <CustomButton
+              onPress={() =>
+                router.push({
+                  pathname: "/addExercise",
+                  params: { from: "editRoutine", routineId },
+                })
+              }
+  
               bg="$blue500"
               icon={<Entypo name="plus" size={24} color="white" />}
               iconPosition="left"
@@ -204,6 +309,18 @@ const handleSave = async () => {
           </HStack>
         </Box>
       </ScrollView>
+      <RestTimerSheet
+        ref={restSheetRef}
+        onSelectDuration={handleRestDurationSelect}
+      />
+      <WeightSheet
+        ref={weightSheetRef}
+        onSelectWeight={handleWeightSelect}
+      />
+      <RepsTypeSheet
+        ref={repsSheetRef}
+        onSelectRepsType={handleRepsTypeSelect}
+      />
     </Box>
   );
 }
