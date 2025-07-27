@@ -12,6 +12,7 @@ import {
   Pressable,
   HStack,
   FlatList,
+  Box,ScrollView
 } from "@gluestack-ui/themed";
 import CustomBottomSheet from "@/components/routine/bottomSheet/customBottomSheet";
 import { db } from "@/db/db";
@@ -37,7 +38,6 @@ const ExerciseFilterDrawer = forwardRef<ExerciseFilterDrawerRef, Props>(
 
     const [equipmentList, setEquipmentList] = useState<string[]>([]);
     const [muscleList, setMuscleList] = useState<Muscle[]>([]);
-    const snapPoints = useMemo(() => ["50%"], []);
 
     useImperativeHandle(ref, () => ({
       open: (tab: "equipment" | "muscle") => {
@@ -68,61 +68,66 @@ const ExerciseFilterDrawer = forwardRef<ExerciseFilterDrawerRef, Props>(
     }, []);
 
     return (
-      <CustomBottomSheet ref={bottomSheetRef}>
-        <VStack space="md" px="$4" py="$4">
-        
+     <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "50%"]}>
+  <VStack flex={1} p="$4" height="100%">
+    <Box
+      borderBottomWidth={1}
+      borderColor="$trueGray700"
+      pb="$3"
+      mb="$4"
+    >
+      <Text fontSize="$lg" fontWeight="$bold" textAlign="center" color="white">
+        {activeTab === "equipment" ? "Equipment" : "Muscle Group"}
+      </Text>
+    </Box>
 
-          {/* Equipment List */}
-          {activeTab === "equipment" && (
-            <FlatList
-              data={equipmentList}
-              keyExtractor={(item:any) => item}
-              renderItem={({ item }:any) => {
-                const isSelected = selectedEquipment === item;
-                return (
-                  <Pressable
-                    p="$3"
-                    borderRadius="$md"
-                    bg={isSelected ? "$blue600" : "#2a2a2a"}
-                    onPress={() => {
-                      onSelectEquipment(item);
-                      bottomSheetRef.current?.close();
-                    }}
-                    mb="$2"
-                  >
-                    <Text color="$white">{item}</Text>
-                  </Pressable>
-                );
+    {/* Scrollable filter content */}
+    <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+      {activeTab === "equipment" &&
+        equipmentList.map((item) => {
+          const isSelected = selectedEquipment === item;
+          return (
+            <Pressable
+              key={item}
+              p="$3"
+              borderRadius="$md"
+              bg={isSelected ? "$blue600" : "#2a2a2a"}
+              onPress={() => {
+                onSelectEquipment(item);
+                bottomSheetRef.current?.close();
               }}
-            />
-          )}
+              mb="$2"
+            >
+              <Text color="$white">{item}</Text>
+            </Pressable>
+          );
+        })}
 
-          {/* Muscle List */}
-          {activeTab === "muscle" && (
-            <FlatList
-              data={muscleList}
-              keyExtractor={(item:any) => item.id}
-              renderItem={({ item }:any) => {
-                const isSelected = selectedMuscle === item.id;
-                return (
-                  <Pressable
-                    p="$3"
-                    borderRadius="$md"
-                    bg={isSelected ? "$blue600" : "#2a2a2a"}
-                    onPress={() => {
-                      onSelectMuscle(item.id);
-                      bottomSheetRef.current?.close();
-                    }}
-                    mb="$2"
-                  >
-                    <Text color="$white">{item.name}</Text>
-                  </Pressable>
-                );
+       {activeTab === "muscle" &&
+        muscleList.map((item) => {
+          const isSelected = selectedMuscle === item.id;
+            return (
+            <Pressable
+              key={item.id}
+              p="$3"
+              borderRadius="$md"
+              bg={isSelected ? "$blue600" : "#2a2a2a"}
+              onPress={() => {
+                onSelectMuscle(item.id);
+                bottomSheetRef.current?.close();
               }}
-            />
-          )}
-        </VStack>
-      </CustomBottomSheet>
+              mb="$2"
+            >
+              <Text color="$white">{item.name}</Text>
+            </Pressable>
+              
+          );
+        })}
+
+</ScrollView>
+  </VStack>
+</CustomBottomSheet>
+
     );
   }
 );

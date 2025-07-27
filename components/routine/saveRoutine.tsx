@@ -18,7 +18,7 @@ type ExerciseData = Record<
 export const saveRoutineToDb = async (
   title: string,
   selectedExercises: Exercise[],
-  exerciseData: ExerciseData
+  exerciseData: ExerciseData,
 ) => {
   const routineId = cuid();
 

@@ -55,7 +55,7 @@ weight: integer("weight").notNull(),
 });
 export const workouts = sqliteTable("workouts", {
  id: text("id").primaryKey().$defaultFn(() => cuid()),
-   userId: text("user_id").notNull().references(() => users.id),
+
   routineId: text("routine_id").references(() => routines.id), 
   date: text("date").notNull(),  
   title: text("title").notNull(),    

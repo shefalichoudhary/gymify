@@ -16,12 +16,15 @@ import { GluestackUIProvider } from "@gluestack-ui/themed";
 import { config } from "@gluestack-ui/config";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { AuthProvider } from "@/context/authContext"; 
 const MainLayout = () => {
    return (
  <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <GluestackUIProvider config={config}>
-          <Slot />
+          <AuthProvider>
+            <Slot />
+          </AuthProvider>
         </GluestackUIProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
@@ -58,11 +61,12 @@ export default function RootLayout() {
   return (
     <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
       <SQLiteProvider
-        databaseName="Expo_gymify.db"
+        databaseName="Gymify.db"
         options={{ enableChangeListener: true }}
         useSuspense
       >
        <MainLayout />
+
       </SQLiteProvider>
     </Suspense>
   );

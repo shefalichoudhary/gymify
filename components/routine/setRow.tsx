@@ -17,9 +17,10 @@ type SetRowProps = {
   showCheckIcon?: boolean;
   onChange: <K extends keyof Set>(key: K, value: Set[K]) => void;
   editable?: boolean;
+  onStartTimer?: () => void; // Optional, if you want to start a timer
 };
 
-export default function SetRow({ index, set, onChange, showCheckIcon }: SetRowProps) {
+export default function SetRow({ index, set, onChange, showCheckIcon, onStartTimer }: SetRowProps) {
   if (!set) return null;
 
 const isSetFilled = () => {
@@ -34,6 +35,10 @@ const isSetFilled = () => {
       const newValue = !set.isCompleted;
       onChange("isCompleted", newValue); // Update parent state
       Vibration.vibrate(60);
+    }
+    
+    if (onStartTimer) {
+      onStartTimer(); // ✅ Start timer on first valid check
     }
   };
 
@@ -81,76 +86,75 @@ onChangeText={(text) =>
           </Input>
         </Box>
 
-        {/* Reps or Rep Range */}
-      <Box flex={showCheckIcon ? 4 : 1}>
-          <HStack alignItems="center" space="sm">
-            {set.isRangeReps ? (
-              <HStack space="sm" alignItems="center" flex={1}>
-                <Input size="sm" borderWidth={0} w="30%">
-                  <InputField
-                    placeholder="-"
-                    keyboardType="numeric"
-                    color="$white"
-                    value={set.minReps?.toString() ?? ""}
-                    onChangeText={(text) =>
-                      onChange("minReps", text ? parseInt(text, 10) || 0 : undefined)
-                    }
-                  />
-                </Input>
-                <Text color="$white" >to</Text>
-                <Input size="sm" borderWidth={0} w="40%">
-                  <InputField
-                    placeholder="-"
-                    keyboardType="numeric"
-                    color="$white"
-                    value={set.maxReps?.toString() ?? ""}
-                    onChangeText={(text) =>
-                      onChange("maxReps", text ? parseInt(text, 10) || 0 : undefined)
-                    }
-                  />
-                </Input>
-              </HStack>
-            ) : (
-                <Input size="sm" borderWidth={0} w="40%">
-                  <InputField
-                    placeholder="-"
-                    keyboardType="numeric"
-                    color="$white"
-                    value={set.reps?.toString() ?? ""}
-                    onChangeText={(text) =>
-                      onChange("reps", text ? parseInt(text, 10) || 0 : undefined)
-                    }
-                  />
-                </Input>
+     {/* Reps or Rep Range */}
+<Box flex={showCheckIcon ? 3 : 1}>
+  <HStack alignItems="center" space="sm">
+    {set.isRangeReps ? (
+      <HStack alignItems="center" flex={1}>
+        <Input size="sm" borderWidth={0} w="44%">
+          <InputField
+            placeholder="-"
+            keyboardType="numeric"
+            color="$white"
+            value={set.minReps?.toString() ?? ""}
+            onChangeText={(text) =>
+              onChange("minReps", text ? parseInt(text, 10) || 0 : undefined)
+            }
+          />
+        </Input>
+        <Text color="$white">to</Text>
+        <Input size="sm" borderWidth={0} w="44%">
+          <InputField
+            placeholder="-"
+            keyboardType="numeric"
+            color="$white"
+            value={set.maxReps?.toString() ?? ""}
+            onChangeText={(text) =>
+              onChange("maxReps", text ? parseInt(text, 10) || 0 : undefined)
+            }
+          />
+        </Input>
+      </HStack>
+    ) : (
+      <Input size="sm" borderWidth={0} w="45%">
+        <InputField
+          placeholder="-"
+          keyboardType="numeric"
+          color="$white"
+          value={set.reps?.toString() ?? ""}
+          onChangeText={(text) =>
+            onChange("reps", text ? parseInt(text, 10) || 0 : undefined)
+          }
+        />
+      </Input>
+    )}
+  </HStack>
+</Box>
 
-            )}
+{/* ✅ Check Icon (put outside) */}
+{showCheckIcon && (
+<Box ml="$3">
+    <Pressable
+      onPress={handleCheckPress}
+      disabled={!isSetFilled()}
+      alignItems="center"
+      justifyContent="center"
+    >
+      <AntDesign
+        name="checkcircle"
+        size={22}
+        color={
+          !isSetFilled()
+            ? "#888"
+            : set.isCompleted
+            ? "#22c55e"
+            : "#888"
+        }
+      />
+    </Pressable>
+  </Box>
+)}
 
-            {/* Check Icon */}
-            {showCheckIcon && (
-              <Pressable
-                onPress={() => {
-                  handleCheckPress();
-                }}
-                disabled={!isSetFilled()}
-                ml="$2"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <AntDesign
-                  name="checkcircle"
-                  size={20}
-                  color={
-                    !isSetFilled()
-                      ? "#888"
-                      : set.isCompleted
-                      ? "#22c55e"
-                      : "#888"
-                  }
-                />
-              </Pressable>
-            )}
-          </HStack>
-        </Box>
       </HStack>
     </Box>
   );

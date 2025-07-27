@@ -55,6 +55,8 @@ const WeightSheet = forwardRef<WeightSheetRef, WeightSheetProps>(
           {["lbs", "kg"].map((weight: string) => (
             <Button
               key={weight}
+              bg={ "#2a2a2a"}
+
               onPress={() => {
                 onSelectWeight(weight);
                 bottomSheetRef.current?.close();

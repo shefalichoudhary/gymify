@@ -69,69 +69,13 @@ type SetType = {
         bottomSheetRef.current?.close();
         };
 
-const handleDuplicate = async (routineId: string) => {
-  const routineWithExercises = await db.query.routines.findFirst({
-    where: (r) => eq(r.id, routineId),
-    with: {
-      routineExercises: {
-        with: {
-          exercise: true,
-          routineSets: true,
-        },
-      },
-    },
-  }) as {
-    id: string;
-    name: string;
-    routineExercises: {
-      exercise: {
-        id: string;
-        exercise_name: string;
-        equipment: string;
-        type: string;
-        exercise_type: string | null;
-      };
-      routineSets: SetType[];
-    }[];
-  };
-
-  if (!routineWithExercises) return;
-
-  const selectedExercises = routineWithExercises.routineExercises.map((re) => ({
-    id: re.exercise.id,
-    exercise_name: re.exercise.exercise_name,
-    equipment: re.exercise.equipment,
-    type: re.exercise.type,
-    exercise_type: re.exercise.exercise_type ?? null,
-  }));
-
-  const exerciseData = routineWithExercises.routineExercises.reduce((acc, re) => {
-    acc[re.exercise.id] = {
-      sets: re.routineSets.map((s) => ({
-        id: s.id,
-        reps: s.reps,
-        weight: s.weight,
-        unit: s.unit,
-        set_type: s.set_type,
-        rest_timer: s.rest_timer,
-        notes: s.notes ?? "",
-        completed: false,
-      })),
-    };
-    return acc;
-  }, {} as Record<string, { sets: SetType[] }>);
-
-  router.push({
-    pathname: "/createRoutine",
-    params: {
-      fromDuplicate: "true",
-      routineName: routineWithExercises.name,
-      selectedExercises: JSON.stringify(selectedExercises),
-      exerciseData: JSON.stringify(exerciseData),
-    },
-  });
-
-  bottomSheetRef.current?.close();
+const handleDuplicate = () => {
+   if (!routine) return;
+       router.push({
+  pathname: "/createRoutine",
+  params: { id: routine.id, duplicate: "true" },
+});
+        bottomSheetRef.current?.close();
 };
 
 
@@ -142,7 +86,7 @@ const handleDuplicate = async (routineId: string) => {
         };
 
         return (
-        <CustomBottomSheet ref={bottomSheetRef} snapPoints={["35%"]}>
+        <CustomBottomSheet ref={bottomSheetRef} snapPoints={["30%"]}>
             <Box >
             {/* Header-style Title */}
             <Box 
@@ -157,8 +101,8 @@ const handleDuplicate = async (routineId: string) => {
                 </Text>
             </Box>
 
-            <VStack space="md" px="$4" mb="$2">
-                <Pressable onPress={() => handleDuplicate(routine?.id || "")}>
+            <VStack space="lg" px="$6" >
+                <Pressable  onPress={() => handleDuplicate}>
                 <HStack alignItems="center" space="lg">
                     <Feather name="copy" size={18} color="white" />
                     <Text color="$white">Duplicate Routine</Text>

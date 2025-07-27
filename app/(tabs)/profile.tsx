@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   Text,
@@ -10,22 +10,33 @@ import {
   Button,
   ScrollView,
 } from "@gluestack-ui/themed";
-import { Pressable } from "@/components/ui/pressable";
 import { useRouter } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
+import { useAuth } from "@/context/authContext"; // make sure this exists
 
 export default function Profile() {
   const router = useRouter();
+  const { user, logout } = useAuth(); // get logged-in user and logout function
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/signIn"); // redirect if not logged in
+    }
+  }, [user]);
+
+  if (!user) {
+    return null; // show nothing while redirecting
+  }
 
   return (
     <ScrollView flex={1} bg="$black" px="$4" py="$6">
       <VStack space="lg" alignItems="center">
         {/* Avatar + Name */}
         <Avatar bgColor="$blue500" size="2xl">
-          <AvatarFallbackText>SC</AvatarFallbackText>
+          <AvatarFallbackText>{user.username.slice(0, 2).toUpperCase()}</AvatarFallbackText>
         </Avatar>
         <Text color="$white" fontSize="$xl" fontWeight="$bold">
-          Shefali Choudhary
+          {user.username}
         </Text>
         <Text color="$coolGray400">Fitness Enthusiast</Text>
 
@@ -39,7 +50,7 @@ export default function Profile() {
           borderColor="$coolGray700"
         >
           <VStack space="lg">
-            <ProfileItem label="Email" value="shefali@example.com" />
+            <ProfileItem label="Email" value={user.email} />
             <Divider />
             <ProfileItem label="Fitness Goal" value="Lose Fat" />
             <Divider />
@@ -63,7 +74,7 @@ export default function Profile() {
           <Button
             bg="$red600"
             borderRadius="$lg"
-            onPress={() => console.log("Log out")}
+            onPress={logout}
           >
             <HStack space="sm" alignItems="center">
               <AntDesign name="logout" size={18} color="white" />

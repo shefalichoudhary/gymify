@@ -33,9 +33,8 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   if (from === "logWorkout") {
     router.push({
       pathname: "/logWorkout",
-      params: {
-        routineId,
-        routineTitle,
+       params: {
+        id: routineId,
         addedExerciseIds: JSON.stringify(selectedIds),
       },
     });

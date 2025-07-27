@@ -15,6 +15,7 @@ import { eq, inArray } from "drizzle-orm";
 import RestTimerSheet, { RestTimerSheetRef } from "@/components/routine/bottomSheet/timer";
 import WeightSheet ,{WeightSheetRef}from "@/components/routine/bottomSheet/weight";
 import RepsTypeSheet,{RepsTypeSheetRef} from "@/components/routine/bottomSheet/repsType";
+import StartTimerBar from "@/components/routine/startTimer";
 
 type SetItem = {
   weight: number;
@@ -35,6 +36,13 @@ type ExerciseEntry = {
 
 type ExerciseData = {
   [exerciseId: string]: ExerciseEntry;
+    
+};
+type ExerciseDetail = {
+  id: string;
+  name: string;
+  equipment?: string;
+  type?: string;
 };
 
 export default function LogWorkoutScreen() {
@@ -44,16 +52,35 @@ const { routineId, routineTitle, addedExerciseIds } = useLocalSearchParams();
 const [loading, setLoading] = useState(true);
 
   const [duration, setDuration] = useState(0);
-  const [isWorkoutActive, setIsWorkoutActive] = useState(true);
+  const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
-  const [exerciseDetails, setExerciseDetails] = useState<any[]>([]);
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
 const [activeRestTimer, setActiveRestTimer] = useState<number | null>(null);
-
+const [exerciseDetails, setExerciseDetails] = useState<ExerciseDetail[]>([]);
 const restSheetRef = useRef<RestTimerSheetRef>(null);
 const weightSheetRef = useRef<WeightSheetRef>(null);
 const repsSheetRef = useRef<RepsTypeSheetRef>(null);
+const [loadedExerciseIds, setLoadedExerciseIds] = useState<string[]>([]);
+  const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
 
+
+
+  useEffect(() => {
+    if (!isWorkoutStarted) return;
+    const interval = setInterval(() => {
+      setDuration((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isWorkoutStarted]);
+
+  const handleToggleSetComplete = (exerciseId: string, setId: string) => {
+    // your usual toggle logic...
+
+    if (!isWorkoutStarted) {
+      setIsWorkoutStarted(true); // start timer only on first check
+    }
+  };
 
   const { volume: totalVolume, sets: totalSets } = useMemo(
     () => calculateWorkoutStats(exerciseData),
@@ -140,6 +167,7 @@ const repsSheetRef = useRef<RepsTypeSheetRef>(null);
     }
     setExerciseData(grouped);
     setExerciseDetails(details);
+    setLoadedExerciseIds(exerciseIds);
   } catch (err) {
     console.error("❌ Error loading routine:", err);
   } finally {
@@ -151,6 +179,61 @@ const repsSheetRef = useRef<RepsTypeSheetRef>(null);
     loadRoutineData();
   }, [routineId])
 );
+useEffect(() => {
+  const fetchNewExercises = async () => {
+    if (!addedExerciseIds) return;
+
+   let newIds: string[] = [];
+
+try {
+  newIds = Array.isArray(addedExerciseIds)
+    ? addedExerciseIds
+    : JSON.parse(addedExerciseIds);
+} catch (err) {
+  console.warn("❌ Failed to parse addedExerciseIds", err);
+  newIds = [];
+}
+
+    const newUniqueIds = newIds.filter((id: string) => !loadedExerciseIds.includes(id));
+
+    if (newUniqueIds.length === 0) return;
+
+    try {
+      // Fetch full exercise details
+      const details = await db
+        .select({
+          id: exercises.id,
+          name: exercises.exercise_name,
+          equipment: exercises.equipment,
+          type: exercises.type,
+        })
+        .from(exercises)
+        .where(inArray(exercises.id, newUniqueIds))
+        .all();
+
+      // Default ExerciseData values
+      const newData: ExerciseData = {};
+      for (const id of newUniqueIds) {
+        newData[id] = {
+          notes: "",
+          restTimer: false,
+          unit: "kg",
+          repsType: "reps",
+          sets: [],
+        };
+      }
+
+      setExerciseData((prev) => ({ ...prev, ...newData }));
+      setExerciseDetails((prev) => [...prev, ...details]);
+      setLoadedExerciseIds((prev) => [...prev, ...newUniqueIds]);
+    } catch (err) {
+      console.error("❌ Error loading added exercises", err);
+    }
+  };
+
+  fetchNewExercises();
+}, [addedExerciseIds]);
+
 
 
   const handleFinish = async () => {
@@ -288,7 +371,7 @@ useFocusEffect(
         exercise={{
           id,
           exercise_name: ex.name || "Unknown",
-          equipment: ex.equipment ?? "",
+          equipment: ex.equipment ?? "unknown",
           type: ex.type ?? "",
           exercise_type: "Weighted",
         }}
@@ -312,6 +395,7 @@ useFocusEffect(
 
     onOpenRestTimer={(exerciseId) => openRestTimer(exerciseId)}
   onOpenRepRange={() => handleRepsTypeSelect("rep range")}
+  
 
       />
     </Box>
@@ -388,6 +472,7 @@ useFocusEffect(
   ref={repsSheetRef}
   onSelectRepsType={handleRepsTypeSelect}
 />
+{isWorkoutStarted && <StartTimerBar duration={duration} />}
     </Box>
   );
 }

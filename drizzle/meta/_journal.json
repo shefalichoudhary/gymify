@@ -134,6 +134,27 @@
       "when": 1753224251388,
       "tag": "0018_cultured_rachel_grey",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1753250496977,
+      "tag": "0019_hard_shaman",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1753250866147,
+      "tag": "0020_wild_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "6",
+      "when": 1753250913644,
+      "tag": "0021_sturdy_slayback",
+      "breakpoints": true
     }
   ]
 }

@@ -47,7 +47,7 @@ const CustomBottomSheet = forwardRef<BottomSheet, CustomBottomSheetProps>(
         handleIndicatorStyle={{ backgroundColor: "#888" , height: 4, width: 50, borderRadius: 2 ,}}
         handleStyle={{ backgroundColor: "#1F1F1F", paddingVertical: 6, borderTopLeftRadius: 24, borderTopRightRadius: 24}}
       >
-        <BottomSheetView style={{  }}>
+        <BottomSheetView style={{ flex:1 }}>
           {children || <Text>Bottom Sheet Content</Text>}
         </BottomSheetView>
       </BottomSheet>

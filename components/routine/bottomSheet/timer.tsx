@@ -55,6 +55,8 @@ const RestTimerSheet = forwardRef<RestTimerSheetRef, RestTimerSheetProps>(
           {[5, 15,  30, 60, 90, 120].map((duration) => (
             <Button
               key={duration}
+              bg={ "#2a2a2a"}
+
               onPress={() => {
                 onSelectDuration(duration);
                 bottomSheetRef.current?.close();

@@ -3,15 +3,14 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CustomHeader from "@/components/customHeader";
 import { Pressable, Text, Box, HStack } from "@gluestack-ui/themed";
-// import { useAuth } from "@/context/AuthContext"; // ✅ make sure you have this
-import { DevSettings } from "react-native";
+import { useAuth } from "@/context/authContext";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
 export default function Layout() {
   const router = useRouter();
     const [reloadKey, setReloadKey] = useState(0);
-
+const { user, logout } = useAuth();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }} edges={["bottom", "left", "right"]}>
       <Box flex={1} bg="#1F1F1F">
@@ -38,17 +37,23 @@ export default function Layout() {
                           </Text>
                         </Pressable>
                       }
-                      right={
-                        <HStack space="md">
-                          <Pressable onPress={() => router.push("/signIn")}>
-                            <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
-                              Login
-                            </Text>
-                          </Pressable>
-                        </HStack>
-                      }
-                    />
-                  );
+                       right={
+          user ? (
+            <Pressable onPress={logout}>
+              <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
+                Logout
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable onPress={() => router.push("/signIn")}>
+              <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
+                Login
+              </Text>
+            </Pressable>
+          )
+        }
+      />
+    );
                 }
 
                 return (

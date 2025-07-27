@@ -7,7 +7,7 @@ import { inArray } from "drizzle-orm";
 import SetTypeModal from "@/components/routine/bottomSheet/set";
 import RestTimerSheet  from "@/components/routine/bottomSheet/timer";
 import RepsTypeSheet from "@/components/routine/bottomSheet/repsType";
-
+import { useAuth } from "@/context/authContext"; 
 import {
   VStack,
   Text,
@@ -25,11 +25,13 @@ import ExerciseBlock from "@/components/routine/exerciseBlock";
   import { saveRoutineToDb } from "@/components/routine/saveRoutine";
 import { useFocusEffect } from "@react-navigation/native";
 import { BackHandler, Alert , Pressable} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import WeightSheet from "@/components/routine/bottomSheet/weight";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
 
 export default function CreateRoutineScreen() {
+  const { user, login} = useAuth();
   const { selected, name, exercises: exerciseParam } = useLocalSearchParams();
 const selectedParam = Array.isArray(selected) ? selected[0] : selected;
 const nameParam = Array.isArray(name) ? name[0] : name;
@@ -41,7 +43,9 @@ const [title, setTitle] = useState<string>(nameParam || "");
     const [isModalVisible, setModalVisible] = useState(false);
   const [selectedType, setSelectedType] = useState("Normal");
   const navigation = useNavigation();
-
+const { id, duplicate } = useLocalSearchParams();
+const isDuplicate = duplicate === "true";
+const idParam = Array.isArray(id) ? id[0] : id;
 
 const {
   exerciseData,
@@ -64,10 +68,6 @@ const discardRoutineAndReset = () => {
   setExerciseData({});
   router.replace("/workout"); // use replace to avoid keeping this screen in stack
 };
-
-
-
-
 
 useFocusEffect(
   React.useCallback(() => {
@@ -161,7 +161,6 @@ useEffect(() => {
 
 
 
-
 const handleSave = async () => {
   if (!title.trim()) {
     alert("Please enter a routine title");
@@ -173,11 +172,47 @@ const handleSave = async () => {
     return;
   }
 
- 
-     await saveRoutineToDb(title, selectedExercises, exerciseData);
-console.log("✅ Routine saved to SQLite DB");
-router.push("/workout");
+  if (!user) {
+    Alert.alert(
+      "Login Required",
+      "Please log in to save your routine.",
+ [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Login",
+        onPress: async() => {
+          await AsyncStorage.setItem("unsavedRoutine", JSON.stringify({
+  title,
+  selectedExercises,
+  exerciseData,
+}));
+
+router.push({
+  pathname: "/signIn",
+  params: { redirectTo: "/createRoutine" },
+});
+          router.push({
+            pathname: "/signIn",
+            params: {
+  redirectTo: "/createRoutine",
+  title,
+  exercises: JSON.stringify(selectedExercises),
+  data: JSON.stringify(exerciseData),
+},
+          });
+        },
+      },
+    ]
+    );
+    return;
+  }
+
+  // Already logged in
+  await saveRoutineToDb(title, selectedExercises, exerciseData); // add user.id if needed
+  console.log("✅ Routine saved to SQLite DB");
+  router.push("/workout");
 };
+
 
   const renderAddExerciseButton = () => (
     <HStack space="sm" alignItems="center" >

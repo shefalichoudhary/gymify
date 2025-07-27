@@ -10,6 +10,10 @@ type Props = {
   exercise: {
     id: string;
     exercise_name: string;
+    exercise_type: string | null;
+    equipment: string;
+    type: string;
+    
   };
 data: { notes: string; restTimer: boolean; restTimeInSeconds?: number; sets: Set[],  unit: "lbs" | "kg"; repsType: "reps" | "rep range"; };
  onChange: (
@@ -22,6 +26,7 @@ data: { notes: string; restTimer: boolean; restTimeInSeconds?: number; sets: Set
     repsType: "reps" | "rep range"; // Add repsType to the data structure
   }
 ) => void;
+onStartTimer?: () => void; // Optional, if you want to start a timer
   onOpenRepRange: (exerciseId: string, setIndex: number) => void;
   showCheckIcon?: boolean; 
    viewOnly?: boolean;
@@ -30,7 +35,7 @@ onOpenRepsType?: (exerciseId: string) => void; // Optional, if you want to use a
   onOpenRestTimer: (exerciseId: string) => void; // Optional, if you want to use a ref for the rest timer sheet
 };
 
-export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly , onOpenRestTimer, onOpenWeight,onOpenRepsType, }: Props) {
+export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly , onOpenRestTimer, onOpenWeight,onOpenRepsType,onStartTimer }: Props) {
  const handleSetChange = <T extends keyof Set>(index: number, key: T, value: Set[T]) => {
   const updatedSets = [...data.sets];
   updatedSets[index] = { ...updatedSets[index], [key]: value };
@@ -125,6 +130,7 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
           showCheckIcon={showCheckIcon}
           editable={!viewOnly}
          onChange={(key, value) => handleSetChange(index, key, value)}
+         onStartTimer={onStartTimer}
         />
       ))}
 

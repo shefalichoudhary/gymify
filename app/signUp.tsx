@@ -2,18 +2,18 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Pressable,
   Alert,
   ActivityIndicator,
-  KeyboardAvoidingView,
+  SafeAreaView,
+  Platform
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import CustomKeyboard from "@/components/customKeyboard";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { ScrollView } from "react-native";
 import {
   FormControl,
 
@@ -22,7 +22,7 @@ import {
 
 } from "@/components/ui/form-control"
 import { Input, InputField,VStack } from  "@gluestack-ui/themed";
-
+import { useAuth } from "@/context/authContext";
 interface FormState {
   username: string;
   email: string;
@@ -31,6 +31,7 @@ interface FormState {
 
 function SignUp(): JSX.Element {
   const router = useRouter();
+    const { register } = useAuth();
   const [form, setForm] = useState<FormState>({
     email: "",
     password: "",
@@ -39,8 +40,9 @@ function SignUp(): JSX.Element {
   const [loading, setLoading] = useState(false);
     const [isInvalid, setIsInvalid] = React.useState(false)
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [emailError, setEmailError] = useState<string | null>(null); // For showing email error
   // const { register } = useAuth();
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+const [emailError, setEmailError] = useState<string | null>(null);
 
   const togglePassword = () => {
     setIsPasswordVisible((prevState: any) => !prevState);
@@ -87,6 +89,8 @@ function SignUp(): JSX.Element {
   const handleRegister = async (): Promise<void> => {
     const { email, password, username } = form;
 
+      setEmailError(null);
+  setUsernameError(null);
     try {
       if (!email || !password || !username) {
         Alert.alert("Sign Up", "Please fill all the fields!");
@@ -105,17 +109,21 @@ function SignUp(): JSX.Element {
       }
 
       setLoading(true);
-      // await register(username.trim(), email.trim(), password);
+      await register(username.trim(), email.trim(), password);
       setLoading(false);
       setForm({ username: "", email: "", password: "" });
-    } catch (error: any) {
-      setLoading(false);
-      Alert.alert(
-        "Sign Up Error",
-        error.message || "An unexpected error occurred."
-      );
+    }  catch (error: any) {
+    if (error.message === "Email already in use") {
+      setEmailError(error.message);
+    } else if (error.message === "Username already in use") {
+      setUsernameError(error.message);
+    } else {
+      Alert.alert("Sign Up Error", error.message);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChange = (field: string, value: string) => {
     setForm((prevForm) => ({
@@ -128,20 +136,20 @@ function SignUp(): JSX.Element {
   
 
   return (
-    <CustomKeyboard>
+ <SafeAreaView style={{ flex: 1 }}>
+    
 
-      <SafeAreaView className="flex-1 bg-white">
         <StatusBar style="dark" />
-    <VStack className="w-full m-auto max-w-[600px]  p-4">
+    <VStack className="w-full m-auto max-w-[800px]  p-4 " >
+        <Text className="text-5xl font-bold text-black text-center mb-8">
+            Create Your Account
+          </Text>
       <FormControl
         isInvalid={isInvalid}
         size="md"
         isDisabled={false}
         isRequired={true}
       >
-          <Text className="text-5xl font-bold text-black text-center mb-8">
-            Create Your Account
-          </Text>
 
           <VStack space="md" className="w-full max-w-md">
     {/* Username Input */}
@@ -156,6 +164,9 @@ function SignUp(): JSX.Element {
         autoCapitalize="none"
       />
     </Input>
+    {usernameError && (
+  <Text className="text-red-500 text-sm mt-1 ml-1">{usernameError}</Text>
+)}
 
     {/* Email Input */}
     <FormControlLabel>
@@ -170,6 +181,9 @@ function SignUp(): JSX.Element {
         keyboardType="email-address"
       />
     </Input>
+    {emailError && (
+  <Text className="text-red-500 text-sm mt-1 ml-1">{emailError}</Text>
+)}
 
     {/* Password Input */}
     <FormControlLabel>
@@ -216,16 +230,15 @@ function SignUp(): JSX.Element {
         </VStack >
 
         {/* Footer - Positioned at the bottom */}
-        <View className="absolute bottom-8 flex-row justify-center items-center w-full">
-          <Text className="font-semibold text-neutral-500">
-            Already have an account?{" "}
-          </Text>
-          <Pressable onPress={() => router.replace("/signIn")}>
-            <Text className="text-sm font-bold text-indigo-500">Sign In</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    </CustomKeyboard>
+       <View className="absolute bottom-8 flex-row justify-center items-center w-full">
+              <Text className="font-semibold text-neutral-500">
+    Already have an account?{" "}
+  </Text>
+  <Pressable onPress={() => router.replace("/signIn")}>
+    <Text className="text-sm font-bold text-indigo-500">Sign In</Text>
+  </Pressable>
+</View>
+    </SafeAreaView>
   );
 }
 

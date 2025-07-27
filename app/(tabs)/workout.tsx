@@ -133,16 +133,27 @@ useFocusEffect(
 </HStack>
         </Box>
 
-        <Box px="$5">
-       {routineList.length > 0 && (
-  <HStack alignItems="center" mb="$3" space="md">
-    <AntDesign name="caretdown" size={12} color="#a1a1aa" />
-    <Text color="$coolGray400" letterSpacing={0.5}>
-      My Routines ({routineList.reduce((count, routine) => count + routine.exercises.length, 0)})
-    </Text>
-  </HStack>
-)}
-  </Box>
+       <Box px="$5" mb="$4">
+  {routineList.length > 0 ? (
+    <HStack alignItems="center" mb="$3" space="md">
+      <AntDesign name="caretdown" size={12} color="#a1a1aa" />
+      <Text color="$coolGray400" letterSpacing={0.5}>
+        My Routines ({routineList.reduce((count, routine) => count + routine.exercises.length, 0)})
+      </Text>
+    </HStack>
+  ) : (
+    <VStack alignItems="center" justifyContent="center" mt="$10" space="md">
+      <Feather name="folder" size={48} color="#4b5563" />
+      <Text color="$coolGray400" fontSize="$md">
+        No routines yet
+      </Text>
+      <Text color="$coolGray500" fontSize="$sm" textAlign="center" maxWidth={250}>
+        Tap "New Routine" to create your first custom workout routine.
+      </Text>
+    </VStack>
+  )}
+</Box>
+
 
 
     <DraggableFlatList

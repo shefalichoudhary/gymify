@@ -38,10 +38,13 @@ type ExerciseUpdateData = {
   repsType: "reps" | "rep range";
 };
 export default function EditRoutineScreen() {
-  const { id: rawId, addedExerciseIds } = useLocalSearchParams<{
+const { id: rawId, addedExerciseIds, duplicate } = useLocalSearchParams<{
   id: string | string[];
   addedExerciseIds?: string;
+  duplicate?: string;
 }>();
+
+const isDuplicate = duplicate === "true";
 
 const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   const router = useRouter();

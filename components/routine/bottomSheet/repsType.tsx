@@ -55,6 +55,8 @@ const RepsTypeSheet = forwardRef<RepsTypeSheetRef, RepsTypeSheetProps>(
           {["reps", "rep range"].map((reps: string) => (
             <Button
               key={reps}
+              bg={ "#2a2a2a"}
+
               onPress={() => {
                 onSelectRepsType(reps === "reps" ? "reps" : "rep range");
                 bottomSheetRef.current?.close();
