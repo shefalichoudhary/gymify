@@ -3,7 +3,6 @@ import { Box, Text, Input, InputField, Pressable, HStack } from "@gluestack-ui/t
 import { Entypo } from "@expo/vector-icons";
 import SetRow from "./setRow";
 import AddSetButton from "./addSetButton";
-import { Exercise } from "@/db/schema";
 import { WorkoutSet as Set } from "@/types/workoutSet";
 import React from "react";
 type Props = {
@@ -19,8 +18,7 @@ data: { notes: string; restTimer: boolean; restTimeInSeconds?: number; sets: Set
  onChange: (
   newData: {
     notes: string;
-    restTimer: boolean;
-    restTimeInSeconds?: number;
+    restTime?: number;
     sets: Set[];
      unit: "lbs" | "kg";
     repsType: "reps" | "rep range"; // Add repsType to the data structure

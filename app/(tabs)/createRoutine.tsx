@@ -174,6 +174,7 @@ const discardRoutineAndReset = () => {
   router.replace("/workout"); // use replace to avoid keeping this screen in stack
 };
 
+
 useFocusEffect(
   React.useCallback(() => {
     const onBackPress = () => {
@@ -198,7 +199,6 @@ useFocusEffect(
 
     const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
     const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
-      if (!title && selectedExercises.length === 0) return;
 
       e.preventDefault();
       Alert.alert(
@@ -219,7 +219,7 @@ useFocusEffect(
       subscription.remove();
       unsubscribe();
     };
-  }, [title, selectedExercises])
+  }, [])
 );
 
 useEffect(() => {
@@ -310,10 +310,7 @@ const handleSave = async () => {
   exerciseData,
 }));
 
-router.push({
-  pathname: "/signIn",
-  params: { redirectTo: "/createRoutine" },
-});
+
           router.push({
             pathname: "/signIn",
             params: {
@@ -428,7 +425,7 @@ router.push({
                   key={exercise.id}
                   exercise={exercise}
                   data={exerciseData[exercise.id]}
-                  onChange={(newData) =>
+                  onChange={(newData:any) =>
                     setExerciseData({ ...exerciseData, [exercise.id]: newData })
                   }
                  onOpenRestTimer={openRestTimer}

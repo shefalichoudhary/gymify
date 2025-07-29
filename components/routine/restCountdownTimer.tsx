@@ -10,7 +10,6 @@ import {
 import * as Haptics from "expo-haptics"; 
 import { Audio } from "expo-av";
 
-
 type Props = {
   timeLeft: number;
   totalTime: number;
@@ -35,26 +34,37 @@ export default function RestCountdownTimer({
 useEffect(() => {
   let isMounted = true;
 
-  const loadSound = async () => {
+  const setupAudio = async () => {
     try {
+      // Set audio mode once
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+      });
+
+      // Load sound
       const { sound } = await Audio.Sound.createAsync(
         require("../../assets/sounds/beep.mp3")
       );
+
       if (isMounted) {
         soundRef.current = sound;
       }
     } catch (e) {
-      console.error("Failed to load sound:", e);
+      console.error("Failed to setup audio:", e);
     }
   };
 
-  loadSound();
+  setupAudio();
 
   return () => {
     isMounted = false;
     soundRef.current?.unloadAsync();
   };
 }, []);
+
 
 
 
@@ -75,14 +85,17 @@ useEffect(() => {
   setupAudio();
 }, []);
 
- useEffect(() => {
+useEffect(() => {
   if (timeLeft === 0 && !hasPlayedSoundRef.current) {
     hasPlayedSoundRef.current = true;
+
     (async () => {
       try {
         console.log("Playing sound");
-        await soundRef.current?.replayAsync();
-             await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        if (soundRef.current) {
+          await soundRef.current.replayAsync(); // Just replay
+        }
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
       } catch (e) {
         console.error("Failed to play sound:", e);
       }
@@ -91,7 +104,6 @@ useEffect(() => {
     hasPlayedSoundRef.current = false;
   }
 }, [timeLeft]);
-
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)

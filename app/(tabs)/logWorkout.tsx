@@ -205,6 +205,7 @@ useEffect(() => {
   repsType: "reps",
   sets: setsForExercise.map((s: any) => ({
     weight: s.weight ?? 0,
+    rest_timer: s.restTimer?? "off",
     reps: s.reps ?? 0,
     minReps: s.minReps,
     maxReps: s.maxReps,
@@ -250,6 +251,7 @@ try {
       // Fetch full exercise details
       const details = await db
         .select({
+          
           id: exercises.id,
           name: exercises.exercise_name,
           equipment: exercises.equipment,
