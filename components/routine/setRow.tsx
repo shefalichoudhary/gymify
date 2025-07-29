@@ -17,10 +17,10 @@ type SetRowProps = {
   showCheckIcon?: boolean;
   onChange: <K extends keyof Set>(key: K, value: Set[K]) => void;
   editable?: boolean;
-  onStartTimer?: () => void; // Optional, if you want to start a timer
+onToggleCheck: (completed: boolean) => void;
 };
 
-export default function SetRow({ index, set, onChange, showCheckIcon, onStartTimer }: SetRowProps) {
+export default function SetRow({ index, set, onChange, showCheckIcon,onToggleCheck}: SetRowProps) {
   if (!set) return null;
 
 const isSetFilled = () => {
@@ -33,13 +33,14 @@ const isSetFilled = () => {
   const handleCheckPress = () => {
     if (isSetFilled()) {
       const newValue = !set.isCompleted;
-      onChange("isCompleted", newValue); // Update parent state
+      onChange("isCompleted", newValue);
+   onToggleCheck(!set.isCompleted);  // Update parent state
       Vibration.vibrate(60);
+    console.log("Set completed?", set.isCompleted);
+
     }
     
-    if (onStartTimer) {
-      onStartTimer(); // ✅ Start timer on first valid check
-    }
+
   };
 
   return (
@@ -135,7 +136,7 @@ onChangeText={(text) =>
 {showCheckIcon && (
 <Box ml="$3">
     <Pressable
-      onPress={handleCheckPress}
+    onPress={handleCheckPress}
       disabled={!isSetFilled()}
       alignItems="center"
       justifyContent="center"

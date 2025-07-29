@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef} from "react";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { db } from "@/db/db";
 
-import { exercises , Exercise } from "@/db/schema";
-import { inArray } from "drizzle-orm";
+import { exercises , Exercise ,routines,routineSets,routineExercises} from "@/db/schema";
+import { inArray,eq } from "drizzle-orm";
 import SetTypeModal from "@/components/routine/bottomSheet/set";
 import RestTimerSheet  from "@/components/routine/bottomSheet/timer";
 import RepsTypeSheet from "@/components/routine/bottomSheet/repsType";
@@ -26,9 +26,29 @@ import ExerciseBlock from "@/components/routine/exerciseBlock";
 import { useFocusEffect } from "@react-navigation/native";
 import { BackHandler, Alert , Pressable} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import WeightSheet from "@/components/routine/bottomSheet/weight";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
+
+
+type PrefillExercise = Exercise & {
+  sets: {
+    id: string;
+    reps?: number;
+    weight?: number;
+    unit?: string;
+    set_type?: string;
+    rest_timer?: number;
+    notes?: string;
+    completed?: boolean;
+  }[];
+};
+
+type PrefillRoutine = {
+  name: string;
+  exercises: PrefillExercise[];
+};
+
+
 
 export default function CreateRoutineScreen() {
   const { user, login} = useAuth();
@@ -44,9 +64,7 @@ const [title, setTitle] = useState<string>(nameParam || "");
   const [selectedType, setSelectedType] = useState("Normal");
   const navigation = useNavigation();
 const { id, duplicate } = useLocalSearchParams();
-const isDuplicate = duplicate === "true";
-const idParam = Array.isArray(id) ? id[0] : id;
-
+  const [prefillData, setPrefillData] = useState<PrefillRoutine | null>(null);
 const {
   exerciseData,
   setExerciseData,
@@ -60,6 +78,93 @@ const {
   updateWeightUnit,
   updateRepsType,
 } = useExerciseOptionsManager();
+
+
+
+
+
+useEffect(() => {
+    const fetchRoutineData = async () => {
+      if (id && duplicate === "true") {
+        // Fetch routine
+        const [routine] = await db.select().from(routines).where(eq(routines.id, id as string));
+        if (!routine) return;
+
+        // Fetch exercises for this routine
+        const exerciseLinks = await db
+          .select()
+          .from(routineExercises)
+          .where(eq(routineExercises.routineId, id as string));
+
+        const exerciseIds = exerciseLinks.map((e) => e.exerciseId);
+        const exerciseDetails = await db
+          .select()
+          .from(exercises)
+        .where(inArray(exercises.id, exerciseIds));
+
+        // Fetch sets per exercise
+        const sets = await db
+          .select()
+          .from(routineSets)
+          .where(eq(routineSets.routineId, id as string));
+
+        // Group sets by exerciseId
+        const setsByExercise = exerciseIds.map((eid) => ({
+          exerciseId: eid,
+          sets: sets.filter((s) => s.exerciseId === eid),
+        }));
+
+        setPrefillData({
+          name: `${routine.name} (Copy)`,
+          exercises: exerciseDetails.map((ex) => {
+            const matched = setsByExercise.find((s) => s.exerciseId === ex.id);
+            return {
+              ...ex,
+             sets: (matched?.sets || []).map((s) => ({
+  id: s.id,
+  reps: s.reps ?? 0,
+  weight: s.weight ?? 0,
+  unit: "kg", // or dynamically infer if you store it elsewhere
+  set_type: "Normal", // default or fetch if stored
+  rest_timer: s.restTimer ?? 0,
+  notes: "", // default or infer
+  completed: false, // default
+})),
+            };
+          }),
+        });
+      }
+    };
+
+    fetchRoutineData();
+  }, [id, duplicate]);
+  useEffect(() => {
+  if (!prefillData) return;
+
+  // 1. Set the title
+  setTitle(prefillData.name);
+
+  // 2. Set selected exercises
+  setSelectedExercises(prefillData.exercises);
+
+  // 3. Build and set exerciseData
+  const structuredData = prefillData.exercises.reduce((acc, ex) => {
+    acc[ex.id] = {
+      notes: "",
+      restTimer: false,
+      unit: ex.sets?.[0]?.unit || "kg",
+      repsType: "reps",
+      sets: ex.sets.map((set) => ({
+        reps: set.reps,
+        weight: set.weight,
+        completed: set.completed ?? false,
+      })),
+    };
+    return acc;
+  }, {} as Record<string, any>);
+
+  setExerciseData(structuredData);
+}, [prefillData]);
 
  
 const discardRoutineAndReset = () => {
@@ -159,7 +264,25 @@ useEffect(() => {
   fetchSelectedExercises();
 }, [selectedParam, exerciseListParam]);
 
+useEffect(() => {
+  const restoreRoutine = async () => {
+    const raw = await AsyncStorage.getItem("unsavedRoutine");
+    if (!raw) return;
 
+    try {
+      const { title, selectedExercises, exerciseData } = JSON.parse(raw);
+      if (title) setTitle(title);
+      if (selectedExercises) setSelectedExercises(selectedExercises);
+      if (exerciseData) setExerciseData(exerciseData);
+
+      await AsyncStorage.removeItem("unsavedRoutine");
+    } catch (err) {
+      console.error("❌ Failed to restore unsaved routine:", err);
+    }
+  };
+
+  restoreRoutine();
+}, []);
 
 const handleSave = async () => {
   if (!title.trim()) {
@@ -312,7 +435,7 @@ router.push({
   onOpenWeight={openWeightSheet}
   onOpenRepsType={openRepsSheet}
   onOpenRepRange={() => {}}
-  
+  onToggleSetComplete={()=>{}}
                 />
               
               ))}

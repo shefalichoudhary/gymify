@@ -285,6 +285,7 @@ const handleSave = async () => {
   setActiveExerciseId(exerciseId);
   weightSheetRef.current?.open();
 }}
+  onToggleSetComplete={()=>{}}
 
     onOpenRestTimer={(exerciseId) => openRestTimer(exerciseId)}
   onOpenRepRange={() => handleRepsTypeSelect("rep range")}

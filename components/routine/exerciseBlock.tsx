@@ -32,10 +32,11 @@ onStartTimer?: () => void; // Optional, if you want to start a timer
    viewOnly?: boolean;
    onOpenWeight?: (exerciseId: string, ) => void;
 onOpenRepsType?: (exerciseId: string) => void; // Optional, if you want to use a ref for the reps type sheet
-  onOpenRestTimer: (exerciseId: string) => void; // Optional, if you want to use a ref for the rest timer sheet
+  onOpenRestTimer: (exerciseId: string) => void;
+  onToggleSetComplete: (exerciseId: string, setIndex: number, completed: boolean) => void;
 };
 
-export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly , onOpenRestTimer, onOpenWeight,onOpenRepsType,onStartTimer }: Props) {
+export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon, viewOnly , onOpenRestTimer, onOpenWeight,onOpenRepsType,onToggleSetComplete }: Props) {
  const handleSetChange = <T extends keyof Set>(index: number, key: T, value: Set[T]) => {
   const updatedSets = [...data.sets];
   updatedSets[index] = { ...updatedSets[index], [key]: value };
@@ -130,7 +131,7 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
           showCheckIcon={showCheckIcon}
           editable={!viewOnly}
          onChange={(key, value) => handleSetChange(index, key, value)}
-         onStartTimer={onStartTimer}
+onToggleCheck={(justCompleted) => onToggleSetComplete?.(exercise.id, index, justCompleted)}
         />
       ))}
 

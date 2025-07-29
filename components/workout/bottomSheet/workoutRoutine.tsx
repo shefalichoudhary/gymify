@@ -102,7 +102,7 @@ const handleDuplicate = () => {
             </Box>
 
             <VStack space="lg" px="$6" >
-                <Pressable  onPress={() => handleDuplicate}>
+                <Pressable  onPress={ handleDuplicate}>
                 <HStack alignItems="center" space="lg">
                     <Feather name="copy" size={18} color="white" />
                     <Text color="$white">Duplicate Routine</Text>

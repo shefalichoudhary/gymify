@@ -15,7 +15,8 @@ import { eq, inArray } from "drizzle-orm";
 import RestTimerSheet, { RestTimerSheetRef } from "@/components/routine/bottomSheet/timer";
 import WeightSheet ,{WeightSheetRef}from "@/components/routine/bottomSheet/weight";
 import RepsTypeSheet,{RepsTypeSheetRef} from "@/components/routine/bottomSheet/repsType";
-import StartTimerBar from "@/components/routine/startTimer";
+import * as Haptics from "expo-haptics";
+import RestCountdownTimer from "@/components/routine/restCountdownTimer";
 
 type SetItem = {
   weight: number;
@@ -62,36 +63,83 @@ const weightSheetRef = useRef<WeightSheetRef>(null);
 const repsSheetRef = useRef<RepsTypeSheetRef>(null);
 const [loadedExerciseIds, setLoadedExerciseIds] = useState<string[]>([]);
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
+const { volume: totalVolume, sets: totalSets } = calculateWorkoutStats(exerciseData);
+const [restCountdowns, setRestCountdowns] = useState<{ [key: string]: number }>({});
 
 
 
-  useEffect(() => {
-    if (!isWorkoutStarted) return;
-    const interval = setInterval(() => {
-      setDuration((prev) => prev + 1);
-    }, 1000);
+useEffect(() => {
+  const interval = setInterval(() => {
+    setRestCountdowns((prev) => {
+      const updated = { ...prev };
 
-    return () => clearInterval(interval);
-  }, [isWorkoutStarted]);
+      Object.entries(updated).forEach(([key, timeLeft]) => {
+        if (timeLeft > 1) {
+          updated[key] = timeLeft - 1;
+        } else {
+          // timeLeft === 1 or 0, complete
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          delete updated[key];
+        }
+      });
 
-  const handleToggleSetComplete = (exerciseId: string, setId: string) => {
-    // your usual toggle logic...
+      return updated;
+    });
+  }, 1000);
 
-    if (!isWorkoutStarted) {
-      setIsWorkoutStarted(true); // start timer only on first check
+  return () => clearInterval(interval);
+}, []);
+
+
+ const handleToggleSetComplete = (
+  exerciseId: string,
+  setIndex: number,
+  justCompleted: boolean
+) => {
+  setExerciseData((prev) => {
+    const updated = { ...prev };
+    const sets = updated[exerciseId]?.sets ?? [];
+
+    if (sets[setIndex]) {
+      sets[setIndex].isCompleted = justCompleted;
+
+      console.log(`[${new Date().toISOString()}] ✅ Toggled Set - Exercise: ${exerciseId}, Set: ${setIndex}, Completed: ${justCompleted}`);
+
+      const key = `${exerciseId}-${setIndex}`;
+
+      if (justCompleted && updated[exerciseId].restTimer) {
+        const restTime = updated[exerciseId].restTimeInSeconds ?? 0;
+        setRestCountdowns((prev) => ({
+          ...prev,
+          [key]: restTime,
+        }));
+      } else if (!justCompleted) {
+        setRestCountdowns((prev) => {
+          const updatedCountdowns = { ...prev };
+          delete updatedCountdowns[key];
+          return updatedCountdowns;
+        });
+      }
     }
-  };
 
-  const { volume: totalVolume, sets: totalSets } = useMemo(
-    () => calculateWorkoutStats(exerciseData),
-    [exerciseData]
-  );
+    return updated;
+  });
 
-  // Start timer
+  if (!isWorkoutStarted) {
+    setIsWorkoutStarted(true);
+  }
+};
+
+
+  // Start time
   useEffect(() => {
-    const interval = setInterval(() => setDuration((prev) => prev + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
+
+  const interval = setInterval(() => {
+    setDuration((prev) => prev + 1);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
 
    
   // Load existing routine data
@@ -265,6 +313,8 @@ try {
 const discardRoutineAndReset = () => {
   setExerciseData({});
   setExerciseDetails([]);
+    setDuration(0);
+     setIsWorkoutStarted(false);
   router.replace("/workout"); // use `replace` to clear this screen from the stack
 };
 
@@ -299,6 +349,7 @@ const handleRestDurationSelect = (duration: number) => {
 
     return updated;
   });
+  
 };
 const handleWeightSelect = (unit: string) => {
   if (!activeExerciseId) return;
@@ -395,12 +446,14 @@ useFocusEffect(
 
     onOpenRestTimer={(exerciseId) => openRestTimer(exerciseId)}
   onOpenRepRange={() => handleRepsTypeSelect("rep range")}
-  
+   onToggleSetComplete={(exerciseId: string, setIndex: number, justCompleted: boolean) => handleToggleSetComplete(exerciseId, setIndex, justCompleted)} 
 
       />
+    
     </Box>
   );
 })}
+
          {/* Add & Actions */}
         <VStack space="lg">
           <Box >
@@ -459,6 +512,43 @@ useFocusEffect(
           
         </VStack>
       </ScrollView>
+      {Object.entries(restCountdowns).map(([key, timeLeft]) => {
+  const [exerciseId] = key.split("-");
+  const data = exerciseData[exerciseId];
+  const totalTime = data?.restTimeInSeconds ?? 0;
+
+  if (typeof timeLeft === "number" && timeLeft > 0) {
+    return (
+      <RestCountdownTimer
+        key={key}
+        timeLeft={timeLeft}
+        totalTime={totalTime}
+        onSkip={() =>
+          setRestCountdowns((prev) => {
+            const updated = { ...prev };
+            delete updated[key];
+            return updated;
+          })
+        }
+        onIncrease={() =>
+          setRestCountdowns((prev) => ({
+            ...prev,
+            [key]: (prev[key] || 0) + 10,
+          }))
+        }
+        onDecrease={() =>
+          setRestCountdowns((prev) => ({
+            ...prev,
+            [key]: Math.max((prev[key] || 0) - 10, 0),
+          }))
+        }
+      />
+    );
+  }
+
+  return null;
+})}
+
   
  <RestTimerSheet
   ref={restSheetRef}
@@ -472,7 +562,6 @@ useFocusEffect(
   ref={repsSheetRef}
   onSelectRepsType={handleRepsTypeSelect}
 />
-{isWorkoutStarted && <StartTimerBar duration={duration} />}
     </Box>
   );
 }
