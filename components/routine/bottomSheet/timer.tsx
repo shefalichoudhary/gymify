@@ -38,7 +38,7 @@ const RestTimerSheet = forwardRef<RestTimerSheetRef, RestTimerSheetProps>(
   );
 
     return (
-      <CustomBottomSheet ref={bottomSheetRef}  snapPoints={["20%","50%"]}>
+      <CustomBottomSheet ref={bottomSheetRef}  snapPoints={["20%","48%"]}>
         <VStack space="md">
          
           <Box 
