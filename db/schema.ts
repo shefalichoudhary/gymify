@@ -42,6 +42,7 @@ exerciseId: text("exercise_id").notNull(), // foreign key to your exercises tabl
   notes: text("notes"),
    unit: text("unit").$type<"lbs" | "kg">().notNull().default("kg"),
   repsType: text("reps_type").$type<"reps" | "rep range">().notNull().default("reps"),
+    restTimer: integer("rest_timer").default(0), 
 });
 export const routineSets = sqliteTable("routine_sets", {
  id: text("id").primaryKey().$defaultFn(() => cuid()),
@@ -51,7 +52,7 @@ weight: integer("weight").notNull(),
   reps: integer("reps").default(0),
   minReps: integer("min_reps").default(0),
   maxReps: integer("max_reps").default(0),
-  restTimer: integer("rest_timer").default(0), // 🕒 rest time per set
+// 🕒 rest time per set
 });
 export const workouts = sqliteTable("workouts", {
  id: text("id").primaryKey().$defaultFn(() => cuid()),

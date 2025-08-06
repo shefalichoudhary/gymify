@@ -32,7 +32,7 @@ import WeightSheet, { WeightSheetRef } from "@/components/routine/bottomSheet/we
 
 type ExerciseUpdateData = {
   notes: string;
-  restTimer: boolean;
+  restTimer: number;
   sets: Set[];
     unit: "lbs" | "kg";
   repsType: "reps" | "rep range";
@@ -123,7 +123,7 @@ useEffect(() => {
         if (!updatedData[ex.id]) {
           updatedData[ex.id] = {
             notes: "",
-            restTimer: false,
+            restTimer: 0,
             sets: [],
             unit: "kg",
             repsType: "reps",
@@ -188,13 +188,12 @@ useEffect(() => {
       reps: s.reps ?? 0, // ✅ ensure number
       minReps: s.minReps ?? undefined,
       maxReps: s.maxReps ?? undefined,
-      restTimer: s.restTimer ?? 0, // ✅ added
     }));
 
 
     updatedExerciseData[ex.id] = {
   notes: matchingRoutineEx?.notes || "",
-  restTimer: sets.some((s) => s.restTimer > 0),
+  restTimer:matchingRoutineEx?.restTimer || 0,
   unit: matchingRoutineEx?.unit || "kg", // or "lbs" if you prefer
   repsType: matchingRoutineEx?.repsType || "reps",
   sets,
@@ -275,6 +274,7 @@ const handleSave = async () => {
   ...data,
   unit: data.unit || "kg",
   repsType: data.repsType || "reps",
+  
 }}
             onChange={(newData) => handleExerciseChange(id, newData)}
              onOpenRepsType={(exerciseId) => {

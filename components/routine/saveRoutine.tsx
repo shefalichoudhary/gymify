@@ -1,16 +1,16 @@
-// components/routine/saveRoutine.ts
-
-import { db } from "@/db/db"; // use alias if you're using "@/"
+import { db } from "@/db/db";
 import { routines, routineExercises, routineSets } from "@/db/schema";
 import cuid from "cuid";
 import { Exercise } from "@/db/schema";
-import { WorkoutSet as Set } from "@/types/workoutSet"; // ✅ make sure this is correctly typed
+import { WorkoutSet as Set } from "@/types/workoutSet";
 
 type ExerciseData = Record<
   string,
   {
     notes: string;
-    restTimer: boolean;
+    restTimer: number;
+    unit: "kg" | "lbs";
+    repsType: "reps" | "rep range";
     sets: Set[];
   }
 >;
@@ -22,48 +22,65 @@ export const saveRoutineToDb = async (
 ) => {
   const routineId = cuid();
 
-  // 1️⃣ Save routine
+  // Insert into routines
   await db.insert(routines).values({
     id: routineId,
     name: title,
   });
 
-   console.log("✅ Routine inserted:", title);
- // 2️⃣ For each exercise
+  console.log("✅ Routine inserted:", title);
+
+  // For each selected exercise
   for (const exercise of selectedExercises) {
     const exerciseId = exercise.id;
-    const routineExerciseId = cuid();
     const exerciseEntry = exerciseData[exerciseId];
+    const routineExerciseId = cuid();
 
-    console.log(`📦 Inserting exercise "${exercise.exercise_name}" with ID: ${routineExerciseId}`);
+    if (!exerciseEntry) {
+      console.warn(`⚠️ No data found for exercise ${exerciseId}`);
+      continue;
+    }
 
+    const {
+      notes,
+      restTimer,
+      unit = "kg",
+      repsType = "reps",
+      sets = [],
+    } = exerciseEntry;
+
+    // Insert into routineExercises
     await db.insert(routineExercises).values({
       id: routineExerciseId,
-      
       routineId,
       exerciseId,
-      notes: exerciseEntry?.notes ?? "",
+      notes,
+      repsType,
+      unit,
+       restTimer: restTimer 
+
     });
 
-    const sets = exerciseEntry?.sets || [];
+    console.log(`📦 Exercise "${exercise.exercise_name}" inserted with ID: ${routineExerciseId}`);
 
-    for (const [i, set] of sets.entries()) {
+    // Insert sets
+    for (const [index, set] of sets.entries()) {
       await db.insert(routineSets).values({
+        id: cuid(),
         routineId,
-          exerciseId,
+        exerciseId,
         weight: Number(set.weight) || 0,
-        reps: Number(set.reps) || 0,
-        minReps: set.minReps ?? null,
-        maxReps: set.maxReps ?? null,
-        restTimer: 0, // or from set if needed
+        reps: set.reps ?? 0,
+        minReps: set.minReps ?? 0,
+        maxReps: set.maxReps ?? 0,
       });
 
       console.log(
-        `  ➕ Set ${i + 1} inserted: weight=${set.weight}, reps=${set.reps}, minReps=${set.minReps}, maxReps=${set.maxReps}`
+        `  ➕ Set ${index + 1}: weight=${set.weight}, reps=${set.reps}, min=${set.minReps}, max=${set.maxReps}, unit=${unit}, rest=${restTimer}`
       );
     }
   }
 
-  console.log("✅ Routine fully saved to DB!");
+  console.log("✅ Full routine saved to DB.");
   return routineId;
 };

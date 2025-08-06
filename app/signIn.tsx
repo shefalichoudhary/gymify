@@ -12,6 +12,8 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useRouter,useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/context/authContext";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
 
 // Gluestack UI Components
 import {
@@ -83,7 +85,12 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-       
+        <KeyboardAwareScrollView
+           enableOnAndroid
+           keyboardShouldPersistTaps="handled"
+           contentContainerStyle={{  flexGrow: 1,paddingVertical:100}}
+         >
+
    
            <StatusBar style="dark" />
        <VStack className="w-full m-auto max-w-[800px]  p-4 " >
@@ -166,6 +173,7 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
               <Text className="text-white font-bold text-lg">Sign In</Text>
             </TouchableOpacity>
           </VStack>
+         </KeyboardAwareScrollView>
 
           {/* Footer */}
           <View className="mt-10 flex-row justify-center items-center">

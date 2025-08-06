@@ -14,7 +14,7 @@ type Props = {
     type: string;
     
   };
-data: { notes: string; restTimer: boolean; restTimeInSeconds?: number; sets: Set[],  unit: "lbs" | "kg"; repsType: "reps" | "rep range"; };
+data: { notes: string; restTimer: number,  sets: Set[],  unit: "lbs" | "kg"; repsType: "reps" | "rep range"; };
  onChange: (
   newData: {
     notes: string;
@@ -85,7 +85,7 @@ export default function ExerciseBlock({ exercise, data, onChange, showCheckIcon,
 
 
           <Text size="md" color="$blue500" mb="$4" ml="$2">
-            ⏱ Rest Timer: {data.restTimer ? `${data.restTimeInSeconds ?? 60}s` : "OFF"}
+            ⏱ Rest Timer: {data.restTimer ? `${data.restTimer ?? 0}s` : "OFF"}
           </Text>
         </Pressable>
       )}

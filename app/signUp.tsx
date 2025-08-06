@@ -13,7 +13,6 @@ import { StatusBar } from "expo-status-bar";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { ScrollView } from "react-native";
 import {
   FormControl,
 
@@ -112,6 +111,7 @@ const [emailError, setEmailError] = useState<string | null>(null);
       await register(username.trim(), email.trim(), password);
       setLoading(false);
       setForm({ username: "", email: "", password: "" });
+       router.replace("/home");
     }  catch (error: any) {
     if (error.message === "Email already in use") {
       setEmailError(error.message);
@@ -136,8 +136,13 @@ const [emailError, setEmailError] = useState<string | null>(null);
   
 
   return (
- <SafeAreaView style={{ flex: 1 }}>
-    
+<SafeAreaView style={{ flex: 1 }}>
+  <StatusBar style="dark" />
+  <KeyboardAwareScrollView
+    enableOnAndroid
+    keyboardShouldPersistTaps="handled"
+    contentContainerStyle={{ padding: 2, flexGrow: 1 }}
+  >
 
         <StatusBar style="dark" />
     <VStack className="w-full m-auto max-w-[800px]  p-4 " >
@@ -228,7 +233,7 @@ const [emailError, setEmailError] = useState<string | null>(null);
   </VStack>
           </FormControl>
         </VStack >
-
+</KeyboardAwareScrollView>
         {/* Footer - Positioned at the bottom */}
        <View className="absolute bottom-8 flex-row justify-center items-center w-full">
               <Text className="font-semibold text-neutral-500">

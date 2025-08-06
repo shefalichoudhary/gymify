@@ -24,9 +24,13 @@ type RoutineWithExercises = {
     id: string;
     name: string;
     subtitle?: string;
+    unit?: string | null;
+    repsType?: string | null;
     sets: {
       weight: number;
-      reps: number;
+      reps: number | null;
+      minReps: number | null;
+      maxReps: number | null;
     }[];
   }[];
 };
@@ -61,11 +65,15 @@ const routineId = Array.isArray(id) ? id[0] : id;
     }
 
     // Fetch exercises linked to the routine
-    const routineEx = await db
-      .select()
-      .from(routineExercises)
-      .where(eq(routineExercises.routineId, routineRow.id))
-      .all();
+const routineEx = await db
+  .select({
+    exerciseId: routineExercises.exerciseId,
+    unit: routineExercises.unit,
+    repsType: routineExercises.repsType,
+  })
+  .from(routineExercises)
+  .where(eq(routineExercises.routineId, routineRow.id))
+  .all();
 
     const exerciseIds = routineEx.map((re) => re.exerciseId);
 
@@ -85,15 +93,24 @@ const routineId = Array.isArray(id) ? id[0] : id;
       .all();
 
     // Map sets to each exercise
-  const exercisesWithSets = exDetails.map((ex) => {
+const exercisesWithSets = exDetails.map((ex) => {
+  const matched = routineEx.find((re) => re.exerciseId === ex.id);
+
   const sets = setEntries
-    .filter((s: any) => s.exerciseId === ex.id)
+    .filter((s) => s.exerciseId === ex.id)
     .map((s) => ({
-      weight: s.weight ?? 0,
-      reps: s.reps ?? 0,
+      weight: s.weight ?? null,
+      reps: s.reps ?? null,
+       minReps:s.minReps ?? null,
+       maxReps:s.maxReps ?? null,
+
+
     }));
+
   return {
     ...ex,
+    unit: matched?.unit ?? null,
+    repsType: matched?.repsType ?? null,
     sets,
   };
 });
@@ -139,7 +156,14 @@ const routineId = Array.isArray(id) ? id[0] : id;
         </Text>
 
         <CustomButton
-          onPress={() => router.push(`/logWorkout?id=${routine.id}`)}
+          onPress={() =>  router.push({
+            pathname: "/logWorkout",
+            params: {
+              routineId:routineId,
+              routineTitle: routine.name,
+            },
+          })
+        }
           bg="$blue500"
         >
           Start Routine
@@ -200,10 +224,10 @@ const routineId = Array.isArray(id) ? id[0] : id;
     <Text size="xs" color="$coolGray400" fontWeight="$small">SET</Text>
   </Box>
   <Box flex={2}>
-    <Text size="xs" color="$coolGray400" fontWeight="$small">WEIGHT</Text>
+    <Text size="xs" color="$coolGray400" fontWeight="$small">    {exercise.unit }</Text>
   </Box>
   <Box flex={4}>
-    <Text size="xs" color="$coolGray400" fontWeight="$small">REPS</Text>
+    <Text size="xs" color="$coolGray400" fontWeight="$small"> {exercise.repsType }</Text>
   </Box>
 </HStack>
 
@@ -223,7 +247,9 @@ const routineId = Array.isArray(id) ? id[0] : id;
           <Text color="$white">{set.weight}</Text>
         </Box>
         <Box flex={5}>
-          <Text color="$white">{set.reps}</Text>
+          <Text color="$white">  {exercise.repsType === "rep range"
+    ? `${set.minReps ?? "-"}-${set.maxReps ?? "-"}`
+    : set.reps ?? "-"}</Text>
         </Box>
       </HStack>
     </Box>

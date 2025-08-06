@@ -31,13 +31,14 @@ import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
 
 
 type PrefillExercise = Exercise & {
+    rest_timer?: number;
+
   sets: {
     id: string;
     reps?: number;
     weight?: number;
     unit?: string;
     set_type?: string;
-    rest_timer?: number;
     notes?: string;
     completed?: boolean;
   }[];
@@ -65,6 +66,8 @@ const [title, setTitle] = useState<string>(nameParam || "");
   const navigation = useNavigation();
 const { id, duplicate } = useLocalSearchParams();
   const [prefillData, setPrefillData] = useState<PrefillRoutine | null>(null);
+  const [hasPrefilled, setHasPrefilled] = useState(false);
+
 const {
   exerciseData,
   setExerciseData,
@@ -82,62 +85,63 @@ const {
 
 
 
-
 useEffect(() => {
-    const fetchRoutineData = async () => {
-      if (id && duplicate === "true") {
-        // Fetch routine
-        const [routine] = await db.select().from(routines).where(eq(routines.id, id as string));
-        if (!routine) return;
+  const fetchRoutineData = async () => {
+    if (hasPrefilled || !id || duplicate !== "true") return;
 
-        // Fetch exercises for this routine
-        const exerciseLinks = await db
-          .select()
-          .from(routineExercises)
-          .where(eq(routineExercises.routineId, id as string));
+    const [routine] = await db.select().from(routines).where(eq(routines.id, id as string));
+    if (!routine) return;
 
-        const exerciseIds = exerciseLinks.map((e) => e.exerciseId);
-        const exerciseDetails = await db
-          .select()
-          .from(exercises)
-        .where(inArray(exercises.id, exerciseIds));
+    const exerciseLinks = await db
+      .select()
+      .from(routineExercises)
+      .where(eq(routineExercises.routineId, id as string));
 
-        // Fetch sets per exercise
-        const sets = await db
-          .select()
-          .from(routineSets)
-          .where(eq(routineSets.routineId, id as string));
+    const exerciseIds = exerciseLinks.map((e) => e.exerciseId);
+    const exerciseDetails = await db
+      .select()
+      .from(exercises)
+      .where(inArray(exercises.id, exerciseIds));
 
-        // Group sets by exerciseId
-        const setsByExercise = exerciseIds.map((eid) => ({
-          exerciseId: eid,
-          sets: sets.filter((s) => s.exerciseId === eid),
-        }));
+    const sets = await db
+      .select()
+      .from(routineSets)
+      .where(eq(routineSets.routineId, id as string));
 
-        setPrefillData({
-          name: `${routine.name} (Copy)`,
-          exercises: exerciseDetails.map((ex) => {
-            const matched = setsByExercise.find((s) => s.exerciseId === ex.id);
-            return {
-              ...ex,
-             sets: (matched?.sets || []).map((s) => ({
-  id: s.id,
-  reps: s.reps ?? 0,
-  weight: s.weight ?? 0,
-  unit: "kg", // or dynamically infer if you store it elsewhere
-  set_type: "Normal", // default or fetch if stored
-  rest_timer: s.restTimer ?? 0,
-  notes: "", // default or infer
-  completed: false, // default
-})),
-            };
-          }),
-        });
-      }
-    };
+    const setsByExercise = exerciseLinks.map((link) => ({
+  exerciseId: link.exerciseId,
+  sets: sets.filter((s) => s.exerciseId === link.exerciseId),
+  restTimer: link.restTimer ?? 0, // ✅ GET rest_timer here
+}));
 
-    fetchRoutineData();
-  }, [id, duplicate]);
+    setPrefillData({
+      name: `${routine.name} (Copy)`,
+      exercises: exerciseDetails.map((ex) => {
+        const matched = setsByExercise.find((s) => s.exerciseId === ex.id);
+        return {
+          ...ex,
+             rest_timer: matched?.restTimer ?? 0,
+
+          sets: (matched?.sets || []).map((s) => ({
+            id: s.id,
+            reps: s.reps ?? 0,
+            weight: s.weight ?? 0,
+            unit: "kg",
+            set_type: "Normal",
+            notes: "",
+            completed: false,
+          })),
+        };
+      }),
+    });
+
+    setHasPrefilled(true);
+  };
+
+  fetchRoutineData();
+}, [id, duplicate, hasPrefilled]);
+
+
   useEffect(() => {
   if (!prefillData) return;
 
@@ -151,7 +155,7 @@ useEffect(() => {
   const structuredData = prefillData.exercises.reduce((acc, ex) => {
     acc[ex.id] = {
       notes: "",
-      restTimer: false,
+       restTimer: ex.rest_timer ?? 0,
       unit: ex.sets?.[0]?.unit || "kg",
       repsType: "reps",
       sets: ex.sets.map((set) => ({
@@ -174,6 +178,16 @@ const discardRoutineAndReset = () => {
   router.replace("/workout"); // use replace to avoid keeping this screen in stack
 };
 
+const confirmDiscard = () => {
+  Alert.alert(
+    "Discard Workout?",
+    "This will delete your current progress. Are you sure?",
+    [
+      { text: "Cancel", style: "cancel" },
+      { text: "Discard", style: "destructive", onPress: discardRoutineAndReset },
+    ]
+  );
+};
 
 useFocusEffect(
   React.useCallback(() => {
@@ -221,6 +235,18 @@ useFocusEffect(
     };
   }, [])
 );
+useFocusEffect(
+  React.useCallback(() => {
+    const onBackPress = () => {
+      confirmDiscard(); // Show your custom discard alert
+      return true; // Block default behavior
+    };
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+    return () => subscription.remove(); // ✅ correct way to clean up
+  }, [])
+);
 
 useEffect(() => {
   const fetchSelectedExercises = async () => {
@@ -247,7 +273,7 @@ useEffect(() => {
           if (!updated[exercise.id]) {
             updated[exercise.id] = {
               notes: "",
-              restTimer: false,
+              restTimer: 0,
               unit: "kg",
               repsType: "reps",
               sets: [{ weight: undefined, reps: undefined }],

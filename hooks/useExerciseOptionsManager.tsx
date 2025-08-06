@@ -10,8 +10,7 @@ export function useExerciseOptionsManager() {
     
     {
       notes: string;
-      restTimer: boolean;
-      restTimeInSeconds?: number;
+      restTimer: number;
       unit: "lbs" | "kg";
       repsType: "reps" | "rep range";
       sets: {
@@ -47,8 +46,7 @@ export function useExerciseOptionsManager() {
     setExerciseData((prev) => {
       const updated = { ...prev };
       if (updated[activeExerciseId]) {
-        updated[activeExerciseId].restTimer = true;
-        updated[activeExerciseId].restTimeInSeconds = duration;
+        updated[activeExerciseId].restTimer = duration;
       }
       return updated;
     });

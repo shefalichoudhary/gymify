@@ -10,7 +10,8 @@ import { WorkoutSet as Set } from "@/types/workoutSet";
 
 type ExerciseUpdateData = {
   notes: string;
-  restTimer: boolean;
+  restTimer: number;
+  
   sets: Set[];
 };
 
@@ -29,7 +30,10 @@ export const updateRoutineInDb = async (
   for (const [exerciseId, data] of Object.entries(exerciseData)) {
     // Update notes (assuming only 1 entry per exercise per routine)
 await db.update(routineExercises)
-  .set({ notes: data.notes })
+
+  .set({ notes: data.notes ?? "" ,
+      restTimer: data.restTimer ?? 0 ,
+  })
   .where(
     and(
       eq(routineExercises.routineId, routineId),
@@ -55,7 +59,6 @@ await db.delete(routineSets)
   reps: set.reps ?? 0,
   minReps: set.minReps ?? 0,
   maxReps: set.maxReps ?? 0,
-  restTimer: data.restTimer ? 60 : 0,
       });
     }
   }

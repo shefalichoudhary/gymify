@@ -142,7 +142,7 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
 
       <ExerciseSearchbar query={query} setQuery={setQuery} />
 
-      <HStack space="md" mb="$4" px="$4" alignItems="center">
+      <HStack space="xs" mb="$4" px="$4" alignItems="center">
   <Button
     onPress={() => filterRef.current?.open("equipment")}
     flex={1}

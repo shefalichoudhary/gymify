@@ -28,7 +28,7 @@ type SetItem = {
 };
 type ExerciseEntry = {
   notes: string;
-  restTimer: boolean;
+  restTimer: number;
   sets: SetItem[];
   unit: "lbs" | "kg";
   repsType: "reps" | "rep range";
@@ -56,7 +56,6 @@ const [loading, setLoading] = useState(true);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
-const [activeRestTimer, setActiveRestTimer] = useState<number | null>(null);
 const [exerciseDetails, setExerciseDetails] = useState<ExerciseDetail[]>([]);
 const restSheetRef = useRef<RestTimerSheetRef>(null);
 const weightSheetRef = useRef<WeightSheetRef>(null);
@@ -151,24 +150,34 @@ useEffect(() => {
 
   try {
     const routineEx = await db
-      .select()
-      .from(routineExercises)
-      .where(eq(routineExercises.routineId, String(routineId)))
-      .all();
+  .select({
+    id: routineExercises.id,
+    exerciseId: routineExercises.exerciseId,
+    notes: routineExercises.notes,
+    repsType: routineExercises.repsType,
+    unit: routineExercises.unit,
+    restTimer: routineExercises.restTimer,
+
+    
+  })
+  .from(routineExercises)
+  .where(eq(routineExercises.routineId, String(routineId)))
+  .all();
 
     const exerciseIds = routineEx.map((re) => String(re.exerciseId));
 
     // Set placeholders immediately to show UI
     const placeholders: ExerciseData = {};
-    exerciseIds.forEach((id) => {
-      placeholders[id] = {
-       notes: "",
-  restTimer: false,
-  unit: "kg",
-  repsType: "reps",
-  sets: [],// Will be filled later
-      };
-    });
+   for (const entry of routineEx) {
+  const id = String(entry.exerciseId);
+  placeholders[id] = {
+    notes: entry.notes ?? "",
+     restTimer:entry.restTimer ?? 0,
+    unit: entry.unit ?? "kg",
+    repsType: entry.repsType ?? "reps",
+    sets: [],
+  };
+}
 
     setExerciseData(placeholders);
     setExerciseDetails(exerciseIds.map((id) => ({ id, name: "Loading...", type: "", equipment: "" })));
@@ -198,21 +207,23 @@ useEffect(() => {
         (set) => String(set.exerciseId) === exerciseId
       );
 
-      grouped[exerciseId] = {
-  notes: "",
-  restTimer: false,
-  unit: "kg",
-  repsType: "reps",
+      const routineEntry = routineEx.find((re) => String(re.exerciseId) === exerciseId);
+
+grouped[exerciseId] = {
+  notes: routineEntry?.notes ?? "",
+  unit: routineEntry?.unit ?? "kg",
+  repsType: routineEntry?.repsType ?? "reps",
+  restTimer: routineEntry?.restTimer ?? 0,
   sets: setsForExercise.map((s: any) => ({
     weight: s.weight ?? 0,
-    rest_timer: s.restTimer?? "off",
+    rest_timer: s.restTimer ?? "off",
     reps: s.reps ?? 0,
     minReps: s.minReps,
     maxReps: s.maxReps,
     isRangeReps: s.isRangeReps ?? false,
-    isCompleted: false,
   })),
 };
+
     }
     setExerciseData(grouped);
     setExerciseDetails(details);
@@ -266,7 +277,7 @@ try {
       for (const id of newUniqueIds) {
         newData[id] = {
           notes: "",
-          restTimer: false,
+          restTimer: 0,
           unit: "kg",
           repsType: "reps",
           sets: [],
@@ -404,10 +415,10 @@ useFocusEffect(
           <Text color="$coolGray400" fontSize="$xs">Volume</Text>
           <Text color="$coolGray400" fontSize="$xs">Sets</Text>
         </HStack>
-        <HStack px="$6" justifyContent="space-between">
-          <Text color="$blue500">{duration}s</Text>
-          <Text color="$white">{Math.round(totalVolume)} kg</Text>
-          <Text color="$white">{totalSets}</Text>
+        <HStack px="$5" justifyContent="space-between">
+          <Text color="$blue500"fontSize="$sm" >{duration}s</Text>
+          <Text color="$white"fontSize="$sm" >{Math.round(totalVolume)} kg</Text>
+          <Text color="$white" fontSize="$sm">{totalSets}</Text>
         </HStack>
       </VStack>
 
