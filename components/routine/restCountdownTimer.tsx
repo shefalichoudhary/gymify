@@ -1,13 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import {
-  VStack,
-  HStack,
-  Box,
-  Text,
-  Progress,
-  Button,
-} from "@gluestack-ui/themed";
-import * as Haptics from "expo-haptics"; 
+import React, { useEffect, useRef, useState } from "react";
+import { VStack, HStack, Box, Text, Progress, Button } from "@gluestack-ui/themed";
+import * as Haptics from "expo-haptics";
 import { Audio } from "expo-av";
 
 type Props = {
@@ -29,14 +22,12 @@ export default function RestCountdownTimer({
 
   const soundRef = useRef<Audio.Sound | null>(null);
   const hasPlayedSoundRef = useRef(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
-  // Load sound on mount
-useEffect(() => {
-  let isMounted = true;
-
-  const setupAudio = async () => {
+  // Unlock audio on first button press
+  const unlockAudio = async () => {
+    if (audioUnlocked) return; // already unlocked
     try {
-      // Set audio mode once
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         staysActiveInBackground: false,
@@ -44,20 +35,40 @@ useEffect(() => {
         shouldDuckAndroid: true,
       });
 
-      // Load sound
+      // Play a silent sound to unlock
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/beep.mp3")
+        require("../../assets/sounds/beep.mp3"), // short silent audio
+        { shouldPlay: true }
       );
+      await sound.playAsync();
+      await sound.unloadAsync();
 
-      if (isMounted) {
-        soundRef.current = sound;
-      }
+      setAudioUnlocked(true);
+      console.log("✅ Audio unlocked");
     } catch (e) {
-      console.error("Failed to setup audio:", e);
+      console.error("Failed to unlock audio:", e);
     }
   };
 
-  setupAudio();
+  // Load beep sound after unlock
+ useEffect(() => {
+  let isMounted = true;
+
+  const loadBeep = async () => {
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/beep.mp3") // make sure this path is correct
+      );
+      if (isMounted) {
+        soundRef.current = sound;
+        console.log("✅ Beep sound loaded");
+      }
+    } catch (e) {
+      console.error("❌ Failed to load beep sound:", e);
+    }
+  };
+
+  loadBeep();
 
   return () => {
     isMounted = false;
@@ -66,49 +77,28 @@ useEffect(() => {
 }, []);
 
 
+  // Play sound + vibration when timer hits 0
+  useEffect(() => {
+    if (timeLeft === 0 && !hasPlayedSoundRef.current && audioUnlocked) {
+      hasPlayedSoundRef.current = true;
 
-
-useEffect(() => {
-  const setupAudio = async () => {
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-      });
-    } catch (e) {
-      console.error("Error setting audio mode:", e);
-    }
-  };
-
-  setupAudio();
-}, []);
-
-useEffect(() => {
-  if (timeLeft === 0 && !hasPlayedSoundRef.current) {
-    hasPlayedSoundRef.current = true;
-
-    (async () => {
-      try {
-        console.log("Playing sound");
-        if (soundRef.current) {
-          await soundRef.current.replayAsync(); // Just replay
+      (async () => {
+        try {
+          if (soundRef.current) {
+            await soundRef.current.replayAsync();
+          }
+          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+        } catch (e) {
+          console.error("Failed to play sound:", e);
         }
-        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      } catch (e) {
-        console.error("Failed to play sound:", e);
-      }
-    })();
-  } else if (timeLeft > 0) {
-    hasPlayedSoundRef.current = false;
-  }
-}, [timeLeft]);
+      })();
+    } else if (timeLeft > 0) {
+      hasPlayedSoundRef.current = false;
+    }
+  }, [timeLeft, audioUnlocked]);
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
+    const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
     const secs = (seconds % 60).toString().padStart(2, "0");
     return `${mins}:${secs}`;
   };
@@ -128,41 +118,26 @@ useEffect(() => {
       zIndex={999}
     >
       <VStack space="md" width="100%" mb="$4">
-        <Progress
-          value={progress * 100}
-          size="xs"
-          bg="#2a2a2a"
-          width="100%"
-          borderRadius={5}
-        >
+        <Progress value={progress * 100} size="xs" bg="#2a2a2a" width="100%" borderRadius={5}>
           <Progress.FilledTrack bg="$blue600" />
         </Progress>
 
-        <HStack
-          justifyContent="space-between"
-          alignItems="center"
-          space="md"
-          px="$4"
-        >
+        <HStack justifyContent="space-between" alignItems="center" space="md" px="$4">
           <Button
             variant="solid"
             bg="#2a2a2a"
             size="sm"
             px="$4"
             borderRadius="$xl"
-            onPress={onDecrease}
+            onPress={() => {
+              unlockAudio();
+              onDecrease();
+            }}
           >
             <Text fontSize="$md" color="$white">-10s</Text>
           </Button>
 
-          <Text
-            fontSize="$2xl"
-            fontWeight="$bold"
-            color="$white"
-            letterSpacing={1.5}
-            textAlign="center"
-            minWidth={80}
-          >
+          <Text fontSize="$2xl" fontWeight="$bold" color="$white" letterSpacing={1.5} textAlign="center" minWidth={80}>
             {formatTime(timeLeft)}
           </Text>
 
@@ -172,7 +147,10 @@ useEffect(() => {
             size="sm"
             px="$4"
             borderRadius="$xl"
-            onPress={onIncrease}
+            onPress={() => {
+              unlockAudio();
+              onIncrease();
+            }}
           >
             <Text fontSize="$md" color="$white">+10s</Text>
           </Button>
@@ -183,7 +161,10 @@ useEffect(() => {
             size="sm"
             px="$4"
             borderRadius="$xl"
-            onPress={onSkip}
+            onPress={() => {
+              unlockAudio();
+              onSkip();
+            }}
             $hover={{ bg: "$blue400" }}
           >
             <Text fontSize="$md" color="$white" fontWeight="$medium">

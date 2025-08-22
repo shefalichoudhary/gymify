@@ -73,10 +73,12 @@ export const saveRoutineToDb = async (
         reps: set.reps ?? 0,
         minReps: set.minReps ?? 0,
         maxReps: set.maxReps ?? 0,
+        duration: set.duration ?? 0,
+      setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
       });
 
       console.log(
-        `  ➕ Set ${index + 1}: weight=${set.weight}, reps=${set.reps}, min=${set.minReps}, max=${set.maxReps}, unit=${unit}, rest=${restTimer}`
+        `  ➕ Set ${set.setType}: weight=${set.weight}, reps=${set.reps}, min=${set.minReps}, max=${set.maxReps}, unit=${unit}, rest=${restTimer}`
       );
     }
   }

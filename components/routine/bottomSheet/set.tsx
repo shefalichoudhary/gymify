@@ -1,109 +1,106 @@
-import { AntDesign } from "@expo/vector-icons";
-import React from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import Modal from "react-native-modal";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { Text, Box, HStack, Pressable } from "@gluestack-ui/themed";
+import BottomSheet from "@gorhom/bottom-sheet";
+import CustomBottomSheet from "./customBottomSheet";
+import * as Haptics from "expo-haptics";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { Ionicons } from "@expo/vector-icons";
+
+export type SetTypeSheetRef = {
+  open: () => void;
+  close: () => void;
+};
 
 interface SetType {
-  key: string;
+  key: "W" | "Normal" | "D" | "F" | "REMOVE";
   label: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
-interface SetTypeModalProps {
-  visible: boolean;
+interface Props {
   selectedType: string;
-  onSelect: (type: string) => void;
-  onClose: () => void;
+  onSelect: (type: SetType["key"]) => void;
 }
 
 const setTypes: SetType[] = [
-  { key: "W", label: "Warm-Up Set", icon: "W" },
-  { key: "Normal", label: "Normal Set", icon: "N" },
-  { key: "D", label: "Drop Set", icon: "D" },
-  { key: "F", label: "Failure", icon: "F" },
+  { key: "W", label: "Warm-Up Set", icon: <Text color="$yellow400">W</Text> },
+  { key: "Normal", label: "Normal Set", icon: <Text color="$white">N</Text> },
+  { key: "D", label: "Drop Set", icon: <Text color="$blue400">D</Text> },
+  { key: "F", label: "Failure", icon: <Text color="$red500">F</Text> },
+  { key: "REMOVE", label: "Remove Set", icon: <Ionicons name="close" size={20} color="red" /> }, // ❌
 ];
 
-// Define icon colors per type
-export const iconColors: Record<string, string> = {
-  W: "text-yellow-400",
-  N: "text-white",
-  D: "text-blue-400",
-  F: "text-red-500",
-};
+const SetTypeSheet = forwardRef<SetTypeSheetRef, Props>(
+  ({ selectedType, onSelect }, ref) => {
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    const [selected, setSelected] = useState<string>(selectedType);
 
-const SetTypeModal: React.FC<SetTypeModalProps> = ({
-  visible,
-  selectedType,
-  onSelect,
-  onClose,
-}) => {
-  return (
-    <Modal
-      isVisible={visible}
-      onBackdropPress={onClose}
-      onSwipeComplete={onClose}
-      swipeDirection="down"
-      style={{ justifyContent: "flex-end", margin: 0 }}
-      backdropColor="black"
-      backdropOpacity={0.8}
-    >
-      <View className="bg-zinc-800 rounded-t-2xl pb-4 max-h-[75%] w-full">
-        {/* Handle and Header */}
-        <View className="items-center py-2 my-1">
-          <View className="w-12 h-1.5 bg-gray-400 rounded-full mb-2" />
-          <Text className="text-white text-xl font-bold py-2">
+    useImperativeHandle(ref, () => ({
+      open: () => bottomSheetRef.current?.snapToIndex(1),
+      close: () => bottomSheetRef.current?.close(),
+    }));
+
+    return (
+      <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "35%"]}>
+        <Box
+          borderBottomWidth={1}
+          borderColor="$trueGray700"
+          pb="$3"
+          pt="$2"
+          mb="$4"
+        >
+          <Text
+            fontSize="$lg"
+            fontWeight="$bold"
+            textAlign="center"
+            color="white"
+          >
             Select Set Type
           </Text>
-        </View>
+        </Box>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          className="bg-zinc-600 m-3 py-1 rounded-lg"
+        <BottomSheetScrollView
+          contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
         >
-          {setTypes.map((type, index, array) => (
-            <TouchableOpacity
-              key={type.key}
-              onPress={() => {
-                onSelect(type.key);
-                onClose();
-              }}
-              accessible
-              accessibilityRole="button"
-              accessibilityLabel={`Select ${type.label}`}
-              className={`py-6 px-4 ${
-                index !== array.length - 1 ? "border-b border-gray-400" : ""
-              }`}
-            >
-              <View className="flex-row justify-between items-center">
-                <View className="flex-row items-center">
-                  <Text
-                    className={`text-xl font-bold mr-2 ${
-                      iconColors[type.icon] ?? "text-gray-300"
-                    }`}
-                  >
+          <HStack flexWrap="wrap" space="sm">
+            {setTypes.map((type) => {
+              const isActive = selected === type.key;
+              return (
+                <Pressable
+                  key={type.key}
+                  onPress={() => {
+                    Haptics.notificationAsync(
+                      Haptics.NotificationFeedbackType.Success
+                    );
+                    setSelected(type.key);
+                    onSelect(type.key);
+                    bottomSheetRef.current?.close();
+                  }}
+                  bg={isActive ? "$primary600" : "#2a2a2a"}
+                  px="$4"
+                  py="$2"
+                  borderRadius="$full"
+                  borderWidth={1}
+                  borderColor={isActive ? "$primary600" : "$trueGray700"}
+                  m="$1"
+                >
+                  <HStack alignItems="center" space="sm">
                     {type.icon}
-                  </Text>
-                  <Text
-                    className={`text-medium font-semibold ml-4 ${
-                      selectedType === type.key
-                        ? "text-white"
-                        : "text-gray-300"
-                    }`}
-                  >
-                    {type.label}
-                  </Text>
-                </View>
+                    <Text
+                      fontWeight="$medium"
+                      color={isActive ? "white" : "$trueGray400"}
+                    >
+                      {type.label}
+                    </Text>
+                  </HStack>
+                </Pressable>
+              );
+            })}
+          </HStack>
+        </BottomSheetScrollView>
+      </CustomBottomSheet>
+    );
+  }
+);
 
-                {type.key === selectedType && (
-                  <AntDesign name="check" size={24} color="#3B82F9" />
-                )}
-              </View>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    </Modal>
-  );
-};
-
-export default SetTypeModal;
+export default SetTypeSheet;

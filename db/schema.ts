@@ -52,6 +52,8 @@ weight: integer("weight").notNull(),
   reps: integer("reps").default(0),
   minReps: integer("min_reps").default(0),
   maxReps: integer("max_reps").default(0),
+    duration: integer("duration").default(0),
+    setType: text("set_type").$type<"W" | "Normal" | "D" | "F">().notNull().default("Normal"), 
 // 🕒 rest time per set
 });
 export const workouts = sqliteTable("workouts", {
@@ -81,6 +83,14 @@ export const workoutSets = sqliteTable("workout_sets", {
   minReps: integer("min_reps"),
   maxReps: integer("max_reps"),
   isRangeReps: integer("is_range_reps", { mode: "boolean" }).notNull().default(false),
+   previousWeight: integer("previous_weight"),
+  previousReps: integer("previous_reps"),
+  previousMinReps: integer("previous_min_reps"),
+  previousMaxReps: integer("previous_max_reps"),
+  previousUnit: text("previous_unit").$type<"lbs" | "kg">(),
+  previousRepsType: text("previous_reps_type").$type<"reps" | "rep range">(),
+    duration: integer("duration").default(0),
+
 });
 export const userRoutineWorkout = sqliteTable("user_routine_workout", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),

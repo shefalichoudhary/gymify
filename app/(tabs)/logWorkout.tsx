@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef, } from "react";
+import React, { useEffect, useState, useRef, } from "react";
 import {
   Box, VStack, HStack, Text, Button, ScrollView,
 } from "@gluestack-ui/themed";
@@ -12,19 +12,26 @@ import { BackHandler, Alert } from "react-native";
 import { db } from "@/db/db";
 import { workouts, exercises, routineExercises } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
-import RestTimerSheet, { RestTimerSheetRef } from "@/components/routine/bottomSheet/timer";
-import WeightSheet ,{WeightSheetRef}from "@/components/routine/bottomSheet/weight";
-import RepsTypeSheet,{RepsTypeSheetRef} from "@/components/routine/bottomSheet/repsType";
+import RestTimerSheet from "@/components/routine/bottomSheet/timer";
+import WeightSheet from "@/components/routine/bottomSheet/weight";
+import RepsTypeSheet from "@/components/routine/bottomSheet/repsType";
+import SetTypeModal from "@/components/routine/bottomSheet/set";
+import ConfirmDialogComponent from "@/components/confirmDialog";
 import * as Haptics from "expo-haptics";
 import RestCountdownTimer from "@/components/routine/restCountdownTimer";
-
+import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
+import { useConfirmDialog } from "@/hooks/useConfirmDialog";
+import { updateRoutineInDb } from "../../components/routine/updateRoutine";
 type SetItem = {
   weight: number;
   reps: number;
   minReps?: number;
   maxReps?: number;
   isRangeReps?: boolean;
+  duration?: number;
   isCompleted?: boolean;
+   setType?: "W" | "Normal" | "D" | "F"; 
+
 };
 type ExerciseEntry = {
   notes: string;
@@ -44,27 +51,99 @@ type ExerciseDetail = {
   name: string;
   equipment?: string;
   type?: string;
+    exercise_type: string | null
 };
 
 export default function LogWorkoutScreen() {
   const router = useRouter();
 const { routineId, routineTitle, addedExerciseIds } = useLocalSearchParams();
+const {
+  activeExerciseId,
+  restSheetRef,
+  weightSheetRef,
+  repsSheetRef,
+  setTypeSheetRef,
+  activeSetIndex,
+  openRestTimer,
+  openWeightSheet,
+  openRepsSheet,
+  openSetTypeSheet,
+ 
 
+} = useExerciseOptionsManager();
 const [loading, setLoading] = useState(true);
+      const { showDialog, ConfirmDialogComponent } = useConfirmDialog();
 
   const [duration, setDuration] = useState(0);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
-  const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
 const [exerciseDetails, setExerciseDetails] = useState<ExerciseDetail[]>([]);
-const restSheetRef = useRef<RestTimerSheetRef>(null);
-const weightSheetRef = useRef<WeightSheetRef>(null);
-const repsSheetRef = useRef<RepsTypeSheetRef>(null);
+
 const [loadedExerciseIds, setLoadedExerciseIds] = useState<string[]>([]);
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
 const { volume: totalVolume, sets: totalSets } = calculateWorkoutStats(exerciseData);
 const [restCountdowns, setRestCountdowns] = useState<{ [key: string]: number }>({});
 
+const handleRestDurationSelect = (duration: number) => {
+  if (!activeExerciseId) return;
+
+  setExerciseData((prev:any) => {
+    const updated = { ...prev };
+    const exercise = updated[activeExerciseId];
+
+    if (exercise) {
+      exercise.restTimer = duration;
+      exercise.restTimeInSeconds = duration;
+    }
+
+    return updated;
+  });
+};
+const handleWeightSelect = (unit: string) => {
+  if (!activeExerciseId) return;
+  setExerciseData((prev:any) => ({
+    ...prev,
+    [activeExerciseId]: {
+      ...prev[activeExerciseId],
+      unit,
+    },
+  }));
+};
+const handleRepsTypeSelect = (type: "reps" | "rep range") => {
+  if (!activeExerciseId) return;
+  setExerciseData((prev: any) => ({
+    ...prev,
+    [activeExerciseId]: {
+      ...prev[activeExerciseId],
+      repsType: type,
+    },
+  }));
+};
+const handleSetTypeSelect = (
+  type: "W" | "Normal" | "D" | "F" | "REMOVE",
+  exerciseId?: string,
+  setIndex?: number
+) => {
+  const exId = exerciseId ?? activeExerciseId;
+  const idx = setIndex ?? activeSetIndex;
+  if (!exId || idx === null) return;
+
+  setExerciseData((prev) => {
+    const updated = { ...prev };
+    const sets = [...updated[exId].sets];
+
+    if (type === "REMOVE") {
+      // 🗑 remove the set
+      sets.splice(idx, 1);
+    } else {
+      // ✅ update set type
+      sets[idx] = { ...sets[idx], setType: type };
+    }
+
+    updated[exId].sets = sets;
+    return updated;
+  });
+};
 
 
 useEffect(() => {
@@ -107,7 +186,8 @@ useEffect(() => {
       const key = `${exerciseId}-${setIndex}`;
 
       if (justCompleted && updated[exerciseId].restTimer) {
-        const restTime = updated[exerciseId].restTimeInSeconds ?? 0;
+        const restTime = updated[exerciseId].restTimeInSeconds ?? updated[exerciseId].restTimer ?? 0;
+
         setRestCountdowns((prev) => ({
           ...prev,
           [key]: restTime,
@@ -180,7 +260,7 @@ useEffect(() => {
 }
 
     setExerciseData(placeholders);
-    setExerciseDetails(exerciseIds.map((id) => ({ id, name: "Loading...", type: "", equipment: "" })));
+    setExerciseDetails(exerciseIds.map((id) => ({ id, name: "Loading...", type: "", equipment: "", exercise_type: null })));
 
     // Fetch details and sets in parallel
     const [routineSetRows, details] = await Promise.all([
@@ -193,6 +273,7 @@ useEffect(() => {
           name: exercises.exercise_name,
           equipment: exercises.equipment,
           type: exercises.type,
+            exercise_type: exercises.exercise_type,
         })
         .from(exercises)
         .where(inArray(exercises.id, exerciseIds))
@@ -214,13 +295,16 @@ grouped[exerciseId] = {
   unit: routineEntry?.unit ?? "kg",
   repsType: routineEntry?.repsType ?? "reps",
   restTimer: routineEntry?.restTimer ?? 0,
+   restTimeInSeconds: routineEntry?.restTimer ?? 0,
   sets: setsForExercise.map((s: any) => ({
     weight: s.weight ?? 0,
     rest_timer: s.restTimer ?? "off",
     reps: s.reps ?? 0,
     minReps: s.minReps,
     maxReps: s.maxReps,
+    setType:s.setType ?? "normal",
     isRangeReps: s.isRangeReps ?? false,
+    duration: s.duration ?? 0,
   })),
 };
 
@@ -260,17 +344,21 @@ try {
 
     try {
       // Fetch full exercise details
-      const details = await db
-        .select({
-          
-          id: exercises.id,
-          name: exercises.exercise_name,
-          equipment: exercises.equipment,
-          type: exercises.type,
-        })
-        .from(exercises)
-        .where(inArray(exercises.id, newUniqueIds))
-        .all();
+     const details = (await db
+  .select({
+    id: exercises.id,
+    name: exercises.exercise_name,
+    equipment: exercises.equipment,
+    type: exercises.type,
+    exercise_type: exercises.exercise_type,
+  })
+  .from(exercises)
+  .where(inArray(exercises.id, newUniqueIds))
+  .all()
+).map((ex) => ({
+  ...ex,
+ exercise_type: ex.exercise_type ?? null,
+}));
 
       // Default ExerciseData values
       const newData: ExerciseData = {};
@@ -297,115 +385,147 @@ try {
 
 
 
-  const handleFinish = async () => {
-    const { volume, sets } = calculateWorkoutStats(exerciseData);
-    if (sets === 0) {
-      return Alert.alert("No Completed Sets", "Please complete at least one set.");
+  // const handleFinish = async () => {
+  //   const { volume, sets } = calculateWorkoutStats(exerciseData);
+  //   if (sets === 0) {
+  //     return Alert.alert("No Completed Sets", "Please complete at least one set.");
+  //   }
+
+  //     showDialog({
+  //   message: "Do you want to add new exercises to this routine?",
+  //   confirmText: "Yes",
+  //   cancelText: "No",
+  //   destructive: false,
+  //   onConfirm: async () => {
+  //     await saveWorkout(true); // save + update routine
+  //   },
+  //   onCancel: async () => {
+  //     await saveWorkout(false); // save only workout
+  //   },
+  // });
+  //   try {
+  //     const [workout] = await db.insert(workouts).values({
+  //       date: new Date().toISOString(),
+  //       duration,
+  //       volume,
+  //       sets,
+  //       routineId: String(routineId),
+  //       title: String(routineTitle),
+  //     }).returning();
+
+  //     setIsWorkoutActive(false);
+  //     router.push({
+  //       pathname: "/saveWorkout",
+  //       params: { id: workout.id, routineId },
+  //     });
+  //   } catch (err) {
+  //     Alert.alert("Save Failed", "Could not save workout.");
+  //   }
+  // };
+const saveWorkout = async (updateRoutine: boolean) => {
+  const { volume, sets } = calculateWorkoutStats(exerciseData);
+
+  try {
+    // Insert workout
+    const [workout] = await db.insert(workouts).values({
+      date: new Date().toISOString(),
+      duration,
+      volume,
+      sets,
+      routineId: String(routineId),
+      title: String(routineTitle),
+    }).returning();
+
+    // Optionally update routine with latest exercise data
+    if (updateRoutine) {
+      await updateRoutineInDb(String(routineId), String(routineTitle), exerciseData);
     }
 
-    try {
-      const [workout] = await db.insert(workouts).values({
-        date: new Date().toISOString(),
-        duration,
-        volume,
-        sets,
-        routineId: String(routineId),
-        title: String(routineTitle),
-      }).returning();
+    setIsWorkoutActive(false);
 
-      setIsWorkoutActive(false);
-      router.push({
-        pathname: "/saveWorkout",
-        params: { id: workout.id, routineId },
-      });
-    } catch (err) {
-      Alert.alert("Save Failed", "Could not save workout.");
-    }
-  };
-
-const discardRoutineAndReset = () => {
-  setExerciseData({});
-  setExerciseDetails([]);
-    setDuration(0);
-     setIsWorkoutStarted(false);
-  router.replace("/workout"); // use `replace` to clear this screen from the stack
+    router.push({
+      pathname: "/saveWorkout",
+      params: { id: workout.id, routineId },
+    });
+  } catch (err) {
+    Alert.alert("Save Failed", "Could not save workout.");
+    console.error("❌ saveWorkout error:", err);
+  }
 };
 
-
-const confirmDiscard = () => {
-  Alert.alert(
-    "Discard Workout?",
-    "This will delete your current progress. Are you sure?",
+ const handleFinish =  () => {
+  const { sets } = calculateWorkoutStats(exerciseData);
+  if (sets === 0) {
+    return Alert.alert("No Completed Sets", "Please complete at least one set.");
+  }
+ Alert.alert(
+    "Finish Workout",
+    "Do you want to add new exercises to this routine?",
     [
-      { text: "Cancel", style: "cancel" },
-      { text: "Discard", style: "destructive", onPress: discardRoutineAndReset },
+      {
+        text: "Yes",
+        onPress: async () => {
+          await saveWorkout(true); // ✅ save + update routine
+        },
+      },
+      {
+        text: "No",
+        onPress: async () => {
+          await saveWorkout(false); // ✅ save workout only
+        },
+        style: "cancel",
+      },
     ]
   );
 };
 
 
-const openRestTimer = (exerciseId: string) => {
-  setActiveExerciseId(exerciseId);
-  restSheetRef.current?.open();
-};
-const handleRestDurationSelect = (duration: number) => {
-  if (!activeExerciseId) return;
 
-  setExerciseData((prev:any) => {
-    const updated = { ...prev };
-    const exercise = updated[activeExerciseId];
+const discardRoutineAndReset = () => {
+  // Reset any temporary workout state if needed
+  setExerciseData({});
+  setExerciseDetails([]);
+  setLoadedExerciseIds([]);
+  setIsWorkoutStarted(false);
+  setDuration(0);
+  setRestCountdowns({});
 
-    if (exercise) {
-      exercise.restTimer = true;
-      exercise.restTimeInSeconds = duration;
-    }
+  // Navigate back to the workout page
+  router.replace("/workout");
+};
 
-    return updated;
-  });
-  
-};
-const handleWeightSelect = (unit: string) => {
-  if (!activeExerciseId) return;
-  setExerciseData((prev:any) => ({
-    ...prev,
-    [activeExerciseId]: {
-      ...prev[activeExerciseId],
-      unit,
-    },
-  }));
-};
-const handleRepsTypeSelect = (type: "reps" | "rep range") => {
-  if (!activeExerciseId) return;
-  setExerciseData((prev: any) => ({
-    ...prev,
-    [activeExerciseId]: {
-      ...prev[activeExerciseId],
-      repsType: type,
-    },
-  }));
-};
+
+
+
 
 useFocusEffect(
   React.useCallback(() => {
     const onBackPress = () => {
-      confirmDiscard(); // Show your custom discard alert
-      return true; // Block default behavior
+      // Directly navigate to the workout page
+      router.replace("/workout"); // use replace so this screen is removed from stack
+      return true; // Prevent default back action
     };
 
-    const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      onBackPress
+    );
 
-    return () => subscription.remove(); // ✅ correct way to clean up
-  }, [])
+    return () => subscription.remove(); // cleanup
+  }, [router])
 );
   return (
     <Box flex={1} bg="$black">
       <CustomHeader
         title="Log Workout"
         left="Cancel"
-        onPress={confirmDiscard} 
+          onPress={() => { router.replace("/workout")}}
       
         right="Finish"
-        onRightButtonPress={handleFinish}
+        onRightButtonPress={
+     handleFinish // runs only if confirmed
+    
+  }
       />
 
       {/* Stats */}
@@ -436,8 +556,7 @@ useFocusEffect(
           id,
           exercise_name: ex.name || "Unknown",
           equipment: ex.equipment ?? "unknown",
-          type: ex.type ?? "",
-          exercise_type: "Weighted",
+          exercise_type: ex.exercise_type ?? "Weighted",
         }}
         data={data}
         showCheckIcon={true}
@@ -447,18 +566,15 @@ useFocusEffect(
     [id]: newData as ExerciseEntry,
   }))
 }
-      onOpenRepsType={(exerciseId) => {
-  setActiveExerciseId(exerciseId);
-  repsSheetRef.current?.open();
-}}
-                 onOpenWeight={(exerciseId) => {
-  setActiveExerciseId(exerciseId);
-  weightSheetRef.current?.open();
-  
-}}
-
-    onOpenRestTimer={(exerciseId) => openRestTimer(exerciseId)}
-  onOpenRepRange={() => handleRepsTypeSelect("rep range")}
+   
+                onOpenRestTimer={openRestTimer}
+      onOpenWeight={openWeightSheet}
+      onOpenRepsType={openRepsSheet}
+      onOpenSetType={(exerciseId, setIndex) => {
+        if (setIndex === undefined) return; // or handle default
+        openSetTypeSheet(exerciseId, setIndex);
+      }}
+      onOpenRepRange={() => {}}
    onToggleSetComplete={(exerciseId: string, setIndex: number, justCompleted: boolean) => handleToggleSetComplete(exerciseId, setIndex, justCompleted)} 
 
       />
@@ -506,20 +622,29 @@ useFocusEffect(
               </HStack>
             </Button>
           
-            <Button
-                 flex={1}
-                       bg="#1F1F1F"
-              size="md"
-              borderRadius="$lg" // adds sufficient rounding
-              justifyContent="flex-start" // aligns content to the left
-              px="$4"
-              py="$1.5"
-              onPress={confirmDiscard}
-            >
-              <HStack alignItems="center" space="sm">
-                <Text color="$red">Discard Workout</Text>
-              </HStack>
-            </Button>
+           <Button
+  flex={1}
+  bg="#1F1F1F"
+  size="md"
+  borderRadius="$lg"
+  justifyContent="flex-start"
+  px="$4"
+  py="$1.5"
+  onPress={() =>
+    showDialog({
+      message: "Are you sure you want to discard this workout?",
+      confirmText: "Discard",
+      cancelText: "Cancel",
+      destructive: true,
+      onConfirm: discardRoutineAndReset,
+    })
+  }
+>
+  <HStack alignItems="center" space="sm">
+    <Text color="$red">Discard Workout</Text>
+  </HStack>
+</Button>
+
           </HStack>
 
           
@@ -562,19 +687,29 @@ useFocusEffect(
   return null;
 })}
 
-  
- <RestTimerSheet
-  ref={restSheetRef}
-  onSelectDuration={handleRestDurationSelect}
-/>
-<WeightSheet
-  ref={weightSheetRef}
-  onSelectWeight={handleWeightSelect}
-/>
-<RepsTypeSheet
-  ref={repsSheetRef}
-  onSelectRepsType={handleRepsTypeSelect}
-/>
+<RestTimerSheet
+        ref={restSheetRef}
+        onSelectDuration={handleRestDurationSelect}
+      />
+      <WeightSheet
+        ref={weightSheetRef}
+        onSelectWeight={handleWeightSelect}
+      />
+      <RepsTypeSheet
+        ref={repsSheetRef}
+        onSelectRepsType={handleRepsTypeSelect}
+      />
+       <SetTypeModal
+        ref={setTypeSheetRef}
+        selectedType={
+          exerciseData[activeExerciseId ?? ""]?.sets?.[activeSetIndex ?? 0]?.setType || "Normal"
+        }
+          onSelect={(type:any) => {
+          handleSetTypeSelect(type, activeExerciseId!, activeSetIndex!); // explicitly pass IDs
+          setTypeSheetRef.current?.close();
+        }}
+        />
+        <ConfirmDialogComponent />
     </Box>
   );
 }

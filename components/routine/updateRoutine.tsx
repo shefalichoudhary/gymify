@@ -59,6 +59,9 @@ await db.delete(routineSets)
   reps: set.reps ?? 0,
   minReps: set.minReps ?? 0,
   maxReps: set.maxReps ?? 0,
+  duration: set.duration ?? 0,
+      setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
+
       });
     }
   }

@@ -1,8 +1,8 @@
-import React from "react";
-import { FlatList, Box, Text } from "@gluestack-ui/themed";
+import React, { useRef, useState } from "react";
+import { Box, Text } from "@gluestack-ui/themed";
 import { Pressable } from "../ui/pressable";
+import { FlatList, ListRenderItem } from "react-native";
 import { Exercise } from "@/db/schema";
-import { ListRenderItem } from "react-native";
 
 interface Props {
   data: Exercise[];
@@ -11,79 +11,129 @@ interface Props {
 }
 
 export default function ExerciseList({ data, selectedIds, toggleSelect }: Props) {
-  const renderItem: ListRenderItem<Exercise> = ({ item }) => {
-    const isSelected = selectedIds.includes(item.id);
+  const flatListRef = useRef<FlatList>(null);
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+
+  // Group exercises by first letter
+  const grouped: Record<string, Exercise[]> = {};
+  data.forEach((ex) => {
+    const letter = ex.exercise_name[0].toUpperCase();
+    if (!grouped[letter]) grouped[letter] = [];
+    grouped[letter].push(ex);
+  });
+
+  const letters = Object.keys(grouped).sort();
+
+  // Flatten grouped for FlatList
+  const flatData: { letter?: string; item?: Exercise }[] = [];
+  letters.forEach((letter) => {
+    flatData.push({ letter });
+    grouped[letter].forEach((ex) => flatData.push({ item: ex }));
+  });
+
+  const renderItem: ListRenderItem<typeof flatData[0]> = ({ item }) => {
+    if (item.letter) {
+      return (
+        <Box px="$2" py="$1" bg="$gray900">
+          <Text color="$coolGray400" fontSize="$lg" fontWeight="$bold">
+            {item.letter}
+          </Text>
+        </Box>
+      );
+    }
+
+    if (!item.item) return null;
+
+    const exercise = item.item;
+    const isSelected = selectedIds.includes(exercise.id);
 
     return (
-      <Pressable onPress={() => toggleSelect(item.id)}>
-        {/* Outer container with fixed border and blue bar */}
+      <Box
+        flexDirection="row"
+        alignItems="center"
+        py="$1.5"
+        px="$4"
+        mb="$2"
+        borderRadius="$md"
+        borderLeftWidth={isSelected ? 4 : 0}
+        borderLeftColor="$blue500"
+        {...(isSelected && { elevation: 3 })}
+      >
         <Box
-          flexDirection="row"
+          w={50}
+          h={50}
+          borderRadius={25}
+          bg="$coolGray600"
+          mr="$3"
+          justifyContent="center"
           alignItems="center"
-          py="$2"
-          bg={isSelected ? "$gray800" : "transparent"}
-          borderBottomWidth={0.6}
-          borderBottomColor="#1F1F1F"
-        >
-          {/* Static left blue bar */}
-          <Box
-            w={5}
-            h={56}
-            bg={isSelected ? "$blue500" : "transparent"}
-             borderRadius={40}
-            ml={isSelected ? "$2" : "$0"}
-          />
-
-          {/* Shifting content container (Icon + Text) */}
-          <Box flexDirection="row" alignItems="center" ml={isSelected ? "$3" : "$0"}>
-            {/* Icon */}
-            <Box
-            w={56} // increased from 42
-           h={56}
-           borderRadius={30}
-              bg="$coolGray600"
-              mr="$4"
-              justifyContent="center"
-              alignItems="center"
-            >
-              {/* Optional icon/initials */}
-            </Box>
-
-            {/* Text */}
-            <Box>
-              <Text color="$white" fontSize="$md" fontWeight="$medium">
-                {item.exercise_name}
-              </Text>
-              <Text color="$coolGray400" fontSize="$sm">
-                {item.exercise_type}
-              </Text>
-            </Box>
+        />
+        <Pressable onPress={() => toggleSelect(exercise.id)}>
+          <Box flex={1}>
+            <Text color="$white" fontSize="$md" fontWeight="$medium">
+              {exercise.exercise_name}
+            </Text>
+            <Text color="$coolGray400" fontSize="$sm">
+              {exercise.exercise_type}
+            </Text>
           </Box>
-        </Box>
-      </Pressable>
+        </Pressable>
+      </Box>
     );
   };
 
+  // Scroll to letter and set active
+  const handleLetterPress = (letter: string) => {
+    setActiveLetter(letter); // highlight pressed letter
+    const index = flatData.findIndex((i) => i.letter === letter);
+    if (index !== -1 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index, animated: true });
+    }
+  };
+
   return (
-    <Box flex={1} px="$1">
-      <Text color="$coolGray400" py="$4" px="$4" fontSize="$md" letterSpacing={0.5}>
+    <Box flex={1} px="$2">
+      <Text color="$coolGray400" py="$4" px="$2" fontSize="$md" letterSpacing={0.5}>
         All Exercises
       </Text>
 
-      {data.length === 0 ? (
-        <Box flex={1} alignItems="center" px="$4" py="$12">
-          <Text color="#cccccc" fontSize="$lg">
-            No exercises found.
-          </Text>
-        </Box>
-      ) : (
+      <Box flex={1} position="relative">
         <FlatList
-          data={data}
-          keyExtractor={(item: any) => item.id}
-          contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 10 }}
-          renderItem={renderItem as ListRenderItem<unknown>}
+          ref={flatListRef}
+          data={flatData}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderItem as any}
+          contentContainerStyle={{ paddingBottom: 64 }}
+          style={{ flex: 1 }}
         />
-      )}
+
+        {/* Alphabet sidebar */}
+        <Box
+          position="absolute"
+          right={0}
+          top={10}
+          bottom={0}
+          justifyContent="center"
+          alignItems="center"
+          pr="$1"
+        >
+          {letters.map((letter) => (
+            <Pressable
+              key={letter}
+              onPress={() => handleLetterPress(letter)}
+              style={{ paddingVertical: 4, paddingHorizontal: 4 }}
+            >
+              <Text
+                color={activeLetter === letter ? "$blue500" : "$white"}
+                fontSize="$xs"
+                fontWeight={activeLetter === letter ? "bold" : "normal"}
+              >
+                {letter}
+              </Text>
+            </Pressable>
+          ))}
+        </Box>
+      </Box>
     </Box>
   );
 }

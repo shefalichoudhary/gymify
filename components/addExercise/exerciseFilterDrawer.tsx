@@ -14,6 +14,8 @@ import {
   FlatList,
   Box,ScrollView
 } from "@gluestack-ui/themed";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+
 import CustomBottomSheet from "@/components/routine/bottomSheet/customBottomSheet";
 import { db } from "@/db/db";
 import { exercises, muscles, Muscle, exerciseMuscles } from "@/db/schema";
@@ -82,7 +84,10 @@ const ExerciseFilterDrawer = forwardRef<ExerciseFilterDrawerRef, Props>(
     </Box>
 
     {/* Scrollable filter content */}
-    <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+  <BottomSheetScrollView
+          contentContainerStyle={{ padding: 1, paddingBottom: 10 }}
+          showsVerticalScrollIndicator={false}
+        >
       {activeTab === "equipment" &&
         equipmentList.map((item) => {
           const isSelected = selectedEquipment === item;
@@ -124,7 +129,7 @@ const ExerciseFilterDrawer = forwardRef<ExerciseFilterDrawerRef, Props>(
           );
         })}
 
-</ScrollView>
+</BottomSheetScrollView>
   </VStack>
 </CustomBottomSheet>
 

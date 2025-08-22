@@ -1,0 +1,1 @@
+ALTER TABLE `routine_sets` ADD `set_type` text DEFAULT 'Normal' NOT NULL;

@@ -24,6 +24,9 @@ import m0019 from './0019_hard_shaman.sql';
 import m0020 from './0020_wild_outlaw_kid.sql';
 import m0021 from './0021_sturdy_slayback.sql';
 import m0022 from './0022_warm_groot.sql';
+import m0023 from './0023_lumpy_ghost_rider.sql';
+import m0024 from './0024_long_gorgon.sql';
+import m0025 from './0025_burly_gravity.sql';
 
   export default {
     journal,
@@ -50,7 +53,10 @@ m0018,
 m0019,
 m0020,
 m0021,
-m0022
+m0022,
+m0023,
+m0024,
+m0025
     }
   }
   

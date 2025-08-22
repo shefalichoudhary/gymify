@@ -162,6 +162,27 @@
       "when": 1754464316276,
       "tag": "0022_warm_groot",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "6",
+      "when": 1755254057189,
+      "tag": "0023_lumpy_ghost_rider",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1755347851355,
+      "tag": "0024_long_gorgon",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "6",
+      "when": 1755353812722,
+      "tag": "0025_burly_gravity",
+      "breakpoints": true
     }
   ]
 }

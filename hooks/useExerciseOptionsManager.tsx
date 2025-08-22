@@ -2,9 +2,13 @@ import { useRef, useState } from "react";
 import { RestTimerSheetRef } from "@/components/routine/bottomSheet/timer";
 import { WeightSheetRef } from "@/components/routine/bottomSheet/weight";
 import { RepsTypeSheetRef } from "@/components/routine/bottomSheet/repsType";
+import { SetTypeSheetRef } from "@/components/routine/bottomSheet/set";
+
 
 export function useExerciseOptionsManager() {
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
+  const [activeSetIndex, setActiveSetIndex] = useState<number | null>(null);
+
   const [exerciseData, setExerciseData] = useState<Record<
     string,
     
@@ -18,6 +22,7 @@ export function useExerciseOptionsManager() {
         reps?: number;
         minReps?: number;
         maxReps?: number;
+              setType?: "W" | "Normal" | "D" | "F";
       }[];
     }
   >>({});
@@ -25,6 +30,9 @@ export function useExerciseOptionsManager() {
   const restSheetRef = useRef<RestTimerSheetRef>(null);
   const weightSheetRef = useRef<WeightSheetRef>(null);
   const repsSheetRef = useRef<RepsTypeSheetRef>(null);
+const setTypeSheetRef = useRef<SetTypeSheetRef>(null);
+
+  
 
   const openRestTimer = (id: string) => {
     setActiveExerciseId(id);
@@ -40,6 +48,30 @@ export function useExerciseOptionsManager() {
     setActiveExerciseId(id);
     repsSheetRef.current?.open();
   };
+const openSetTypeSheet = (exerciseId: string, setIndex: number) => {
+  setExerciseData((prev) => {
+    const updated = { ...prev };
+    if (!updated[exerciseId]) {
+      // initialize if missing
+      updated[exerciseId] = {
+        notes: "",
+        restTimer: 0,
+        unit: "kg",
+        repsType: "reps",
+        sets: [{ weight: undefined, reps: undefined, setType: "Normal" }],
+      };
+    } else if (!updated[exerciseId].sets[setIndex]) {
+      // initialize set if missing
+      updated[exerciseId].sets[setIndex] = { weight: undefined, reps: undefined, setType: "Normal" };
+    }
+    return updated;
+  });
+
+  setActiveExerciseId(exerciseId);
+  setActiveSetIndex(setIndex);
+  setTypeSheetRef.current?.open();
+};
+
 
   const updateRestDuration = (duration: number) => {
     if (!activeExerciseId) return;
@@ -75,7 +107,38 @@ export function useExerciseOptionsManager() {
   };
 
 
+
+const updateSetType = (
+ 
+
+  type: "W" | "Normal" | "D" | "F" | "REMOVE",
+  exerciseId?: string,
+  setIndex?: number
+) => {
+  const exId = exerciseId ?? activeExerciseId;
+  const idx = setIndex ?? activeSetIndex;
+  if (!exId || idx === null) return;
+
+  setExerciseData((prev) => {
+    const updated = { ...prev };
+    const sets = [...updated[exId].sets];
+
+    if (type === "REMOVE") {
+      // 🗑 remove the set
+      sets.splice(idx, 1);
+    } else {
+      // ✅ update set type
+      sets[idx] = { ...sets[idx], setType: type };
+    }
+
+    updated[exId].sets = sets;
+    return updated;
+  });
+};
+
+
   return {
+    activeSetIndex,setActiveSetIndex,
     activeExerciseId,
     setActiveExerciseId,
     exerciseData,
@@ -83,11 +146,14 @@ export function useExerciseOptionsManager() {
     restSheetRef,
     weightSheetRef,
     repsSheetRef,
+    setTypeSheetRef,
     openRestTimer,
     openWeightSheet,
     openRepsSheet,
     updateRestDuration,
     updateWeightUnit,
     updateRepsType,
+ openSetTypeSheet,   // ✅
+  updateSetType,   
   };
 }

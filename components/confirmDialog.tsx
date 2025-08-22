@@ -1,58 +1,109 @@
-// components/ConfirmDialog.tsx
-
 import React from "react";
-import { Modal, Pressable } from "react-native";
-import {
-  Box,
-  Text,
-  VStack,
-  HStack,
-  Button,
-} from "@gluestack-ui/themed";
+import { Button, Text, HStack, VStack, Box } from "@gluestack-ui/themed";
+import { AlertDialog } from "@gluestack-ui/themed";
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 
 type ConfirmDialogProps = {
   visible: boolean;
-  title: string;
   message: string;
   confirmText?: string;
   cancelText?: string;
+  destructive?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
-  destructive?: boolean;
 };
 
 export default function ConfirmDialog({
   visible,
-  title,
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
+  destructive = false,
   onConfirm,
   onCancel,
-  destructive = false,
 }: ConfirmDialogProps) {
   return (
-    <Modal transparent visible={visible} animationType="fade">
-      <Box flex={1} justifyContent="center" alignItems="center" bg="rgba(0,0,0,0.6)">
-        <Box bg="$coolGray800" p="$6" rounded="2xl" width="85%">
-          <VStack space="md">
-            <Text fontSize="$lg" fontWeight="$bold" color="white">{title}</Text>
-            <Text color="$coolGray300">{message}</Text>
+    <AlertDialog isOpen={visible} onClose={onCancel}>
+      {/* 🔹 Blurred backdrop */}
+      <AlertDialog.Backdrop>
+        <BlurView intensity={90} tint="dark" style={{ flex: 1 }} />
+      </AlertDialog.Backdrop>
 
-            <HStack justifyContent="flex-end" space="sm" mt="$4">
-              <Button variant="link" onPress={onCancel}>
-                <Text color="$coolGray300">{cancelText}</Text>
-              </Button>
-              <Button
-                bg={destructive ? "$red600" : "$blue600"}
-                onPress={onConfirm}
-              >
-                <Text color="white">{confirmText}</Text>
-              </Button>
-            </HStack>
-          </VStack>
+      {/* 🔹 Dialog content */}
+      <AlertDialog.Content
+        bg="rgba(28,28,30,0.95)" // frosted glass look
+        borderWidth={0}
+        rounded="3xl"
+        px="$6"
+        py="$6"
+        w="75%"
+        alignSelf="center"
+        shadowColor="$black"
+        shadowOffset={{ width: 0, height: 6 }}
+        shadowOpacity={0.35}
+        shadowRadius={12}
+        elevation={8}
+      >
+        {/* 🔹 Icon */}
+        <Box alignItems="center">
+          <Ionicons
+            name={destructive ? "warning-outline" : "information-circle-outline"}
+            size={36}
+            color={destructive ? "#F87171" : "#60A5FA"}
+          />
         </Box>
-      </Box>
-    </Modal>
+
+        {/* 🔹 Message */}
+        <AlertDialog.Body>
+          <Text fontSize="$md" color="$coolGray100" textAlign="center" lineHeight={22}>
+            {message}
+          </Text>
+        </AlertDialog.Body>
+
+        {/* 🔹 Buttons */}
+    <AlertDialog.Footer >
+  <HStack space="xs" justifyContent="center">
+    {/* Cancel */}
+    <Button
+      variant="outline"
+      rounded="2xl"
+      flex={1}           // equal width
+      onPress={onCancel}
+      bg="rgba(255,255,255,0.1)"
+      borderWidth={0}
+    >
+      <HStack space="xs" alignItems="center" justifyContent="center">
+        <Ionicons name="close" size={14} color="#D1D5DB" />
+        <Text color="$coolGray200" fontSize="$sm" fontWeight="medium">
+          {cancelText}
+        </Text>
+      </HStack>
+    </Button>
+
+    {/* Confirm */}
+    <Button
+      rounded="xl"
+      flex={1}           // equal width
+      onPress={onConfirm}
+      bg={destructive ? "$blue500" : "$black"}
+    >
+      <HStack space="xs" alignItems="center" justifyContent="center">
+        <Ionicons
+          name={destructive ? "trash-outline" : "checkmark"}
+          size={14}
+          color="white"
+        />
+        <Text color="white" fontSize="$sm" fontWeight="semibold">
+          {confirmText}
+        </Text>
+      </HStack>
+    </Button>
+  </HStack>
+</AlertDialog.Footer>
+
+
+      </AlertDialog.Content>
+    </AlertDialog>
   );
 }

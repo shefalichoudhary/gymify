@@ -1,11 +1,10 @@
-// components/routine/bottomSheet/restTimer.tsx
-
-import React, { forwardRef, useImperativeHandle, useRef, } from "react";
-import { Text, Button, VStack,Box } from "@gluestack-ui/themed";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { Text, Box, HStack, Pressable } from "@gluestack-ui/themed";
 import BottomSheet from "@gorhom/bottom-sheet";
 import CustomBottomSheet from "./customBottomSheet";
 import { useFocusEffect } from "@react-navigation/native";
-
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import * as Haptics from "expo-haptics";
 export type RestTimerSheetRef = {
   open: () => void;
   close: () => void;
@@ -18,54 +17,86 @@ type RestTimerSheetProps = {
 const RestTimerSheet = forwardRef<RestTimerSheetRef, RestTimerSheetProps>(
   ({ onSelectDuration }, ref) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const [selected, setSelected] = useState<number | null>(null);
 
     useImperativeHandle(ref, () => ({
-      open: () => {
-        bottomSheetRef.current?.snapToIndex(1);
-      },
-      close: () => {
-        bottomSheetRef.current?.close();
-      },
+      open: () => bottomSheetRef.current?.snapToIndex(1),
+      close: () => bottomSheetRef.current?.close(),
     }));
 
-     useFocusEffect(
-    React.useCallback(() => {
-      bottomSheetRef.current?.close();
-      return () => {
-        bottomSheetRef.current?.close(); // Just in case on blur
-      };
-    }, [])
-  );
+    useFocusEffect(
+      React.useCallback(() => {
+        bottomSheetRef.current?.close();
+        return () => {
+          bottomSheetRef.current?.close();
+        };
+      }, [])
+    );
+
+const options = [
+  { label: "Off", value: 0 },
+  { label: "10s", value: 10 },
+  { label: "30s", value: 30 },
+  { label: "45s", value: 45 },
+  { label: "1 min", value: 60 },
+  { label: "1.5 min", value: 90 },
+  { label: "2 min", value: 120 },
+];
 
     return (
-      <CustomBottomSheet ref={bottomSheetRef}  snapPoints={["20%","48%"]}>
-        <VStack space="md">
-         
-          <Box 
-                      borderBottomWidth={1}
-                      borderColor="$trueGray700"
-                      pb="$3"
-                      pt="$2"
-                      mb="$4"
-                    >
-                       <Text fontSize="$lg" fontWeight="$bold" textAlign="center" color="white">
-             Rest Timer
+      <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "30%"]}>
+        {/* Fixed Header */}
+        <Box
+          borderBottomWidth={1}
+          borderColor="$trueGray700"
+          pb="$3"
+          pt="$2"
+          mb="$4"
+        >
+          <Text
+            fontSize="$lg"
+            fontWeight="$bold"
+            textAlign="center"
+            color="white"
+          >
+            Rest Timer
           </Text>
-                    </Box>
-          {[5, 15,  30, 60, 90, 120].map((duration) => (
-            <Button
-              key={duration}
-              bg={ "#2a2a2a"}
+        </Box>
 
-              onPress={() => {
-                onSelectDuration(duration);
-                bottomSheetRef.current?.close();
-              }}
-            >
-              <Text color="white">{duration} seconds</Text>
-            </Button>
-          ))}
-        </VStack>
+        {/* Scrollable List */}
+        <BottomSheetScrollView
+          contentContainerStyle={{ padding: 12, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <HStack flexWrap="wrap" space="sm">
+            {options.map((opt) => {
+              const isActive = selected === opt.value;
+              return (
+                <Pressable
+                  key={opt.value}
+                  onPress={() => {
+                    
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+                    setSelected(opt.value);
+                    onSelectDuration(opt.value);
+                    bottomSheetRef.current?.close();
+                  }}
+                  bg={isActive ? "$primary600" : "#2a2a2a"}
+                  px="$4"
+                  py="$2"
+                  borderRadius="$full"
+                  borderWidth={1}
+                  borderColor={isActive ? "$primary600" : "$trueGray700"}
+                  m="$1"
+                >
+                  <Text color="white" fontWeight="$medium">
+                    {opt.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </HStack>
+        </BottomSheetScrollView>
       </CustomBottomSheet>
     );
   }

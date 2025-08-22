@@ -25,10 +25,11 @@ import { eq, inArray  } from "drizzle-orm";
 import { updateRoutineInDb } from "@/components/routine/updateRoutine"; 
 import { WorkoutSet as Set } from "@/types/workoutSet";
 import {  useLocalSearchParams } from "expo-router";
-import RestTimerSheet, { RestTimerSheetRef } from "@/components/routine/bottomSheet/timer";
-import RepsTypeSheet, { RepsTypeSheetRef } from "@/components/routine/bottomSheet/repsType";
-import WeightSheet, { WeightSheetRef } from "@/components/routine/bottomSheet/weight";
-
+import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
+  import SetTypeModal from "@/components/routine/bottomSheet/set";
+    import RestTimerSheet  from "@/components/routine/bottomSheet/timer";
+    import RepsTypeSheet from "@/components/routine/bottomSheet/repsType";
+    import WeightSheet from "@/components/routine/bottomSheet/weight";
 
 type ExerciseUpdateData = {
   notes: string;
@@ -48,7 +49,19 @@ const isDuplicate = duplicate === "true";
 
 const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   const router = useRouter();
-
+const {
+   activeExerciseId,
+      activeSetIndex,
+      restSheetRef,
+      weightSheetRef,
+      repsSheetRef,
+      setTypeSheetRef,
+      openRestTimer,
+      openWeightSheet,
+      openRepsSheet,
+      openSetTypeSheet,
+      
+} = useExerciseOptionsManager();
   const [routineTitle, setRoutineTitle] = useState("Loading...");
   const [exerciseData, setExerciseData] = useState<Record<string, ExerciseUpdateData>>({});
   const [exerciseMeta, setExerciseMeta] = useState<Record<string, {
@@ -59,10 +72,32 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
     type: string;
   }>>({});
 
-  const restSheetRef = useRef<RestTimerSheetRef>(null);
-const weightSheetRef = useRef<WeightSheetRef>(null);
-const repsSheetRef = useRef<RepsTypeSheetRef>(null);
-const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
+const handleSetTypeSelect = (
+  type: "W" | "Normal" | "D" | "F" | "REMOVE",
+  exerciseId?: string,
+  setIndex?: number
+) => {
+  const exId = exerciseId ?? activeExerciseId;
+  const idx = setIndex ?? activeSetIndex;
+  if (!exId || idx === null) return;
+
+  setExerciseData((prev) => {
+    const updated = { ...prev };
+    const sets = [...updated[exId].sets];
+
+    if (type === "REMOVE") {
+      // 🗑 remove the set
+      sets.splice(idx, 1);
+    } else {
+      // ✅ update set type
+      sets[idx] = { ...sets[idx], setType: type };
+    }
+
+    updated[exId].sets = sets;
+    return updated;
+  });
+};
+
 
 const handleRestDurationSelect = (duration: number) => {
   if (!activeExerciseId) return;
@@ -72,7 +107,7 @@ const handleRestDurationSelect = (duration: number) => {
     const exercise = updated[activeExerciseId];
 
     if (exercise) {
-      exercise.restTimer = true;
+      exercise.restTimer = duration;
       exercise.restTimeInSeconds = duration;
     }
 
@@ -99,11 +134,6 @@ const handleRepsTypeSelect = (type: "reps" | "rep range") => {
     },
   }));
 };
-const openRestTimer = (exerciseId: string) => {
-  setActiveExerciseId(exerciseId);
-  restSheetRef.current?.open();
-};
-
 
 
 useEffect(() => {
@@ -188,6 +218,8 @@ useEffect(() => {
       reps: s.reps ?? 0, // ✅ ensure number
       minReps: s.minReps ?? undefined,
       maxReps: s.maxReps ?? undefined,
+        setType: s.setType ?? "Normal",
+        duration: s.duration ?? 0,
     }));
 
 
@@ -212,10 +244,10 @@ useEffect(() => {
   }, [routineId]);
  
 const handleSave = async () => {
-  console.log("🟡 handleSave called");
   try {
     await updateRoutineInDb(routineId, routineTitle, exerciseData);
-    console.log("✅ Routine updated");
+    console.log("Saving sets:", JSON.stringify(exerciseData
+      , null, 2));
     router.back();
   } catch (err) {
     console.error("❌ Failed to update routine:", err);
@@ -277,18 +309,16 @@ const handleSave = async () => {
   
 }}
             onChange={(newData) => handleExerciseChange(id, newData)}
-             onOpenRepsType={(exerciseId) => {
-  setActiveExerciseId(exerciseId);
-  repsSheetRef.current?.open();
-}}
-                 onOpenWeight={(exerciseId) => {
-  setActiveExerciseId(exerciseId);
-  weightSheetRef.current?.open();
-}}
+              onOpenRestTimer={openRestTimer}
+       onOpenWeight={openWeightSheet}
+      onOpenRepsType={openRepsSheet}
+      onOpenSetType={(exerciseId, setIndex) => {
+        if (setIndex === undefined) return; // or handle default
+        openSetTypeSheet(exerciseId, setIndex);
+      }}
+  onOpenRepRange={() =>{}}
   onToggleSetComplete={()=>{}}
 
-    onOpenRestTimer={(exerciseId) => openRestTimer(exerciseId)}
-  onOpenRepRange={() => handleRepsTypeSelect("rep range")}
 
                 />
               
@@ -325,6 +355,16 @@ const handleSave = async () => {
         ref={repsSheetRef}
         onSelectRepsType={handleRepsTypeSelect}
       />
+      <SetTypeModal
+        ref={setTypeSheetRef}
+        selectedType={
+          exerciseData[activeExerciseId ?? ""]?.sets?.[activeSetIndex ?? 0]?.setType || "Normal"
+        }
+          onSelect={(type:any) => {
+          handleSetTypeSelect(type, activeExerciseId!, activeSetIndex!); // explicitly pass IDs
+          setTypeSheetRef.current?.close();
+        }}
+        />
     </Box>
   );
 }
