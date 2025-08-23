@@ -38,26 +38,20 @@ export default function RootLayout() {
   useDrizzleStudio(expo_sqlite);
   console.log("DB Initialized:", db);
 
-  useEffect(() => {
-    if (migrationError) {
-      console.error("Migration error:", migrationError);
-    } else if (success) {
-      console.log("Migration Success:", success);
-      setIsReady(true);
-    SplashScreen.preventAutoHideAsync().catch(() => {});
-    SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [success, migrationError]);
+useEffect(() => {
+  if (migrationError) {
+    console.error("Migration error:", migrationError);
+  } else if (success) {
+    console.log("Migration Success:", success);
+    setIsReady(true);
 
-  if (!isReady || migrationError) {
-    return (
-      <Suspense >
-        <Text>
-          {migrationError ? "Error initializing database" : "Loading..."}
-        </Text>
-      </Suspense>
-    );
+    SplashScreen.hideAsync().catch(() => {}); // hide only after DB and app ready
   }
+}, [success, migrationError]);  
+
+if (!isReady || migrationError) {
+  return null; // keep splash visible
+}
 
   return (
     <Suspense >
