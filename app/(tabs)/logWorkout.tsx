@@ -10,27 +10,41 @@ import ExerciseBlock from "@/components/routine/exerciseBlock";
 import { useFocusEffect } from "@react-navigation/native";
 import { BackHandler, Alert } from "react-native";
 import { db } from "@/db/db";
-import { workouts, exercises, routineExercises } from "@/db/schema";
+import { workouts, exercises, routineExercises,workoutExercises,workoutSets,routineSets,routines, } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import RestTimerSheet from "@/components/routine/bottomSheet/timer";
 import WeightSheet from "@/components/routine/bottomSheet/weight";
 import RepsTypeSheet from "@/components/routine/bottomSheet/repsType";
 import SetTypeModal from "@/components/routine/bottomSheet/set";
-import ConfirmDialogComponent from "@/components/confirmDialog";
 import * as Haptics from "expo-haptics";
 import RestCountdownTimer from "@/components/routine/restCountdownTimer";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
 import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { updateRoutineInDb } from "../../components/routine/updateRoutine";
+import cuid from "cuid";
+
 type SetItem = {
-  weight: number;
-  reps: number;
+  weight?: number;
+  reps?: number | null;
   minReps?: number;
   maxReps?: number;
   isRangeReps?: boolean;
-  duration?: number;
+
+  // Previous values for prefill
+  previousWeight?: number;
+  previousReps?: number;
+  previousMinReps?: number;
+  previousMaxReps?: number;
+  previousUnit?: "kg" | "lbs";
+  previousRepsType?: "reps" | "rep range";
+  previousDuration?: number;
+
+  // Set metadata
   isCompleted?: boolean;
-   setType?: "W" | "Normal" | "D" | "F"; 
+  setType?: "W" | "Normal" | "D" | "F" | string;
+  unit?: "kg" | "lbs";
+  repsType?: "reps" | "rep range";
+    duration?: number;
 
 };
 type ExerciseEntry = {
@@ -73,7 +87,6 @@ const {
 } = useExerciseOptionsManager();
 const [loading, setLoading] = useState(true);
       const { showDialog, ConfirmDialogComponent } = useConfirmDialog();
-
   const [duration, setDuration] = useState(0);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
@@ -384,58 +397,77 @@ try {
 }, [addedExerciseIds]);
 
 
+function getRoutineId(id: string | string[] | undefined): string | undefined {
+  if (!id) return undefined;
+  return Array.isArray(id) ? id[0] : id;
+}
 
-  // const handleFinish = async () => {
-  //   const { volume, sets } = calculateWorkoutStats(exerciseData);
-  //   if (sets === 0) {
-  //     return Alert.alert("No Completed Sets", "Please complete at least one set.");
-  //   }
-
-  //     showDialog({
-  //   message: "Do you want to add new exercises to this routine?",
-  //   confirmText: "Yes",
-  //   cancelText: "No",
-  //   destructive: false,
-  //   onConfirm: async () => {
-  //     await saveWorkout(true); // save + update routine
-  //   },
-  //   onCancel: async () => {
-  //     await saveWorkout(false); // save only workout
-  //   },
-  // });
-  //   try {
-  //     const [workout] = await db.insert(workouts).values({
-  //       date: new Date().toISOString(),
-  //       duration,
-  //       volume,
-  //       sets,
-  //       routineId: String(routineId),
-  //       title: String(routineTitle),
-  //     }).returning();
-
-  //     setIsWorkoutActive(false);
-  //     router.push({
-  //       pathname: "/saveWorkout",
-  //       params: { id: workout.id, routineId },
-  //     });
-  //   } catch (err) {
-  //     Alert.alert("Save Failed", "Could not save workout.");
-  //   }
-  // };
 const saveWorkout = async (updateRoutine: boolean) => {
   const { volume, sets } = calculateWorkoutStats(exerciseData);
 
+  let titleToUse = "Workout";
+
+if (routineId) {
+  try {
+    const routine = await db
+      .select({ title: routines.name })
+      .from(routines)
+      .where(eq(routines.id, String(routineId)))
+      .get();
+
+    if (routine?.title) titleToUse = routine.title;
+  } catch (err) {
+    console.warn("Could not fetch routine title:", err);
+  }
+} else if (routineTitle) {
+  titleToUse = String(routineTitle);
+}
+
   try {
     // Insert workout
-    const [workout] = await db.insert(workouts).values({
-      date: new Date().toISOString(),
-      duration,
-      volume,
-      sets,
-      routineId: String(routineId),
-      title: String(routineTitle),
-    }).returning();
+   const normalizedRoutineId = getRoutineId(routineId);
 
+const [workout] = await db.insert(workouts).values({
+  routineId: normalizedRoutineId, // string or undefined
+  date: new Date().toISOString(), // string
+  title: titleToUse ? titleToUse : "Workout", // string
+  duration: Number(duration), // number
+  volume: Number(volume),
+      sets: Number(sets), // number
+}).returning();
+
+   for (const [exerciseId, exData] of Object.entries(exerciseData)) {
+        const workoutExerciseId = cuid();
+        await db.insert(workoutExercises).values({
+          id: workoutExerciseId,
+          workoutId: workout.id,
+          exerciseId,
+          notes: exData.notes,
+          unit: exData.unit,
+          repsType: exData.repsType,
+          restTimer: exData.restTimer,
+        });
+ for (const set of exData.sets) {
+          await db.insert(workoutSets).values({
+            id: cuid(),
+            workoutId: workout.id,
+            exerciseId,
+            weight: set.weight ?? 0,
+            reps: set.reps ?? 0,
+            minReps: set.minReps ?? 0,
+            maxReps: set.maxReps ?? 0,
+            duration: set.duration ?? 0,
+      setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
+    previousWeight: set.previousWeight ?? null,
+    previousReps: set.previousReps ?? null,
+    previousMinReps: set.previousMinReps ?? null,
+    previousMaxReps: set.previousMaxReps ?? null,
+    previousUnit: set.previousUnit ?? null,
+    previousRepsType: set.previousRepsType ?? null,
+    previousDuration: set.previousDuration ?? null,
+          });
+        }
+      }
     // Optionally update routine with latest exercise data
     if (updateRoutine) {
       await updateRoutineInDb(String(routineId), String(routineTitle), exerciseData);
@@ -453,32 +485,32 @@ const saveWorkout = async (updateRoutine: boolean) => {
   }
 };
 
- const handleFinish =  () => {
+const handleFinish = () => {
   const { sets } = calculateWorkoutStats(exerciseData);
-  if (sets === 0) {
-    return Alert.alert("No Completed Sets", "Please complete at least one set.");
-  }
- Alert.alert(
-    "Finish Workout",
-    "Do you want to add new exercises to this routine?",
-    [
-      {
-        text: "Yes",
-        onPress: async () => {
-          await saveWorkout(true); // ✅ save + update routine
-        },
-      },
-      {
-        text: "No",
-        onPress: async () => {
-          await saveWorkout(false); // ✅ save workout only
-        },
-        style: "cancel",
-      },
-    ]
-  );
-};
 
+  // Case: no completed sets
+  if (sets === 0) {
+    return showDialog({
+      message: "No Completed Sets. Please complete at least one set.",
+      confirmText: "OK",
+      destructive: false,
+    });
+  }
+
+  // Case: completed sets exist
+  showDialog({
+    message: "Do you want to add new exercises to this routine?",
+    confirmText: "Yes",
+    cancelText: "No",
+    destructive: false,
+    onConfirm: async () => {
+      await saveWorkout(true);
+    },
+    onCancel: async () => {
+      await saveWorkout(false);
+    },
+  });
+};
 
 
 const discardRoutineAndReset = () => {
@@ -522,10 +554,7 @@ useFocusEffect(
           onPress={() => { router.replace("/workout")}}
       
         right="Finish"
-        onRightButtonPress={
-     handleFinish // runs only if confirmed
-    
-  }
+       onRightButtonPress={handleFinish}
       />
 
       {/* Stats */}
@@ -686,7 +715,6 @@ useFocusEffect(
 
   return null;
 })}
-
 <RestTimerSheet
         ref={restSheetRef}
         onSelectDuration={handleRestDurationSelect}
@@ -709,7 +737,8 @@ useFocusEffect(
           setTypeSheetRef.current?.close();
         }}
         />
-        <ConfirmDialogComponent />
+        <ConfirmDialogComponent 
+        />
     </Box>
   );
 }
@@ -721,8 +750,16 @@ const calculateWorkoutStats = (exerciseData: ExerciseData) => {
   Object.values(exerciseData).forEach((ex) => {
     ex.sets.forEach((s: SetItem) => {
       if (s.isCompleted) {
-        const reps = s.reps ?? ((s.minReps || 0) + (s.maxReps || 0)) / 2;
-        totalVolume += s.weight * reps;
+        const weight = Number(s.weight) || 0;
+        let reps = 0;
+
+        if (s.reps != null) {
+          reps = Number(s.reps) || 0;
+        } else if (s.minReps != null || s.maxReps != null) {
+          reps = ((Number(s.minReps) || 0) + (Number(s.maxReps) || 0)) / 2;
+        }
+
+        totalVolume += weight * reps;
         totalSets += 1;
       }
     });
@@ -733,3 +770,4 @@ const calculateWorkoutStats = (exerciseData: ExerciseData) => {
     sets: totalSets,
   };
 };
+

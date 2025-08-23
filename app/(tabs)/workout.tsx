@@ -23,7 +23,6 @@ import { useRouter } from 'expo-router';
 import { eq, inArray } from "drizzle-orm";
 import WorkoutRoutineSheet,{WorkoutRoutineSheetRef} from '@/components/workout/bottomSheet/workoutRoutine';
 
-const sheetRef = useRef<WorkoutRoutineSheetRef>(null);
 
 type RoutineWithExercises = {
   id: string;
@@ -36,6 +35,7 @@ type RoutineWithExercises = {
 
 export default function WorkoutScreen() {
   const router = useRouter();
+const sheetRef = useRef<WorkoutRoutineSheetRef>(null);
 
 const [routineList, setRoutineList] = React.useState<RoutineWithExercises[]>([]);
 
@@ -138,7 +138,7 @@ useFocusEffect(
     <HStack alignItems="center" mb="$3" space="md">
       <AntDesign name="caretdown" size={12} color="#a1a1aa" />
       <Text color="$coolGray400" letterSpacing={0.5}>
-        My Routines ({routineList.reduce((count, routine) => count + routine.exercises.length, 0)})
+        My Routines ({routineList.length})
       </Text>
     </HStack>
   ) : (

@@ -19,14 +19,13 @@ export default function RestCountdownTimer({
   onDecrease,
 }: Props) {
   const progress = timeLeft / totalTime;
-
   const soundRef = useRef<Audio.Sound | null>(null);
-  const hasPlayedSoundRef = useRef(false);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const hasPlayedEndRef = useRef(false);
 
   // Unlock audio on first button press
   const unlockAudio = async () => {
-    if (audioUnlocked) return; // already unlocked
+    if (audioUnlocked) return;
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -35,9 +34,8 @@ export default function RestCountdownTimer({
         shouldDuckAndroid: true,
       });
 
-      // Play a silent sound to unlock
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/beep.mp3"), // short silent audio
+        require("../../assets/sounds/beep.mp3"),
         { shouldPlay: true }
       );
       await sound.playAsync();
@@ -50,52 +48,69 @@ export default function RestCountdownTimer({
     }
   };
 
-  // Load beep sound after unlock
- useEffect(() => {
-  let isMounted = true;
+  // Load beep sound
+  useEffect(() => {
+    let isMounted = true;
 
-  const loadBeep = async () => {
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/beep.mp3") // make sure this path is correct
-      );
-      if (isMounted) {
-        soundRef.current = sound;
-        console.log("✅ Beep sound loaded");
+    const loadBeep = async () => {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require("../../assets/sounds/beep.mp3")
+        );
+        if (isMounted) {
+          soundRef.current = sound;
+          console.log("✅ Beep sound loaded");
+        }
+      } catch (e) {
+        console.error("❌ Failed to load beep sound:", e);
       }
+    };
+
+    loadBeep();
+
+    return () => {
+      isMounted = false;
+      soundRef.current?.unloadAsync();
+    };
+  }, []);
+
+  // Play beep + haptic
+  const playBeep = async () => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.stopAsync(); // reset if already playing
+        await soundRef.current.playAsync();
+      }
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
-      console.error("❌ Failed to load beep sound:", e);
+      console.error("Failed to play beep:", e);
     }
   };
 
-  loadBeep();
-
-  return () => {
-    isMounted = false;
-    soundRef.current?.unloadAsync();
-  };
-}, []);
-
-
-  // Play sound + vibration when timer hits 0
+  // Play start beep
   useEffect(() => {
-    if (timeLeft === 0 && !hasPlayedSoundRef.current && audioUnlocked) {
-      hasPlayedSoundRef.current = true;
+    if (timeLeft === totalTime && audioUnlocked) {
+      playBeep();
+    }
+  }, [timeLeft, totalTime, audioUnlocked]);
 
-      (async () => {
-        try {
-          if (soundRef.current) {
-            await soundRef.current.replayAsync();
-          }
-          await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
-        } catch (e) {
-          console.error("Failed to play sound:", e);
-        }
-      })();
-    } else if (timeLeft > 0) {
-      hasPlayedSoundRef.current = false;
+  // Play end beep
+  useEffect(() => {
+    if (timeLeft <= 0 && !hasPlayedEndRef.current && audioUnlocked) {
+      hasPlayedEndRef.current = true;
+      playBeep();
+    }
+    if (timeLeft > 0) {
+      hasPlayedEndRef.current = false;
     }
   }, [timeLeft, audioUnlocked]);
+
+  // Skip handler
+  const handleSkip = () => {
+    unlockAudio();
+    playBeep(); // play end beep on skip
+    onSkip();
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -118,7 +133,13 @@ export default function RestCountdownTimer({
       zIndex={999}
     >
       <VStack space="md" width="100%" mb="$4">
-        <Progress value={progress * 100} size="xs" bg="#2a2a2a" width="100%" borderRadius={5}>
+        <Progress
+          value={progress * 100}
+          size="xs"
+          bg="#2a2a2a"
+          width="100%"
+          borderRadius={5}
+        >
           <Progress.FilledTrack bg="$blue600" />
         </Progress>
 
@@ -137,7 +158,14 @@ export default function RestCountdownTimer({
             <Text fontSize="$md" color="$white">-10s</Text>
           </Button>
 
-          <Text fontSize="$2xl" fontWeight="$bold" color="$white" letterSpacing={1.5} textAlign="center" minWidth={80}>
+          <Text
+            fontSize="$2xl"
+            fontWeight="$bold"
+            color="$white"
+            letterSpacing={1.5}
+            textAlign="center"
+            minWidth={80}
+          >
             {formatTime(timeLeft)}
           </Text>
 
@@ -161,10 +189,7 @@ export default function RestCountdownTimer({
             size="sm"
             px="$4"
             borderRadius="$xl"
-            onPress={() => {
-              unlockAudio();
-              onSkip();
-            }}
+            onPress={handleSkip}
             $hover={{ bg: "$blue400" }}
           >
             <Text fontSize="$md" color="$white" fontWeight="$medium">

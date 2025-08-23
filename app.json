@@ -7,29 +7,35 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "doctor": {
-      "reactNativeDirectoryCheck": {
-        "listUnknownPackages": false
-      }
-    },
+
+  
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shefali.gymify",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "splash": {
+    "backgroundColor": "#1F1F1F",
+    "image": "./assets/images/logo.png",
+    "resizeMode": "contain"
+  }
     },
     "android": {
-      
-      "package": "com.shefali_choudhary.gymify"
-    },
+      "package": "com.shefali_choudhary.gymify",
+      "splash" : null
+      },
+    
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "splash": {
+        "backgroundColor": "#1F1F1F",
+        "resizeMode": "contain"
+      }
     },
     "plugins": [
       "expo-router",
-     
       "expo-sqlite",
       "expo-font",
       "expo-web-browser"

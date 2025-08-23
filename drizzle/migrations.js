@@ -27,6 +27,10 @@ import m0022 from './0022_warm_groot.sql';
 import m0023 from './0023_lumpy_ghost_rider.sql';
 import m0024 from './0024_long_gorgon.sql';
 import m0025 from './0025_burly_gravity.sql';
+import m0026 from './0026_faithful_toad_men.sql';
+import m0027 from './0027_long_bloodscream.sql';
+import m0028 from './0028_messy_spitfire.sql';
+import m0029 from './0029_glorious_omega_flight.sql';
 
   export default {
     journal,
@@ -56,7 +60,11 @@ m0021,
 m0022,
 m0023,
 m0024,
-m0025
+m0025,
+m0026,
+m0027,
+m0028,
+m0029
     }
   }
   

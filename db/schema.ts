@@ -58,8 +58,7 @@ weight: integer("weight").notNull(),
 });
 export const workouts = sqliteTable("workouts", {
  id: text("id").primaryKey().$defaultFn(() => cuid()),
-
-  routineId: text("routine_id").references(() => routines.id), 
+    routineId: text("routineId"),
   date: text("date").notNull(),  
   title: text("title").notNull(),    
   duration: integer("duration").notNull(),
@@ -69,27 +68,30 @@ export const workouts = sqliteTable("workouts", {
 export const workoutExercises = sqliteTable("workout_exercises", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
   workoutId: text("workout_id").notNull().references(() => workouts.id),
-  exerciseId: text("exercise_id").notNull().references(() => exercises.id),
+  exerciseId: text("exercise_id").notNull(), // foreign key to your exercises table
   notes: text("notes"),
-  unit: text("unit").$type<"lbs" | "kg">().notNull().default("kg"),
+   unit: text("unit").$type<"lbs" | "kg">().notNull().default("kg"),
   repsType: text("reps_type").$type<"reps" | "rep range">().notNull().default("reps"),
+    restTimer: integer("rest_timer").default(0), 
+
 });
 export const workoutSets = sqliteTable("workout_sets", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
   workoutId: text("workout_id").notNull().references(() => workouts.id),
   exerciseId: text("exercise_id").notNull().references(() => exercises.id),
   weight: integer("weight").notNull(),
-  reps: integer("reps"),
   minReps: integer("min_reps"),
   maxReps: integer("max_reps"),
-  isRangeReps: integer("is_range_reps", { mode: "boolean" }).notNull().default(false),
    previousWeight: integer("previous_weight"),
+  previousDuration: integer("previous_duration"),
   previousReps: integer("previous_reps"),
   previousMinReps: integer("previous_min_reps"),
   previousMaxReps: integer("previous_max_reps"),
   previousUnit: text("previous_unit").$type<"lbs" | "kg">(),
   previousRepsType: text("previous_reps_type").$type<"reps" | "rep range">(),
+  reps: integer("reps").default(0),
     duration: integer("duration").default(0),
+    setType: text("set_type").$type<"W" | "Normal" | "D" | "F">().notNull().default("Normal"), 
 
 });
 export const userRoutineWorkout = sqliteTable("user_routine_workout", {
@@ -110,3 +112,4 @@ export type Routine = InferSelectModel<typeof routines>;
 export type RoutineExercise = InferSelectModel<typeof routineExercises>;
 export type RoutineSet = InferSelectModel<typeof routineSets>;
 export type Workout = InferSelectModel<typeof workouts>;
+export type WorkoutSet = InferSelectModel<typeof workoutSets>;

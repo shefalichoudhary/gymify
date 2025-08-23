@@ -16,7 +16,6 @@ const seedExercises = [
     type: "Compound",
     exercise_type: "Weighted",
     muscles: [
-      { name: "Upper Pectoralis Major", role: "Primary" },
       { name: "Anterior Deltoid", role: "Secondary" },
       { name: "Triceps Brachii", role: "Secondary" }
     ]
@@ -232,16 +231,7 @@ const seedExercises = [
       { name: "Rhomboids", role: "Secondary" }
     ]
   },
-  {
-    exercise_name: "Chest Fly",
-    equipment: "Machine",
-    type: "Isolation",
-    exercise_type: "Weighted",
-    muscles: [
-      { name: "Pectoralis Major", role: "Primary" },
-      { name: "Anterior Deltoid", role: "Secondary" }
-    ]
-  },
+
   {
     exercise_name: "Triceps Pushdown",
     equipment: "Cable",
@@ -278,6 +268,72 @@ const seedExercises = [
     muscles: [
       { name: "Biceps Brachii", role: "Primary" },
       { name: "Brachialis", role: "Secondary" }
+    ]
+  },
+    {
+    exercise_name: "Child's Pose",
+    equipment: "Bodyweight",
+    type: "Stretching",
+    exercise_type: "Yoga",
+    muscles: [
+      { name: "Erector Spinae", role: "Primary" },
+      { name: "Latissimus Dorsi", role: "Secondary" },
+      { name: "Gluteus Maximus", role: "Secondary" }
+    ]
+  },
+  {
+    exercise_name: "Downward Dog",
+    equipment: "Bodyweight",
+    type: "Stretching",
+    exercise_type: "Yoga",
+    muscles: [
+      { name: "Hamstrings", role: "Primary" },
+      { name: "Gastrocnemius", role: "Primary" },
+      { name: "Shoulders", role: "Secondary" }
+    ]
+  },
+  {
+    exercise_name: "Cobra Pose",
+    equipment: "Bodyweight",
+    type: "Stretching",
+    exercise_type: "Yoga",
+    muscles: [
+      { name: "Erector Spinae", role: "Primary" },
+      { name: "Abdominals", role: "Secondary" },
+      { name: "Chest", role: "Secondary" }
+    ]
+  },
+  {
+    exercise_name: "Standing Forward Bend",
+    equipment: "Bodyweight",
+    type: "Stretching",
+    exercise_type: "Yoga",
+    muscles: [
+      { name: "Hamstrings", role: "Primary" },
+      { name: "Calves", role: "Secondary" },
+      { name: "Lower Back", role: "Secondary" }
+    ]
+  },
+  {
+    exercise_name: "Seated Spinal Twist",
+    equipment: "Bodyweight",
+    type: "Stretching",
+    exercise_type: "Yoga",
+    muscles: [
+      { name: "Obliques", role: "Primary" },
+      { name: "Erector Spinae", role: "Secondary" },
+      { name: "Gluteus Maximus", role: "Secondary" }
+    ]
+  },
+  {
+    exercise_name: "Cat-Cow Stretch",
+    equipment: "Bodyweight",
+    type: "Stretching",
+    exercise_type: "Yoga",
+    muscles: [
+      { name: "Erector Spinae", role: "Primary" },
+      { name: "Abdominals", role: "Secondary" },
+      { name: "Neck", role: "Secondary" }
     ]
   }
 ];

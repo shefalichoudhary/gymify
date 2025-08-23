@@ -8,15 +8,13 @@ import {
 } from "@gluestack-ui/themed";
 import { db } from "@/db/db";
 import {
-  routines,
   exercises,
-  routineExercises,
-  routineSets,
+  workoutExercises,
+  workoutSets,
   workouts as workoutsTable,
 } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
-
 type Workout = {
   id: string;
   name: string;
@@ -26,129 +24,150 @@ type Workout = {
   exercises: {
     name: string;
     sets: number;
-    image?: any;
+    totalWeight: number;
   }[];
 };
 
+
 export default function Home() {
   const [workouts, setWorkouts] = useState<Workout[]>([]);
+useFocusEffect(
+  useCallback(() => {
+    const fetchWorkouts = async () => {
+      try {
+        const allWorkouts = await db.select().from(workoutsTable);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchWorkouts = async () => {
-        try {
-          const allRoutines = await db
+        const workoutsWithExercises: Workout[] = []; // ✅ Initialize array
+
+        for (const w of allWorkouts) {
+          const wExercises = await db
             .select()
-            .from(routines)
-            .orderBy(sql`${routines.createdAt} DESC`);
+            .from(workoutExercises)
+            .where(eq(workoutExercises.workoutId, w.id));
 
-          const workoutsWithExercises: Workout[] = [];
+          const exerciseList = [];
+          let totalVolume = 0;
 
-          for (const routine of allRoutines) {
-            const workoutMeta = await db
+          for (const we of wExercises) {
+            const ex = await db.select().from(exercises).where(eq(exercises.id, we.exerciseId));
+            const sets = await db
               .select()
-              .from(workoutsTable)
-              .where(eq(workoutsTable.routineId, routine.id));
+              .from(workoutSets)
+              .where(
+                and(
+                  eq(workoutSets.workoutId, w.id),
+                  eq(workoutSets.exerciseId, we.exerciseId)
+                )
+              );
 
-            const duration = workoutMeta[0]?.duration ?? 0;
+            const setsCount = sets.length;
+            const exerciseVolume = sets.reduce((sum, s) => sum + (s.weight ?? 0) * (s.reps ?? 1), 0);
+            totalVolume += exerciseVolume;
 
-            const routineExs = await db
-              .select()
-              .from(routineExercises)
-              .where(eq(routineExercises.routineId, routine.id));
-
-            let totalVolume = 0;
-            const exerciseList = [];
-
-            for (const rex of routineExs) {
-              const ex = await db
-                .select()
-                .from(exercises)
-                .where(eq(exercises.id, rex.exerciseId));
-
-              const sets = await db
-                .select()
-                .from(routineSets)
-                .where(
-                  and(
-                    eq(routineSets.routineId, routine.id),
-                    eq(routineSets.exerciseId, rex.exerciseId)
-                  )
-                );
-
-              const totalSets = sets.length;
-              const exerciseVolume = sets.reduce((sum, set) => sum + (set.weight ?? 0), 0);
-              totalVolume += exerciseVolume;
-
-              exerciseList.push({
-                name: ex[0]?.exercise_name || "Unknown Exercise",
-                sets: totalSets,
-              });
-            }
-
-            workoutsWithExercises.push({
-              id: routine.id,
-              name: routine.name,
-              createdAt: routine.createdAt
-                ? new Date(routine.createdAt).toLocaleDateString()
-                : "Unknown date",
-              totalVolume: `${totalVolume} kg`,
-              time: duration,
-              exercises: exerciseList,
+            exerciseList.push({
+              name: ex[0]?.exercise_name || "Unknown Exercise",
+              sets: setsCount,
+              totalWeight: exerciseVolume,
             });
           }
 
-          setWorkouts(workoutsWithExercises);
-        } catch (err) {
-          console.error("Error fetching workouts:", err);
+          workoutsWithExercises.push({
+            id: w.id,
+            name: w.title,
+            createdAt: w.date,
+            totalVolume: `${totalVolume} kg`,
+            time: w.duration,
+            exercises: exerciseList,
+          });
         }
-      };
 
-      fetchWorkouts();
-    }, [])
-  );
+        setWorkouts(workoutsWithExercises); // ✅ Update state
+      } catch (err) {
+        console.error("Error fetching workouts:", err);
+      }
+    };
 
-  return (
-    <Box flex={1} bg="#1F1F1F">
-      <ScrollView pt="$1" contentContainerStyle={{ flexGrow: 1 }}>
-        <VStack flex={1} bg="#1F1F1F" pb="$4" px="$4">
+    fetchWorkouts();
+  }, [])
+);
+return (
+   <Box flex={1} bg="#1F1F1F">
+      <ScrollView pt="$2" contentContainerStyle={{ flexGrow: 1 }}>
+        <VStack flex={1} pb="$4" px="$4" space="md">
           {workouts.length > 0 ? (
             workouts.map((workout) => (
-              <Box key={workout.id} bg="$black" p="$4" mb="$3" borderRadius="$lg">
-                <HStack justifyContent="space-between" alignItems="center" mb="$2">
+              <Box
+                key={workout.id}
+                bg="$gray800"
+                borderRadius="$xl"
+                p="$4"
+                mb="$2"
+                shadowColor="#000"
+                shadowOpacity={0.2}
+                shadowRadius={8}
+              >
+                {/* Header with Avatar & Username */}
+                <HStack alignItems="center" mb="$3" justifyContent="space-between">
                   <HStack alignItems="center" space="sm">
-                    <Box width={32} height={32} borderRadius={16} backgroundColor="$coolGray800" />
+                   <Box
+                                      w={40}
+                                      h={40}
+                                      borderRadius={30}
+                                      bg="#1F1F1F"
+                                      mr="$2"
+                                      justifyContent="center"
+                                      alignItems="center"
+                                    >
+                      <Text color="$white" fontWeight="$bold" fontSize="$md">
+                        U
+                      </Text>
+                    </Box>
                     <VStack>
-                      <Text color="$white" fontWeight="$bold">hey_shefali</Text>
-                      <Text color="$coolGray400" fontSize="$xs">{workout.createdAt}</Text>
+                      <Text color="$white" fontWeight="$bold" fontSize="$md">
+                        unknown
+                      </Text>
+                   <Text color="$coolGray400" fontSize="$xs"> {new Date(workout.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", })} </Text>
                     </VStack>
                   </HStack>
                 </HStack>
 
-                <Text color="$white" fontWeight="$bold" fontSize="$lg" mb="$1">
+                {/* Workout Title */}
+                <Text color="$white" fontWeight="$bold" fontSize="$lg" mb="$2">
                   {workout.name}
                 </Text>
 
-                <VStack py="$5" space="xs" mb="$2" borderBottomWidth={0.2} borderColor="$coolGray400">
-                  <HStack px="$3" justifyContent="space-between">
+                {/* Stats */}
+                <HStack justifyContent="space-between" mb="$3">
+                  <VStack>
                     <Text color="$coolGray400" fontSize="$xs">Duration</Text>
-                    <Text color="$coolGray400" fontSize="$xs">Volume</Text>
-                  </HStack>
-                  <HStack px="$5" justifyContent="space-between">
                     <Text color="$blue500" fontSize="$sm">
                       {workout.time < 60
                         ? `${workout.time} sec`
                         : `${Math.floor(workout.time / 60)} min ${workout.time % 60 || ""}${workout.time % 60 ? " sec" : ""}`}
                     </Text>
+                  </VStack>
+                  <VStack alignItems="flex-end" >
+                    <Text color="$coolGray400" fontSize="$xs" mr="$1.5">Volume</Text>
                     <Text color="$white" fontSize="$sm">{workout.totalVolume}</Text>
-                  </HStack>
-                </VStack>
+                  </VStack>
+                </HStack>
 
-                <VStack alignItems="center">
+                {/* Exercises */}
+                <VStack space="sm">
                   {workout.exercises.map((ex, idx) => (
-                    <HStack key={idx} alignItems="center" space="md" mb="$2">
-                      <Text textAlign="center" color="$white">
-                        {ex.sets} sets {ex.name}
+                    <HStack
+                      key={idx}
+                      justifyContent="space-between"
+                      alignItems="center"
+                      bg="$gray700"
+                      p="$1"
+                      borderRadius="$md"
+                    >
+                      <Text color="$white" fontSize="$sm" mr="$1">
+                        {ex.name}
+                      </Text>
+                      <Text color="$blue500" fontSize="$sm">
+                        {ex.sets} sets
                       </Text>
                     </HStack>
                   ))}
@@ -156,48 +175,28 @@ export default function Home() {
               </Box>
             ))
           ) : (
-
-            <VStack
-  flex={1}
-  alignItems="center"
-  justifyContent="center"
-  space="lg"
-  px="$6"
->
-  {/* Stylized Icon */}
-  <Box
-    width={120}
-    height={120}
-    borderRadius={60}
-    bgColor="rgba(255,255,255,0.05)"
-    alignItems="center"
-    justifyContent="center"
-    shadowColor="#000"
-    shadowOpacity={0.2}
-    shadowRadius={10}
-    borderWidth={1}
-    borderColor="rgba(255,255,255,0.1)"
-  >
-    <Text fontSize="$4xl">🏋️</Text>
-  </Box>
-
-  {/* Title */}
-  <Text fontSize="$xl" fontWeight="$bold" color="$white">
-    No Workouts Yet
-  </Text>
-
-  {/* Description */}
-  <Text
-    fontSize="$sm"
-    textAlign="center"
-    color="$coolGray400"
-    maxWidth={280}
-  >
-    Your completed workouts will show up here once you start logging. Time to get moving!
-  </Text>
-    </VStack>
-  )}
-</VStack>
+            <VStack flex={1} alignItems="center" justifyContent="center" space="lg" px="$6" mt="$20">
+              <Box
+                width={140}
+                height={140}
+                borderRadius={70}
+                bgColor="rgba(255,255,255,0.05)"
+                alignItems="center"
+                justifyContent="center"
+                borderWidth={1}
+                borderColor="rgba(255,255,255,0.1)"
+              >
+                <Text fontSize="$5xl">🏋️</Text>
+              </Box>
+              <Text fontSize="$xl" fontWeight="$bold" color="$white" textAlign="center">
+                No Workouts Yet
+              </Text>
+              <Text fontSize="$sm" color="$gray400" textAlign="center" maxWidth={280}>
+                Your completed workouts will show up here once you start logging. Time to get moving!
+              </Text>
+            </VStack>
+          )}
+        </VStack>
       </ScrollView>
     </Box>
   );

@@ -44,13 +44,14 @@ export default function RootLayout() {
     } else if (success) {
       console.log("Migration Success:", success);
       setIsReady(true);
-      SplashScreen.hideAsync();
+    SplashScreen.preventAutoHideAsync().catch(() => {});
+    SplashScreen.hideAsync().catch(() => {});
     }
   }, [success, migrationError]);
 
   if (!isReady || migrationError) {
     return (
-      <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
+      <Suspense >
         <Text>
           {migrationError ? "Error initializing database" : "Loading..."}
         </Text>
@@ -59,7 +60,7 @@ export default function RootLayout() {
   }
 
   return (
-    <Suspense fallback={<ActivityIndicator size="large" color="#0000ff" />}>
+    <Suspense >
       <SQLiteProvider
         databaseName="Gymify.db"
         options={{ enableChangeListener: true }}

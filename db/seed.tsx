@@ -7,24 +7,34 @@ import { eq } from "drizzle-orm";
 
 export const useSeedExercises = () => {
   useEffect(() => {
-     if (Platform.OS === "web") return;
-    const seed = async () => {
-      const existing = await db.select().from(exercises);
-      if (existing.length > 0) {
-        console.log("✅ Exercises already seeded.");
-        return;
-      }
+    if (Platform.OS === "web") return;
 
+    const seed = async () => {
       console.log("🌱 Seeding database...");
 
       const muscleMap = new Map<string, string>();
 
       for (const item of seedExercises) {
+        // Skip exercise if already exists
+        const existingExercise = await db
+          .select()
+          .from(exercises)
+          .where(eq(exercises.exercise_name, item.exercise_name));
+
+        if (existingExercise.length > 0) continue;
+
         // Insert exercise
-        const [insertedExercise] = await db.insert(exercises)
-          .values({ exercise_name: item.exercise_name, exercise_type: item.exercise_type, equipment: item.equipment, type: item.type })
+        const [insertedExercise] = await db
+          .insert(exercises)
+          .values({
+            exercise_name: item.exercise_name,
+            exercise_type: item.exercise_type,
+            equipment: item.equipment,
+            type: item.type,
+          })
           .returning();
 
+        // Insert muscles
         for (const muscle of item.muscles) {
           let muscleId = muscleMap.get(muscle.name);
 
@@ -37,7 +47,8 @@ export const useSeedExercises = () => {
             if (existingMuscle) {
               muscleId = existingMuscle.id;
             } else {
-              const [insertedMuscle] = await db.insert(muscles)
+              const [insertedMuscle] = await db
+                .insert(muscles)
                 .values({ name: muscle.name })
                 .returning();
               muscleId = insertedMuscle.id;

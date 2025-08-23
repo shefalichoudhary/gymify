@@ -11,7 +11,8 @@ import { WorkoutSet as Set } from "@/types/workoutSet";
 type ExerciseUpdateData = {
   notes: string;
   restTimer: number;
-  
+  unit: "lbs" | "kg";
+  repsType: "reps" | "rep range";
   sets: Set[];
 };
 
@@ -22,49 +23,77 @@ export const updateRoutineInDb = async (
   newTitle: string,
   exerciseData: ExerciseMap
 ) => {
-  // Update routine title
+  console.log("🔹 Updating routine:", routineId);
+  console.log("New title:", newTitle);
+  console.log("New exercise data:", exerciseData);
+
+  // 1️⃣ Update routine title
   await db.update(routines)
     .set({ name: newTitle })
     .where(eq(routines.id, routineId));
 
   for (const [exerciseId, data] of Object.entries(exerciseData)) {
-    // Update notes (assuming only 1 entry per exercise per routine)
-await db.update(routineExercises)
+    // 2️⃣ Check if exercise exists in routineExercises
+    const existingRoutineEx = await db
+      .select()
+      .from(routineExercises)
+      .where(
+        and(
+          eq(routineExercises.routineId, routineId),
+          eq(routineExercises.exerciseId, exerciseId)
+        )
+      )
+      .get();
 
-  .set({ notes: data.notes ?? "" ,
-      restTimer: data.restTimer ?? 0 ,
-  })
-  .where(
-    and(
-      eq(routineExercises.routineId, routineId),
-      eq(routineExercises.exerciseId, exerciseId)
-    )
-  );
+    if (!existingRoutineEx) {
+      await db.insert(routineExercises).values({
+        routineId,
+        exerciseId,
+        notes: data.notes ?? "",
+        restTimer: data.restTimer ?? 0,
+        unit: data.unit ?? "kg",
+        repsType: data.repsType ?? "reps",
+      });
+    } else {
+      await db.update(routineExercises)
+        .set({
+          notes: data.notes ?? "",
+          restTimer: data.restTimer ?? 0,
+          unit: data.unit ?? "kg",
+          repsType: data.repsType ?? "reps",
+        })
+        .where(
+          and(
+            eq(routineExercises.routineId, routineId),
+            eq(routineExercises.exerciseId, exerciseId)
+          )
+        );
+    }
 
-    // Delete old sets for this exercise in this routine
-await db.delete(routineSets)
-  .where(
-    and(
-      eq(routineSets.routineId, routineId),
-      eq(routineSets.exerciseId, exerciseId)
-    )
-  );
+    // 3️⃣ DELETE old sets for this exercise
+    await db.delete(routineSets)
+      .where(
+        and(
+          eq(routineSets.routineId, routineId),
+          eq(routineSets.exerciseId, exerciseId)
+        )
+      );
 
-    // Insert updated sets
-    for (const set of data.sets) {
+    // 4️⃣ Insert new sets
+    for (let i = 0; i < data.sets.length; i++) {
+      const newSet = data.sets[i];
       await db.insert(routineSets).values({
         routineId,
         exerciseId,
-         weight: set.weight ?? 0, 
-  reps: set.reps ?? 0,
-  minReps: set.minReps ?? 0,
-  maxReps: set.maxReps ?? 0,
-  duration: set.duration ?? 0,
-      setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
-
+        weight: newSet.weight ?? 0,
+        reps: newSet.reps ?? 0,
+        minReps: newSet.minReps ?? 0,
+        maxReps: newSet.maxReps ?? 0,
+        duration: newSet.duration ?? 0,
+        setType: (newSet.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
       });
     }
   }
 
-  console.log("✅ Routine updated!");
+  console.log("✅ Routine updated and old sets deleted!");
 };

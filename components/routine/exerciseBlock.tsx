@@ -60,8 +60,10 @@ export default function ExerciseBlock({
 
   onChange({ ...data, sets: [...data.sets, newSet] });
 };
-  const isDuration = exercise.exercise_type === "Duration";
-  const isWeighted = exercise.exercise_type === "Weighted";
+  const isDuration = exercise.exercise_type === "Duration" || exercise.exercise_type === "Yoga";
+const isWeighted =
+  exercise.exercise_type === "Weighted" ||
+  exercise.exercise_type === "Assisted Bodyweight";
   const isBodyweight = exercise.exercise_type === "Bodyweight";
 
   return (
@@ -101,13 +103,13 @@ export default function ExerciseBlock({
 
     {/* Weighted exercises → show PREVIOUS + KG/LBS + REPS */}
     { showCheckIcon && (
-      <Box flex={3} ml="$4">
+      <Box flex={3} ml="$2">
         <Text size="xs" color="$coolGray400" fontWeight="$small">PREVIOUS</Text>
       </Box>
     )}
 
-    {isWeighted && !isBodyweight &&!viewOnly && (
-      <Pressable flex={showCheckIcon ? 2 : 1}  onPress={() => onOpenWeight?.(exercise.id)}>
+    {isWeighted  && !isBodyweight && !viewOnly && (
+      <Pressable flex={showCheckIcon ? 2 : 1} onPress={() => onOpenWeight?.(exercise.id)}>
         <Text size="xs" color="$coolGray400" fontWeight="$small">
           {data.unit.toUpperCase()}
         </Text>
@@ -116,7 +118,7 @@ export default function ExerciseBlock({
 
   
 
-    {(isWeighted || isBodyweight) && !viewOnly &&(
+    {(isWeighted  || isBodyweight) && !viewOnly &&(
   <Pressable
    flex={showCheckIcon ? (isWeighted ? 5 : 5) : 3}
     onPress={() => onOpenRepsType?.(exercise.id)}
