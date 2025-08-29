@@ -101,12 +101,7 @@ const isWeighted =
       <Text size="xs" color="$coolGray400" fontWeight="$small">SET</Text>
     </Box>
 
-    {/* Weighted exercises → show PREVIOUS + KG/LBS + REPS */}
-    { showCheckIcon && (
-      <Box flex={3} ml="$2">
-        <Text size="xs" color="$coolGray400" fontWeight="$small">PREVIOUS</Text>
-      </Box>
-    )}
+   
 
     {isWeighted  && !isBodyweight && !viewOnly && (
       <Pressable flex={showCheckIcon ? 2 : 1} onPress={() => onOpenWeight?.(exercise.id)}>
@@ -120,7 +115,7 @@ const isWeighted =
 
     {(isWeighted  || isBodyweight) && !viewOnly &&(
   <Pressable
-   flex={showCheckIcon ? (isWeighted ? 5 : 5) : 3}
+  flex={showCheckIcon ? 4 : 3}
     onPress={() => onOpenRepsType?.(exercise.id)}
   >
     <HStack alignItems="center" space="xs">
@@ -134,7 +129,7 @@ const isWeighted =
 
     {/* Duration → show time */}
     {isDuration && (
-      <Box flex={showCheckIcon ? 5 : 3} >
+      <Box flex={showCheckIcon ? 4 : 3} >
         <Text size="xs" color="$coolGray400" fontWeight="$small" >DURATION</Text>
       </Box>
     )}

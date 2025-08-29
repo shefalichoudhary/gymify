@@ -197,7 +197,7 @@ export default function LandingPage() {
             alignItems="center"
             justifyContent="flex-end"
             alignSelf="center"
-            // more padding at the bottom
+            pb="$3"
           >
             <Text
               fontSize={width > 600 ? "$2xl" : width > 400 ? "$xl" : "$2xl"}

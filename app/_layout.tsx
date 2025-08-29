@@ -58,7 +58,6 @@ if (!isReady || migrationError) {
       <SQLiteProvider
         databaseName="Gymify.db"
         options={{ enableChangeListener: true }}
-        useSuspense
       >
        <MainLayout />
 

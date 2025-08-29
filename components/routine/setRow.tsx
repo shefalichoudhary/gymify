@@ -1,5 +1,7 @@
   import React  from "react";
-  import { useState, useEffect } from "react";
+  import { useState, useEffect,useRef
+
+   } from "react";
   import {
     Box,
     HStack,
@@ -8,7 +10,8 @@
     Text,
     Pressable,
   } from "@gluestack-ui/themed";
-  import { AntDesign } from "@expo/vector-icons";
+  import { AntDesign,
+    Ionicons } from "@expo/vector-icons";
   import { WorkoutSet as Set } from "@/types/workoutSet";
   import { Vibration } from "react-native";
 import { eq } from "drizzle-orm";
@@ -38,14 +41,40 @@ import { workoutSets, WorkoutSet } from "@/db/schema";
   }: SetRowProps) {
     if (!set) return null;
 const [previousSets, setPreviousSets] = useState<Record<string, WorkoutSet[]>>({});
+const intervalRef = useRef<number | null>(null);
+const [timerRunning, setTimerRunning] = useState(false);
+const [timeLeft, setTimeLeft] = useState<number | undefined>(set.duration || 0);
+useEffect(() => {
+  if (timerRunning) {
+    intervalRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        const newVal = (prev || 0) + 1; // ⬅️ increment
+        onChange("duration", newVal);
+        return newVal;
+      });
+    }, 1000);
+  }
+
+  return () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  };
+}, [timerRunning]);
 
 useEffect(() => {
   async function fetchHistory() {
     const sets = await getPreviousSets(exerciseId);
-    setPreviousSets(prev => ({ ...prev, [exerciseId]: sets }));
+    if (sets.length > 0) {
+      const lastSet = sets[0];
+      onChange("previousWeight", lastSet.weight ?? undefined);
+      onChange("previousReps", lastSet.reps ?? undefined);
+      onChange("previousMinReps", lastSet.minReps ?? undefined);
+      onChange("previousMaxReps", lastSet.maxReps ?? undefined);
+      onChange("previousDuration", lastSet.duration ?? undefined);
+    }
   }
   fetchHistory();
-}, []);
+}, [exerciseId]);
+
     const isDuration = exerciseType === "Duration" || exerciseType === "Yoga";
 const isWeighted = exerciseType === "Weighted" || exerciseType === "Assisted Bodyweight";
     const isBodyweight = exerciseType === "Bodyweight";
@@ -78,7 +107,14 @@ const isWeighted = exerciseType === "Weighted" || exerciseType === "Assisted Bod
         Vibration.vibrate(60);
       }
     };
-
+const formatTime = (secs?: number) => {
+  if (secs == null) return "00:00"; // fallback
+  const minutes = Math.floor(secs / 60);
+  const seconds = secs % 60;
+  return `${minutes.toString().padStart(2, "0")}:${seconds
+    .toString()
+    .padStart(2, "0")}`;
+};
     const getSetTypeColor = (type?: string) => {
       switch (type) {
         case "W":
@@ -100,11 +136,11 @@ async function getPreviousSets(exerciseId: string) {
 }
     // --- Shared reps input for Weighted & Bodyweight
     const renderRepsInput = () => (
-      <Box flex={showCheckIcon ? (isWeighted ? 4 : 4) : 4}>
-        <HStack alignItems="center" space="sm">
+      <Box flex={showCheckIcon ? 4 : 4}>
+        <HStack alignItems="center" space="sm" ml="$3">
           {set.isRangeReps ? (
             <HStack alignItems="center" flex={1}>
-              <Input size="sm" borderWidth={0} w="44%">
+              <Input size="sm" borderWidth={0} w="22%">
                 <InputField
                   placeholder="-"
                   keyboardType="numeric"
@@ -116,7 +152,7 @@ async function getPreviousSets(exerciseId: string) {
                 />
               </Input>
               <Text color="$white">to</Text>
-              <Input size="sm" borderWidth={0} w="44%">
+              <Input size="sm" borderWidth={0} w="25%">
                 <InputField
                   placeholder="-"
                   keyboardType="numeric"
@@ -129,7 +165,7 @@ async function getPreviousSets(exerciseId: string) {
               </Input>
             </HStack>
           ) : (
-            <Input size="sm" borderWidth={0} w="45%">
+            <Input size="sm" borderWidth={0} w="24%">
               <InputField
                 placeholder="-"
                 keyboardType="numeric"
@@ -159,47 +195,11 @@ async function getPreviousSets(exerciseId: string) {
             </Pressable>
           </Box>
 
-          {/* Previous values */}
-{/* Previous values */}
-{showCheckIcon && (
-  <Box mt="$1" flex={3}>
-    {Array.from({ length: Math.max(1, previousSets[exerciseId]?.length ?? 1) }).map((_, idx) => {
-      const prevSet = previousSets[exerciseId]?.[idx];
-      const prevUnit = prevSet?.previousUnit ?? "kg"; // fallback to kg
-      const isPrevRangeReps = prevSet?.previousMinReps != null && prevSet?.previousMaxReps != null;
-
-      // Compute display text
-      let displayText = "-";
-      if (prevSet) {
-        if (isDuration) {
-          displayText = prevSet.duration != null ? `${prevSet.duration}s` : "-";
-        } else if (isPrevRangeReps) {
-          displayText = `${prevSet.weight ? `${prevSet.weight} ${prevUnit} x ` : ""}${prevSet.minReps}–${prevSet.maxReps}`;
-        } else if (prevSet.reps != null) {
-          displayText = `${prevSet.weight ? `${prevSet.weight} ${prevUnit} x ` : ""}${prevSet.reps}`;
-        }
-      }
-
-      return (
-        <Text
-          key={idx}
-          color="$coolGray400"
-          fontSize="$xs"
-          textAlign="center"   // center-align the text
-          width={60}          // fixed width for all rows (adjust as needed)
-        >
-          {displayText}
-        </Text>
-      );
-    })}
-  </Box>
-)}
-
 
           {/* Weighted = weight + reps */}
           {isWeighted && (
             <>
-              <Box flex={showCheckIcon ? 2 : 2}>
+              <Box flex={showCheckIcon ? 2 : 1}>
                 <Input size="sm" borderWidth={0}>
                   <InputField
                     placeholder="-"
@@ -220,25 +220,71 @@ async function getPreviousSets(exerciseId: string) {
           {isBodyweight && renderRepsInput()}
 
           {/* Duration = secs */}
-          {isDuration && (
-          <Box flex={showCheckIcon ? 4 : 4} ml="$6">
-              <Input size="sm" borderWidth={0}>
-                <InputField
-                  placeholder="Secs"
-                  keyboardType="numeric"
-                  color="$white"
-                  value={getPrefillValue(set.duration, set.previousDuration)}
-                  onChangeText={(text) =>
-                    onChange("duration", text ? parseInt(text, 10) || 0 : undefined)
-                  }
-                />
-              </Input>
-            </Box>
-          )}
+         {isDuration && (
+  <Box flex={4} >
+    <HStack alignItems="center" >
+      {/* Timer Icon */}
+      <Pressable
+        onPress={() => {
+          if (timerRunning) {
+            // pause
+            setTimerRunning(false);
+            if (intervalRef.current) clearInterval(intervalRef.current);
+          } else {
+            // start
+            setTimerRunning(true);
+          }
+        }}
+      >
+       {timerRunning ? (
+          <AntDesign name="pausecircle" size={24} color="#3b82f6" />
+        ) : (
+          <Ionicons
+            name="caret-forward-circle-outline"
+            size={24}
+            color="#3b82f6" 
+          />
+        )}
+      </Pressable>
+
+      {/* Duration input */}
+      <Input size="sm" borderWidth={0} w="70%">
+  <InputField
+    placeholder="00:00"
+    keyboardType="numeric"
+    color="$white"
+    value={formatTime(timeLeft)}
+    onChangeText={(text) => {
+      // Parse MM:SS input
+      const parts = text.split(":");
+      let val: number | undefined;
+
+      if (parts.length === 2) {
+        const minutes = parseInt(parts[0], 10) || 0;
+        const seconds = parseInt(parts[1], 10) || 0;
+        val = minutes * 60 + seconds;
+      } else {
+        val = text ? parseInt(text, 10) || 0 : undefined;
+      }
+
+      // ✅ Ensure it's never undefined when saving
+      const safeVal = val ?? 0;
+
+      setTimeLeft(val);
+      onChange("duration", safeVal);
+    }}
+  />
+</Input>
+
+
+    </HStack>
+  </Box>
+)}
+
 
           {/* ✅ Check Icon */}
           {showCheckIcon && (
-            <Box ml="$3">
+            <Box ml="$3" >
               <Pressable
                 onPress={handleCheckPress}
                 disabled={!isSetFilled()}
@@ -247,7 +293,7 @@ async function getPreviousSets(exerciseId: string) {
               >
                 <AntDesign
                   name="checkcircle"
-                  size={22}
+                  size={28}
                   color={
                     !isSetFilled()
                       ? "#888"

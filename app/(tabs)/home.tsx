@@ -98,7 +98,7 @@ return (
             workouts.map((workout) => (
               <Box
                 key={workout.id}
-                bg="$gray800"
+                bg="$black"
                 borderRadius="$xl"
                 p="$4"
                 mb="$2"
@@ -191,7 +191,7 @@ return (
               <Text fontSize="$xl" fontWeight="$bold" color="$white" textAlign="center">
                 No Workouts Yet
               </Text>
-              <Text fontSize="$sm" color="$gray400" textAlign="center" maxWidth={280}>
+              <Text fontSize="$sm" color="$white" textAlign="center" maxWidth={280}>
                 Your completed workouts will show up here once you start logging. Time to get moving!
               </Text>
             </VStack>

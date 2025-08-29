@@ -115,17 +115,14 @@ const { user, logout } = useAuth();
   <Tabs.Screen
     name="home"
     options={{ title: "Home" }}
-    key={`home-${reloadKey}`}
   />
   <Tabs.Screen
     name="workout"
     options={{ title: "Workout" }}
-    key={`workout-${reloadKey}`}
   />
   <Tabs.Screen
     name="profile"
     options={{ title: "Profile" }}
-    key={`profile-${reloadKey}`}
   />
           <Tabs.Screen
           name="createRoutine"

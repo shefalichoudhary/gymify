@@ -268,7 +268,7 @@ const handleSave = async () => {
   onRightButtonPress={handleSave}
 />
 
-      <ScrollView showsVerticalScrollIndicator={false} px="$4">
+      <ScrollView showsVerticalScrollIndicator={false} px="$4" my="$4"> 
       <Box pt="$4"  mb="$4">
  <Input variant="underlined" borderBottomWidth={0.5} size="xl"borderColor="#1F1F1F" >
                       <InputField

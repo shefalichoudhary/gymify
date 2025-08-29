@@ -49,5 +49,5 @@ export function useConfirmDialog() {
     />
   );
 
-  return { showDialog, ConfirmDialogComponent };
+  return { showDialog, ConfirmDialogComponent,setVisible };
 }

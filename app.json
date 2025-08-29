@@ -3,42 +3,46 @@
     "name": "gymify",
     "slug": "gymify",
     "version": "1.0.0",
+    "icon" : "./assets/images/icon.png",
     "orientation": "portrait",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "splash": {
+      "image":"./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1F1F1F"
 
-  
+    },
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shefali.gymify",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "splash": {
-    "backgroundColor": "#1F1F1F",
-    "image": "./assets/images/logo.png",
-    "resizeMode": "contain"
-  }
+      }
+      
     },
     "android": {
       "package": "com.shefali_choudhary.gymify",
-      "splash" : null
-      },
-    
+      "adaptiveIcon": {
+      "foregroundImage":"./assets/images/adaptive-icon.png",
+      "backgroundColor": "#1F1F1F"
+
+    }
+      
+        
+    },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "splash": {
-        "backgroundColor": "#1F1F1F",
-        "resizeMode": "contain"
-      }
+      "output": "static"
+      
     },
     "plugins": [
       "expo-router",
       "expo-sqlite",
       "expo-font",
       "expo-web-browser"
+    
     ],
     "experiments": {
       "typedRoutes": true
@@ -48,14 +52,14 @@
         "origin": false
       },
       "eas": {
-        "projectId": "867635d0-876f-4757-a778-75594b3b2532"
+        "projectId": "0a8eae0c-2341-44cd-a769-9bfc88d1fc0b"
       }
     },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/867635d0-876f-4757-a778-75594b3b2532"
+      "url": "https://u.expo.dev/0a8eae0c-2341-44cd-a769-9bfc88d1fc0b"
     },
     "owner": "shefali_choudhary"
   }

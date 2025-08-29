@@ -19,10 +19,9 @@ import SetTypeModal from "@/components/routine/bottomSheet/set";
 import * as Haptics from "expo-haptics";
 import RestCountdownTimer from "@/components/routine/restCountdownTimer";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
-import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 import { updateRoutineInDb } from "../../components/routine/updateRoutine";
 import cuid from "cuid";
-
+import CustomDialog from "@/components/logWorkoutDialog";
 type SetItem = {
   weight?: number;
   reps?: number | null;
@@ -69,6 +68,7 @@ type ExerciseDetail = {
 };
 
 export default function LogWorkoutScreen() {
+
   const router = useRouter();
 const { routineId, routineTitle, addedExerciseIds } = useLocalSearchParams();
 const {
@@ -85,8 +85,16 @@ const {
  
 
 } = useExerciseOptionsManager();
+const [dialogVisible, setDialogVisible] = useState(false);
+const [dialogProps, setDialogProps] = useState({
+  message: "",
+  confirmText: "OK",
+  cancelText: undefined,
+  destructive: false,
+  onConfirm: () => setDialogVisible(false),
+  onCancel: () => setDialogVisible(false),
+});
 const [loading, setLoading] = useState(true);
-      const { showDialog, ConfirmDialogComponent } = useConfirmDialog();
   const [duration, setDuration] = useState(0);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
@@ -96,7 +104,6 @@ const [loadedExerciseIds, setLoadedExerciseIds] = useState<string[]>([]);
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
 const { volume: totalVolume, sets: totalSets } = calculateWorkoutStats(exerciseData);
 const [restCountdowns, setRestCountdowns] = useState<{ [key: string]: number }>({});
-
 const handleRestDurationSelect = (duration: number) => {
   if (!activeExerciseId) return;
 
@@ -485,33 +492,39 @@ const [workout] = await db.insert(workouts).values({
   }
 };
 
+
 const handleFinish = () => {
   const { sets } = calculateWorkoutStats(exerciseData);
 
-  // Case: no completed sets
   if (sets === 0) {
-    return showDialog({
+    // Show warning that no sets are completed
+    setDialogProps({
       message: "No Completed Sets. Please complete at least one set.",
       confirmText: "OK",
+      cancelText: undefined,
       destructive: false,
+      onConfirm: () => setDialogVisible(false),
+      onCancel: () => setDialogVisible(false),
     });
-  }
-
-  // Case: completed sets exist
-  showDialog({
-    message: "Do you want to add new exercises to this routine?",
-    confirmText: "Yes",
-    cancelText: "No",
-    destructive: false,
-    onConfirm: async () => {
-      await saveWorkout(true);
-    },
-    onCancel: async () => {
-      await saveWorkout(false);
-    },
-  });
-};
-
+    setDialogVisible(true);
+  } else {
+    // Ask to add new exercises or finish workout
+    setDialogProps({
+      message: "Do you want to add new exercises to this routine?",
+      confirmText: "Yes",
+      cancelText:undefined,
+      destructive: false,
+      onConfirm: async () => {
+        await saveWorkout(true);
+        setDialogVisible(false);
+      },
+      onCancel: async () => {
+        await saveWorkout(false);
+        setDialogVisible(false);
+      },
+    });
+    setDialogVisible(true);
+  }}
 
 const discardRoutineAndReset = () => {
   // Reset any temporary workout state if needed
@@ -534,8 +547,19 @@ useFocusEffect(
   React.useCallback(() => {
     const onBackPress = () => {
       // Directly navigate to the workout page
-      router.replace("/workout"); // use replace so this screen is removed from stack
-      return true; // Prevent default back action
+       setDialogProps({
+      message: "Are you sure you want to discard this workout? All progress will be lost.",
+      confirmText: "Discard",
+      cancelText: undefined,
+      destructive: true,
+      onConfirm: () => {
+        setDialogVisible(false);
+        discardRoutineAndReset();
+      },
+      onCancel: () => setDialogVisible(false),
+    });
+    setDialogVisible(true);
+      return true;
     };
 
     const subscription = BackHandler.addEventListener(
@@ -659,15 +683,22 @@ useFocusEffect(
   justifyContent="flex-start"
   px="$4"
   py="$1.5"
-  onPress={() =>
-    showDialog({
-      message: "Are you sure you want to discard this workout?",
+  onPress={
+  () => {
+    setDialogProps({
+      message: "Are you sure you want to discard this workout? All progress will be lost.",
       confirmText: "Discard",
-      cancelText: "Cancel",
+      cancelText: undefined,
       destructive: true,
-      onConfirm: discardRoutineAndReset,
-    })
+      onConfirm: () => {
+        setDialogVisible(false);
+        discardRoutineAndReset();
+      },
+      onCancel: () => setDialogVisible(false),
+    });
+    setDialogVisible(true);
   }
+}
 >
   <HStack alignItems="center" space="sm">
     <Text color="$red">Discard Workout</Text>
@@ -737,8 +768,7 @@ useFocusEffect(
           setTypeSheetRef.current?.close();
         }}
         />
-        <ConfirmDialogComponent 
-        />
+        <CustomDialog {...dialogProps} visible={dialogVisible} />
     </Box>
   );
 }
