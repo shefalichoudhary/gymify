@@ -37,7 +37,7 @@ export default function ExerciseBlock({
   onOpenWeight,
   onOpenRepsType,
   onToggleSetComplete,
-  onOpenSetType
+  onOpenSetType,
 }: Props) {
   const handleSetChange = <T extends keyof Set>(index: number, key: T, value: Set[T]) => {
     const updatedSets = [...data.sets];
@@ -97,7 +97,7 @@ const isWeighted =
 
 <Pressable>
   <HStack px="$3" alignItems="center">
-    <Box flex={1}>
+    <Box flex={showCheckIcon ? 2 : 1} >
       <Text size="xs" color="$coolGray400" fontWeight="$small">SET</Text>
     </Box>
 
@@ -115,7 +115,7 @@ const isWeighted =
 
     {(isWeighted  || isBodyweight) && !viewOnly &&(
   <Pressable
-  flex={showCheckIcon ? 4 : 3}
+  flex={showCheckIcon ? 5 : 3}
     onPress={() => onOpenRepsType?.(exercise.id)}
   >
     <HStack alignItems="center" space="xs">
@@ -129,8 +129,8 @@ const isWeighted =
 
     {/* Duration → show time */}
     {isDuration && (
-      <Box flex={showCheckIcon ? 4 : 3} >
-        <Text size="xs" color="$coolGray400" fontWeight="$small" >DURATION</Text>
+      <Box flex={showCheckIcon ? 2: 1} >
+        <Text size="xs" color="$coolGray400" fontWeight="$small" >TIME</Text>
       </Box>
     )}
   </HStack>

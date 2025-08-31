@@ -1,4 +1,4 @@
-  import React  from "react";
+import React  from "react";
   import { useState, useEffect,useRef
 
    } from "react";
@@ -17,6 +17,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/db"; // filepath: c:\Users\Elsa\gymify\components\routine\setRow.tsx
 import { workoutSets, WorkoutSet } from "@/db/schema";
+import CustomDialog from "../logWorkoutDialog";
   type SetRowProps = {
     index: number;
     set: Set;
@@ -26,6 +27,7 @@ import { workoutSets, WorkoutSet } from "@/db/schema";
     editable?: boolean;
     onOpenSetType: (exerciseId: string, setIndex: number) => void;
     onToggleCheck: (completed: boolean) => void;
+    onShowDialog?: (message: string) => void;
     exerciseType?: "Weighted" | "Bodyweight" | "Duration" | "Yoga" | string | null;
   };
 
@@ -44,6 +46,7 @@ const [previousSets, setPreviousSets] = useState<Record<string, WorkoutSet[]>>({
 const intervalRef = useRef<number | null>(null);
 const [timerRunning, setTimerRunning] = useState(false);
 const [timeLeft, setTimeLeft] = useState<number | undefined>(set.duration || 0);
+
 useEffect(() => {
   if (timerRunning) {
     intervalRef.current = setInterval(() => {
@@ -79,16 +82,7 @@ useEffect(() => {
 const isWeighted = exerciseType === "Weighted" || exerciseType === "Assisted Bodyweight";
     const isBodyweight = exerciseType === "Bodyweight";
 
-    // --- Validation for check icon
-    const isSetFilled = () => {
-      if (isDuration) {
-        return !!set.duration;
-      }
-      if (set.isRangeReps) {
-        return (isWeighted ? !!set.weight : true) && !!set.minReps && !!set.maxReps;
-      }
-      return (isWeighted ? !!set.weight : true) && !!set.reps;
-    };
+   
 
     const getPrefillValue = (
       current?: number | string | null,
@@ -99,14 +93,17 @@ const isWeighted = exerciseType === "Weighted" || exerciseType === "Assisted Bod
       return "";
     };
 
-    const handleCheckPress = () => {
-      if (isSetFilled()) {
-        const newValue = !set.isCompleted;
-        onChange("isCompleted", newValue);
-        onToggleCheck(newValue);
-        Vibration.vibrate(60);
-      }
-    };
+ const handleCheckPress = () => {
+   if (timerRunning) {
+    setTimerRunning(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+  }
+      const newValue = !set.isCompleted;
+      onChange("isCompleted", newValue);
+      onToggleCheck(newValue);
+     Vibration.vibrate([0, 200, 100, 200], false);
+  };
+
 const formatTime = (secs?: number) => {
   if (secs == null) return "00:00"; // fallback
   const minutes = Math.floor(secs / 60);
@@ -136,11 +133,11 @@ async function getPreviousSets(exerciseId: string) {
 }
     // --- Shared reps input for Weighted & Bodyweight
     const renderRepsInput = () => (
-      <Box flex={showCheckIcon ? 4 : 4}>
-        <HStack alignItems="center" space="sm" ml="$3">
+      <Box flex={showCheckIcon ? 6: 4}>
+        <HStack alignItems="center" space="sm" ml="$4">
           {set.isRangeReps ? (
             <HStack alignItems="center" flex={1}>
-              <Input size="sm" borderWidth={0} w="22%">
+              <Input size="sm" borderWidth={0} w="25%">
                 <InputField
                   placeholder="-"
                   keyboardType="numeric"
@@ -152,7 +149,7 @@ async function getPreviousSets(exerciseId: string) {
                 />
               </Input>
               <Text color="$white">to</Text>
-              <Input size="sm" borderWidth={0} w="25%">
+              <Input size="sm" borderWidth={0} w="30%">
                 <InputField
                   placeholder="-"
                   keyboardType="numeric"
@@ -162,10 +159,10 @@ async function getPreviousSets(exerciseId: string) {
                     onChange("maxReps", text ? parseInt(text, 10) || 0 : undefined)
                   }
                 />
-              </Input>
-            </HStack>
+                </Input>
+              </HStack>
           ) : (
-            <Input size="sm" borderWidth={0} w="24%">
+            <Input size="sm" borderWidth={0} w="32%" ml="$2">
               <InputField
                 placeholder="-"
                 keyboardType="numeric"
@@ -185,7 +182,7 @@ async function getPreviousSets(exerciseId: string) {
       <Box bg={index % 2 !== 0 ? "#1F1F1F" : "transparent"} py="$1" mb="$1">
         <HStack justifyContent="flex-start" alignItems="center" px="$4">
           {/* Set number / type */}
-          <Box flex={1} mt="$2">
+          <Box flex={showCheckIcon ? 2 : 1} mt="$2">
             <Pressable onPress={() => onOpenSetType(exerciseId, index)}>
               <Text color={getSetTypeColor(set.setType)}>
                 {set.setType && set.setType !== "Normal"
@@ -220,87 +217,76 @@ async function getPreviousSets(exerciseId: string) {
           {isBodyweight && renderRepsInput()}
 
           {/* Duration = secs */}
-         {isDuration && (
-  <Box flex={4} >
-    <HStack alignItems="center" >
-      {/* Timer Icon */}
-      <Pressable
-        onPress={() => {
-          if (timerRunning) {
-            // pause
-            setTimerRunning(false);
-            if (intervalRef.current) clearInterval(intervalRef.current);
-          } else {
-            // start
-            setTimerRunning(true);
-          }
-        }}
-      >
-       {timerRunning ? (
-          <AntDesign name="pausecircle" size={24} color="#3b82f6" />
-        ) : (
-          <Ionicons
-            name="caret-forward-circle-outline"
-            size={24}
-            color="#3b82f6" 
-          />
-        )}
-      </Pressable>
+{isDuration && (
+  <Box flex={showCheckIcon ? 6 : 6} position="relative">
+    {/* Timer Icon - absolute, left side */}
+    {!set.isCompleted && showCheckIcon && (
+      <Box position="absolute" left={38} top={0} bottom={0} justifyContent="center" zIndex={1}>
+        <Pressable
+          onPress={() => {
+            if (timerRunning) {
+              setTimerRunning(false);
+              if (intervalRef.current) clearInterval(intervalRef.current);
+            } else {
+              setTimerRunning(true);
+            }
+          }}
+        >
+          {timerRunning ? (
+            <AntDesign name="pausecircle" size={24} color="#3b82f6" />
+          ) : (
+            <Ionicons
+              name="caret-forward-circle-outline"
+              size={24}
+              color="#3b82f6"
+            />
+          )}
+        </Pressable>
+      </Box>
+    )}
 
-      {/* Duration input */}
-      <Input size="sm" borderWidth={0} w="70%">
-  <InputField
-    placeholder="00:00"
-    keyboardType="numeric"
-    color="$white"
-    value={formatTime(timeLeft)}
-    onChangeText={(text) => {
-      // Parse MM:SS input
-      const parts = text.split(":");
-      let val: number | undefined;
-
-      if (parts.length === 2) {
-        const minutes = parseInt(parts[0], 10) || 0;
-        const seconds = parseInt(parts[1], 10) || 0;
-        val = minutes * 60 + seconds;
-      } else {
-        val = text ? parseInt(text, 10) || 0 : undefined;
-      }
-
-      // ✅ Ensure it's never undefined when saving
-      const safeVal = val ?? 0;
-
-      setTimeLeft(val);
-      onChange("duration", safeVal);
-    }}
-  />
-</Input>
-
-
-    </HStack>
+    {/* Duration input - always centered and fixed width */}
+    <Box alignItems="center">
+      <Input size="sm" borderWidth={0} w={100}>
+        <InputField
+          placeholder="00:00"
+          keyboardType="numeric"
+          color="$white"
+          textAlign="center"
+          value={formatTime(timeLeft)}
+          onChangeText={(text) => {
+            const parts = text.split(":");
+            let val: number | undefined;
+            if (parts.length === 2) {
+              const minutes = parseInt(parts[0], 10) || 0;
+              const seconds = parseInt(parts[1], 10) || 0;
+              val = minutes * 60 + seconds;
+            } else {
+              val = text ? parseInt(text, 10) || 0 : undefined;
+            }
+            const safeVal = val ?? 0;
+            setTimeLeft(val);
+            onChange("duration", safeVal);
+          }}
+        />
+      </Input>
+    </Box>
   </Box>
 )}
 
 
           {/* ✅ Check Icon */}
-          {showCheckIcon && (
-            <Box ml="$3" >
-              <Pressable
-                onPress={handleCheckPress}
-                disabled={!isSetFilled()}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <AntDesign
-                  name="checkcircle"
-                  size={28}
-                  color={
-                    !isSetFilled()
-                      ? "#888"
-                      : set.isCompleted
-                      ? "#22c55e"
-                      : "#888"
-                  }
+         {showCheckIcon && (
+  <Box ml="$3">
+    <Pressable
+      onPress={handleCheckPress}
+      alignItems="center"
+      justifyContent="center"
+    >
+      <AntDesign
+        name="checkcircle"
+        size={28}
+       color={set.isCompleted ? "#22c55e" : "#888"}
                 />
               </Pressable>
             </Box>

@@ -176,7 +176,7 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
          </KeyboardAwareScrollView>
 
           {/* Footer */}
-          <View className="mt-10 flex-row justify-center items-center">
+          <View className="mt-10 flex-row justify-center items-center pb-5">
             <Text className="font-semibold text-neutral-500">
               Don't have an account?{" "}
             </Text>

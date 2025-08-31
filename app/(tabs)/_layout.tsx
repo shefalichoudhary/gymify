@@ -6,19 +6,35 @@ import { Pressable, Text, Box, HStack } from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
 
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 export default function Layout() {
   const router = useRouter();
     const [reloadKey, setReloadKey] = useState(0);
 const { user, logout } = useAuth();
+
+  useEffect(() => {
+    router.prefetch("/createRoutine");
+    router.prefetch("/addExercise");
+    router.prefetch("/logWorkout");
+    router.prefetch("/saveWorkout");
+    router.prefetch("/workout");
+    router.prefetch("/profile");
+    router.prefetch("/signIn");
+    router.prefetch("/signUp");
+    router.prefetch("/routine/[id]");
+    router.prefetch("/routine/edit/[id]");
+  }, []);
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }} edges={["bottom", "left", "right"]}>
-      <Box flex={1} bg="#1F1F1F">
+    <SafeAreaView style={{ flex: 1}} edges={["bottom", "left", "right"]}>
+      <Box flex={1}>
         <Tabs
-          screenOptions={({ route }) => {
+         
+          screenOptions={({ route,    }) => {
             const showTabBar = ["home", "workout", "profile"].includes(route.name);
 
             return {
+              contentStyle: { backgroundColor: "#1F1F1F" },
+              lazy: false, // preload all tabs for smoother navigation
               header: () => {
                 if (route.name === "home") {
                   return (
@@ -37,6 +53,7 @@ const { user, logout } = useAuth();
                           </Text>
                         </Pressable>
                       }
+                      
                        right={
           user ? (
             <Pressable onPress={logout}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, } from "react";
 import {
   Box, VStack, HStack, Text, Button, ScrollView,
+  SafeAreaView,
 } from "@gluestack-ui/themed";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
@@ -484,7 +485,7 @@ const [workout] = await db.insert(workouts).values({
 
     router.push({
       pathname: "/saveWorkout",
-      params: { id: workout.id, routineId },
+      params: { id: workout.id, routineId, addedExerciseCount: String(Object.keys(exerciseData).length) },
     });
   } catch (err) {
     Alert.alert("Save Failed", "Could not save workout.");
@@ -497,7 +498,6 @@ const handleFinish = () => {
   const { sets } = calculateWorkoutStats(exerciseData);
 
   if (sets === 0) {
-    // Show warning that no sets are completed
     setDialogProps({
       message: "No Completed Sets. Please complete at least one set.",
       confirmText: "OK",
@@ -508,23 +508,11 @@ const handleFinish = () => {
     });
     setDialogVisible(true);
   } else {
-    // Ask to add new exercises or finish workout
-    setDialogProps({
-      message: "Do you want to add new exercises to this routine?",
-      confirmText: "Yes",
-      cancelText:undefined,
-      destructive: false,
-      onConfirm: async () => {
-        await saveWorkout(true);
-        setDialogVisible(false);
-      },
-      onCancel: async () => {
-        await saveWorkout(false);
-        setDialogVisible(false);
-      },
-    });
-    setDialogVisible(true);
-  }}
+    // Directly save and navigate, no dialog
+    saveWorkout(true);
+  }
+};
+
 
 const discardRoutineAndReset = () => {
   // Reset any temporary workout state if needed
@@ -571,7 +559,7 @@ useFocusEffect(
   }, [router])
 );
   return (
-    <Box flex={1} bg="$black">
+    <SafeAreaView flex={1} bg="$black">
       <CustomHeader
         title="Log Workout"
         left="Cancel"
@@ -629,6 +617,7 @@ useFocusEffect(
       }}
       onOpenRepRange={() => {}}
    onToggleSetComplete={(exerciseId: string, setIndex: number, justCompleted: boolean) => handleToggleSetComplete(exerciseId, setIndex, justCompleted)} 
+    
 
       />
     
@@ -769,7 +758,7 @@ useFocusEffect(
         }}
         />
         <CustomDialog {...dialogProps} visible={dialogVisible} />
-    </Box>
+    </SafeAreaView>
   );
 }
 

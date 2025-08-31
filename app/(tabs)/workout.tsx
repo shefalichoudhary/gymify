@@ -6,6 +6,7 @@ import {
   Text,
   Button,
   ScrollView,
+  SafeAreaView,
 } from '@gluestack-ui/themed';
 import { Vibration } from "react-native";
 import { useFocusEffect } from "expo-router";
@@ -84,8 +85,7 @@ useFocusEffect(
 
 
   return (
-    <Box flex={1} bg="$black" pt="$5" py="$6">
-     
+    <SafeAreaView flex={1} bg="$black" pt="$5" py="$6">
 
         {/* Routines */}
         <Box px="$3">
@@ -231,6 +231,6 @@ useFocusEffect(
   }}
 />
 
-    </Box>
+    </SafeAreaView>
   );
 }

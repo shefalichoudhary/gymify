@@ -7,12 +7,12 @@
     "orientation": "portrait",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image":"./assets/images/splash.png",
+
+   "splash": {
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#1F1F1F"
-
-    },
+  },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -24,13 +24,12 @@
     },
     "android": {
       "package": "com.shefali_choudhary.gymify",
-      "adaptiveIcon": {
-      "foregroundImage":"./assets/images/adaptive-icon.png",
-      "backgroundColor": "#1F1F1F"
+       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+          "backgroundColor": "#1F1F1F"
 
-    }
-      
-        
+      }
+     
     },
     "web": {
       "bundler": "metro",

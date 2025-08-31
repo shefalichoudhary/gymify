@@ -16,7 +16,7 @@ import { workouts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import CustomHeader from "@/components/customHeader";
 import { routines } from "@/db/schema"; // ✅ import routines
-
+import CustomDialog from "../../components/logWorkoutDialog";
 
 type Workout = {
   id: string;
@@ -32,7 +32,16 @@ const SaveWorkoutScreen = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [workout, setWorkout] = useState<Workout | null>(null);
-  const { id, routineId } = useLocalSearchParams();
+  const { id, routineId ,addedExerciseCount} = useLocalSearchParams();
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogProps, setDialogProps] = useState({
+    message: "",
+    confirmText: "Yes",
+    cancelText: "No",
+    destructive: false,
+    onConfirm: () => {},
+    onCancel: () => setDialogVisible(false),
+  });
 
 useEffect(() => {
   if (!id) return;
@@ -79,6 +88,34 @@ useEffect(() => {
     );
   }
 
+  const count =
+  typeof addedExerciseCount === "string"
+    ? parseInt(addedExerciseCount, 10)
+    : Array.isArray(addedExerciseCount)
+    ? parseInt(addedExerciseCount[0], 10)
+    : 0;
+
+useEffect(() => {
+  if (count > 0) {
+    setDialogProps({
+      message: `You added ${count} new exercise${count > 1 ? "s" : ""}.\nDo you want to update the routine or keep the original?`,
+      confirmText: "Update Routine",
+      cancelText: "Keep Original Routine",
+      destructive: false,
+      onConfirm: async () => {
+        // Update routine logic here
+        setDialogVisible(false);
+        router.push("/home");
+      },
+      onCancel: () => {
+        setDialogVisible(false);
+        router.push("/home");
+      },
+    });
+    setDialogVisible(true);
+  }
+}, [addedExerciseCount]);
+
   return (
     <Box flex={1} bg="$black">
       <CustomHeader
@@ -87,18 +124,23 @@ useEffect(() => {
         onPress={() => router.push("/home")}
         right="Save"
       onRightButtonPress={async () => {
-  try {
-    await db
-      .update(workouts)
-      .set({
-        title
-      })
-      .where(eq(workouts.id, String(id)));
-
-    router.push("/home");
-  } catch (error) {
-    console.error("Error updating workout:", error);
-  }
+  setDialogProps({
+    message: "Do you want to add new exercises to this routine?",
+    confirmText: "Yes",
+    cancelText: "No",
+    destructive: false,
+    onConfirm: async () => {
+      // Save logic here
+      await db
+        .update(workouts)
+        .set({ title })
+        .where(eq(workouts.id, String(id)));
+      setDialogVisible(false);
+      router.push("/home");
+    },
+    onCancel: () => setDialogVisible(false),
+  });
+  setDialogVisible(true);
 }}
       />
 
@@ -173,7 +215,7 @@ useEffect(() => {
     </Text>
   </Pressable>
 </ScrollView>
-
+<CustomDialog {...dialogProps} visible={dialogVisible} />
     </Box>
   );
 };

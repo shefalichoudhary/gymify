@@ -16,6 +16,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
       Box,
       HStack,
       ScrollView,
+      SafeAreaView,
     } from "@gluestack-ui/themed";
     import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
     import { Entypo, MaterialIcons } from "@expo/vector-icons";
@@ -278,46 +279,45 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
         return;
       }
 
-      if (!user) {
-        Alert.alert(
-          "Login Required",
-          "Please log in to save your routine.",
-    [
-          { text: "Cancel", style: "cancel" },
-          {
-            text: "Login",
-            onPress: async() => {
-              await AsyncStorage.setItem("unsavedRoutine", JSON.stringify({
-      title,
-      selectedExercises,
-      exerciseData,
-    }));
+//       if (!user) {
+//         Alert.alert(
+//           "Login Required",
+//           "Please log in to save your routine.",
+//     [
+//           { text: "Cancel", style: "cancel" },
+//           {
+//             text: "Login",
+//             onPress: async() => {
+//               await AsyncStorage.setItem("unsavedRoutine", JSON.stringify({
+//       title,
+//       selectedExercises,
+//       exerciseData,
+//     }));
 
 
-              router.push({
-                pathname: "/signIn",
-                params: {
-      redirectTo: "/createRoutine",
-      title,
-      exercises: JSON.stringify(selectedExercises),
-      data: JSON.stringify(exerciseData),
-    },
-              });
-            },
-          },
-        ]
-        );
-        return;
-      }
- console.log("💾 Saving Routine Data:", {
-    title,
-    selectedExercises,
-    exerciseData,
-  });
+//               router.push({
+//                 pathname: "/signIn",
+//                 params: {
+//       redirectTo: "/createRoutine",
+//       title,
+//       exercises: JSON.stringify(selectedExercises),
+//       data: JSON.stringify(exerciseData),
+//     },
+//               });
+//             },
+//           },
+//         ]
+//         );
+//         return;
+//       }
+//  console.log("💾 Saving Routine Data:", {
+//     title,
+//     selectedExercises,
+//     exerciseData,
+//   });
 
       // Already logged in
-      await saveRoutineToDb(title, selectedExercises, exerciseData); // add user.id if needed
-      console.log("✅ Routine saved to SQLite DB");
+      await saveRoutineToDb(title, selectedExercises, exerciseData);
       router.push("/workout");
     };
 
@@ -342,7 +342,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
       );
 
       return (
-        <Box flex={1} bg="$black">
+        <SafeAreaView flex={1} bg="$black">
           <CustomHeader
             title="Create Routine"
             left="Cancel"
@@ -436,9 +436,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
     <WeightSheet ref={weightSheetRef} onSelectWeight={(weight) => {
         if (weight === "lbs" || weight === "kg") {
           updateWeightUnit(weight);
-        } else {
-          console.warn("Invalid unit:", weight);
-        }
+        } 
       }}/>
     <RepsTypeSheet ref={repsSheetRef} onSelectRepsType={updateRepsType} />
     <SetTypeModal
@@ -452,6 +450,6 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
       }}
     />
     <ConfirmDialogComponent/>
-        </Box>
+        </SafeAreaView>
       );
     }
