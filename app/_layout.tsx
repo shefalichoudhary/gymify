@@ -1,10 +1,9 @@
 import "react-native-reanimated";
-import { Slot, } from "expo-router";
+import { Slot } from "expo-router";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import { db, expo_sqlite } from "../db/db";
+import { db, expo_sqlite } from "../db/db";   // 👈 global singleton db
 import migrations from "@/drizzle/migrations";
-import { Suspense, useEffect, useRef, useState } from "react";
-import { SQLiteProvider } from "expo-sqlite";
+import { useEffect, useRef, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import "../global.css";
@@ -14,11 +13,12 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { AuthProvider } from "@/context/authContext"; 
 import { ActivityIndicator } from "react-native";
+
 SplashScreen.preventAutoHideAsync();
 
 const MainLayout = () => {
-   return (
- <GestureHandlerRootView style={{ flex: 1,  }}>
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <BottomSheetModalProvider>
         <GluestackUIProvider config={config}>
           <AuthProvider>
@@ -27,20 +27,22 @@ const MainLayout = () => {
         </GluestackUIProvider>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
-   );
+  );
 };
 
 export default function RootLayout() {
   const { success, error: migrationError } = useMigrations(db, migrations);
   const [appReady, setAppReady] = useState(false);
 
-  useDrizzleStudio(expo_sqlite);
+  useDrizzleStudio(expo_sqlite); // optional debugger
 
   const hasHiddenSplash = useRef(false);
 
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
     const prepare = async () => {
-      if (hasHiddenSplash.current) return; // already handled
+      if (hasHiddenSplash.current) return;
 
       if (migrationError) {
         console.error("Migration error:", migrationError);
@@ -55,14 +57,24 @@ export default function RootLayout() {
       }
     };
 
-    // only run once when migrations finish
     if ((success || migrationError) && !hasHiddenSplash.current) {
       prepare();
     }
+
+    // 🚨 fallback to avoid infinite splash
+    timeout = setTimeout(async () => {
+      if (!hasHiddenSplash.current) {
+        console.warn("Migrations stuck — forcing splash hide.");
+        await SplashScreen.hideAsync();
+        setAppReady(true);
+        hasHiddenSplash.current = true;
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
   }, [success, migrationError]);
 
-   if (!appReady) {
-    // temporary fallback before splash hides
+  if (!appReady) {
     return (
       <View
         style={{
@@ -76,12 +88,7 @@ export default function RootLayout() {
       </View>
     );
   }
-  return (
-    <SQLiteProvider
-      databaseName="Gymify.db"
-      options={{ enableChangeListener: true }}
-    >
-      <MainLayout />
-    </SQLiteProvider>
-  );
+
+  // ✅ No <SQLiteProvider> needed here
+  return <MainLayout />;
 }
