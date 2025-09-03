@@ -5,7 +5,6 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
-import * as AuthSession from 'expo-auth-session';
 
 WebBrowser.maybeCompleteAuthSession();
 type User = {
@@ -64,9 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(loggedInUser);
     await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
 
-    console.log("Login successful");
   } catch (error: any) {
-    console.error("Login failed:", error.message);
     throw new Error(error.message);
   }
 };
@@ -102,15 +99,12 @@ const register = async (username: string, email: string, password: string) => {
 };
 
 
-
-
  
 
 const logout = async () => {
   try {
     setUser(null);
     await AsyncStorage.removeItem("user");
-    console.log("Logged out successfully");
   } catch (error) {
     console.error("Logout failed:", error);
     throw new Error("Something went wrong while logging out");

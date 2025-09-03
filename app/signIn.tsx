@@ -1,28 +1,34 @@
 import React, { useState ,} from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  TextInput,
-  Platform,
-} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useRouter,useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/context/authContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
-
-// Gluestack UI Components
+// Gluestack UI
 import {
   FormControl,
   FormControlLabel,
+  FormControlError,
+  FormControlErrorText,
+  FormControlErrorIcon,
+  FormControlHelper,
+  FormControlHelperText,
   FormControlLabelText,
-} from "@/components/ui/form-control";
-import { Input, InputField, VStack } from "@gluestack-ui/themed";
+  Input,
+  InputField,
+  InputIcon,
+  InputSlot,
+  Button,
+  ButtonText,
+  Box,
+  VStack,
+  HStack,
+  Text,
+  Pressable,
+  AlertCircleIcon,
+} from "@gluestack-ui/themed";
+
 import { StatusBar } from "expo-status-bar";
+import { TouchableOpacity } from "react-native";
 
 interface FormState {
   email: string;
@@ -84,108 +90,136 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
 };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAwareScrollView
-           enableOnAndroid
-           keyboardShouldPersistTaps="handled"
-           contentContainerStyle={{  flexGrow: 1,paddingVertical:100}}
-         >
+  <Box flex={1} bg="#1F1F1F">
+  <KeyboardAwareScrollView
+    enableOnAndroid
+    keyboardShouldPersistTaps="handled"
+    contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-start" }}
+  >
+    <StatusBar style="light" />
 
-   
-           <StatusBar style="dark" />
-       <VStack className="w-full m-auto max-w-[800px]  p-4 " >
-           <Text className="text-5xl font-bold text-black text-center mb-8">
-            Login</Text>
+    <VStack
+      flex={1}
+      pt="$48"
+      px="$5"
+      space="lg" // 🔥 reduce space so "Forgot password?" isn’t pushed too far
+      width="100%"
+      maxWidth={800}
+      alignSelf="center"
+    >
+      {/* Title */}
+      <Text size="4xl" bold color="$textLight50" textAlign="center" mb="$4">
+        Login
+      </Text>
 
-            <FormControl isRequired>
-              <VStack space="md">
-                {/* Email */}
-                <FormControlLabel>
-                  <FormControlLabelText>Email</FormControlLabelText>
-                </FormControlLabel>
-                <Input>
-                  <InputField
-                    placeholder="example@gmail.com"
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    value={form.email}
-                    onChangeText={(text) => handleChange("email", text)}
-                  />
-                </Input>
-                {fieldErrors.email && (
-    <Text className="text-red-500 text-sm mt-1">{fieldErrors.email}</Text>
-  )}
+      {/* Email */}
+      <FormControl isInvalid={!!fieldErrors.email}>
+        <FormControlLabel>
+          <FormControlLabelText color="$textLight50">
+            Email
+          </FormControlLabelText>
+        </FormControlLabel>
+        <Input bg="$backgroundDark800" rounded="$xl" borderWidth={0} size="md">
+          <InputField
+            placeholder="example@gmail.com"
+            placeholderTextColor="$textLight400"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={form.email}
+            onChangeText={(text) => handleChange("email", text)}
+            color="$textLight50"
+          />
+        </Input>
+        {fieldErrors.email && (
+          <FormControlError>
+            <FormControlErrorIcon as={AlertCircleIcon} color="$error500" />
+            <FormControlErrorText color="$error500">
+              {fieldErrors.email}
+            </FormControlErrorText>
+          </FormControlError>
+        )}
+      </FormControl>
 
-                {/* Password */}
-                <FormControlLabel>
-                  <FormControlLabelText>Password</FormControlLabelText>
-                </FormControlLabel>
-                <Input>
-                  <InputField
-                    placeholder="minimum 6 characters"
-                    autoCapitalize="none"
-                    secureTextEntry={!isPasswordVisible}
-                    value={form.password}
-                    onChangeText={(text) => handleChange("password", text)}
-                  />
-                  <TouchableOpacity
-                    onPress={togglePassword}
-                    style={{
-                      position: "absolute",
-                      right: 12,
-                      top: 12,
-                      zIndex: 1,
-                    }}
-                    hitSlop={10}
-                  >
-                    <Feather
-                      name={isPasswordVisible ? "eye-off" : "eye"}
-                      size={20}
-                      color="gray"
-                    />
-                  </TouchableOpacity>
-                </Input>
-                 {fieldErrors.password && (
-    <Text className="text-red-500 text-sm mt-1">{fieldErrors.password}</Text>
-  )}
-              </VStack>
-            </FormControl>
+      {/* Password */}
+      <FormControl isInvalid={!!fieldErrors.password}>
+        <FormControlLabel>
+          <FormControlLabelText color="$textLight50">
+            Password
+          </FormControlLabelText>
+        </FormControlLabel>
+        <Input bg="$backgroundDark800" rounded="$xl" borderWidth={0} size="md">
+          <InputField
+            placeholder="minimum 6 characters"
+            placeholderTextColor="$textLight400"
+            autoCapitalize="none"
+            secureTextEntry={!isPasswordVisible}
+            value={form.password}
+            onChangeText={(text) => handleChange("password", text)}
+            color="$textLight50"
+          />
+          <TouchableOpacity
+            onPress={togglePassword}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: 12,
+              zIndex: 1,
+            }}
+            hitSlop={10}
+          >
+            <Feather
+              name={isPasswordVisible ? "eye-off" : "eye"}
+              size={20}
+              color="gray"
+            />
+          </TouchableOpacity>
+        </Input>
+        {fieldErrors.password && (
+          <FormControlError>
+            <FormControlErrorIcon as={AlertCircleIcon} color="$error500" />
+            <FormControlErrorText color="$error500">
+              {fieldErrors.password}
+            </FormControlErrorText>
+          </FormControlError>
+        )}
+      </FormControl>
 
-            {/* Forgot Password */}
-            <TouchableOpacity style={{ marginTop: 10 }}>
-              <Pressable onPress={() => router.replace("/forgotPassword")}>
-                <Text className="text-right text-neutral-500 font-semibold">
-                  Forgot password?
-                </Text>
-              </Pressable>
-            </TouchableOpacity>
+      {/* Forgot Password - moved closer */}
+      <Pressable onPress={() => router.push("/forgotPassword")}>
+        <Text size="sm" color="$blue500" bold textAlign="right" >
+          Forgot password?
+        </Text>
+      </Pressable>
 
-            {/* Error message */}
-            {error !== "" && (
-              <Text className="text-red-500 mt-3 text-sm font-medium">{error}</Text>
-            )}
+      {/* Error Message */}
+      {error !== "" && (
+        <Text size="sm" color="$error500" mt="$2" textAlign="center">
+          {error}
+        </Text>
+      )}
 
-            {/* Sign In Button */}
-            <TouchableOpacity
-              onPress={handleSignIn}
-              className="bg-zinc-900 rounded-xl justify-center items-center p-4 w-full mt-6"
-            >
-              <Text className="text-white font-bold text-lg">Sign In</Text>
-            </TouchableOpacity>
-          </VStack>
-         </KeyboardAwareScrollView>
+      {/* Sign In Button */}
+      <Button bg="$blue600" rounded="$xl" mt="$4" onPress={handleSignIn} size="md">
+        <ButtonText color="white" bold size="lg">
+          Sign In
+        </ButtonText>
+      </Button>
+    </VStack>
+  </KeyboardAwareScrollView>
 
-          {/* Footer */}
-          <View className="mt-10 flex-row justify-center items-center pb-5">
-            <Text className="font-semibold text-neutral-500">
-              Don't have an account?{" "}
-            </Text>
-            <Pressable onPress={() => router.replace("/signUp")}>
-              <Text className="text-sm font-bold text-indigo-500">Sign Up</Text>
-            </Pressable>
-          </View>
-    </SafeAreaView>
-  );
+  {/* Footer */}
+    <HStack justifyContent="center" alignItems="center" py="$4">
+      <Text color="$textLight400" mr="$1">
+        Don’t have an account?
+      </Text>
+      <Pressable onPress={() => router.push("/signUp")}>
+        <Text size="sm" bold color="$blue500">
+          Sign Up
+        </Text>
+      </Pressable>
+    </HStack>
+</Box>
+
+);
 }
-
-export default SignIn;
+export default SignIn ;

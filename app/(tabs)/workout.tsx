@@ -155,82 +155,68 @@ useFocusEffect(
 </Box>
 
 
+<DraggableFlatList
+        data={routineList}
+        onDragEnd={({ data }) => {
+          setRoutineList(data);
+          Vibration.vibrate(30);
+        }}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, drag, isActive }) => (
+          <Box
+            bg="#1F1F1F"
+            p="$4"
+            mb="$4"
+            rounded="$xl"
+            style={{
+              opacity: isActive ? 0.9 : 1,
+              transform: [{ scale: isActive ? 1.02 : 1 }],
+            }}
+          >
+            <Pressable
+              onLongPress={() => {
+                Vibration.vibrate(50);
+                drag();
+              }}
+              onPress={() =>
+                router.push({ pathname: "/routine/[id]", params: { id: item.id } })
+              }
+            >
+              <HStack justifyContent="space-between" alignItems="center">
+                <Text color="$white" fontSize="$lg" fontWeight="$semibold">
+                  {item.name}
+                </Text>
+                <Pressable onPress={() => sheetRef.current?.open(item)}>
+                  <Feather name="more-horizontal" size={22} color="white" />
+                </Pressable>
+              </HStack>
+              <Text color="$coolGray400" fontSize="$sm" mt="$0.5" mb="$4">
+                {item.exercises.length > 0
+                  ? item.exercises.map((ex) => ex.name).join(", ")
+                  : "No exercises added"}
+              </Text>
+            </Pressable>
 
-    <DraggableFlatList
-  data={routineList}
-   onDragEnd={({ data }) => {
-    setRoutineList(data);
-    Vibration.vibrate(30); // Vibrate after drag ends
-  }}
-  keyExtractor={(item) => item.id}
-  contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120 }}
-  renderItem={({ item, drag, isActive }: RenderItemParams<RoutineWithExercises>) => (
-    <Box
-      bg="#1F1F1F"
-      p="$4"
-      mb="$4"
-      rounded="$xl"
-      style={{
-        opacity: isActive ? 0.9 : 1,
-        transform: [{ scale: isActive ? 1.02 : 1 }],
-      }}
-     
-    >
-      <Pressable
-  onLongPress={() => {
-    Vibration.vibrate(50); // 50ms vibration
-    drag(); // Start dragging
-  }}
-    onPress={() => {
-    router.push({
-      pathname: "/routine/[id]",
-      params: { id: item.id },
-    });
-  }}
->
-       <HStack justifyContent="space-between" alignItems="center">
-  <Text color="$white" fontSize="$lg" fontWeight="$semibold">
-    {item.name}
-  </Text>
-   <Pressable
-  onPress={() => {
-    sheetRef.current?.open(item);
-  }}
->
-    <Feather name="more-horizontal" size={22} color="white" />
-  </Pressable>
-</HStack>
-        <Text color="$coolGray400" fontSize="$sm" mt="$0.5" mb="$4">
-          {item.exercises.length > 0
-            ? item.exercises.map((ex) => ex.name).join(", ")
-            : "No exercises added"}
-        </Text>
-      </Pressable>
-
-      <CustomButton
-        onPress={() =>
-          router.push({
-            pathname: "/logWorkout",
-            params: {
-              routineId: item.id,
-              routineTitle: item.name,
-            },
-          })
+            <CustomButton
+              onPress={() =>
+                router.push({
+                  pathname: "/logWorkout",
+                  params: { routineId: item.id, routineTitle: item.name },
+                })
+              }
+              bg="$blue500"
+            >
+              Start Routine
+            </CustomButton>
+          </Box>
+        )}
+      />
+ <WorkoutRoutineSheet
+        ref={sheetRef}
+        onRoutineDeleted={(id) =>
+          setRoutineList((prev) => prev.filter((r) => r.id !== id))
         }
-        bg="$blue500"
-      >
-        Start Routine
-      </CustomButton>
-    </Box>
-  )}
-/>
-<WorkoutRoutineSheet
-  ref={sheetRef}
-  onRoutineDeleted={(id) => {
-    setRoutineList((prev) => prev.filter((r) => r.id !== id));
-  }}
-/>
-
+      />
     </SafeAreaView>
   );
 }

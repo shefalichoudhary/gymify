@@ -5,7 +5,6 @@ import CustomHeader from "@/components/customHeader";
 import { Pressable, Text, Box, HStack } from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
 
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 export default function Layout() {
   const router = useRouter();
@@ -25,7 +24,6 @@ const { user, logout } = useAuth();
     router.prefetch("/routine/edit/[id]");
   }, []);
   return (
-    <SafeAreaView style={{ flex: 1}} edges={["bottom", "left", "right"]}>
       <Box flex={1}>
         <Tabs
          
@@ -41,7 +39,7 @@ const { user, logout } = useAuth();
                     <CustomHeader
                       isHome
                       left={
-                        <Pressable onPress={() => router.replace("/")}>
+                        <Pressable onPress={() => router.navigate("/")}>
                           <Text
                             color="$white"
                             fontWeight="$xl"
@@ -76,7 +74,7 @@ const { user, logout } = useAuth();
                 return (
                   <CustomHeader
                     left={
-                      <Pressable onPress={() => router.push("/home")}>
+                      <Pressable onPress={() => router.navigate("/home")}>
                         <AntDesign name="arrowleft" size={24} color="white" />
                       </Pressable>
                     }
@@ -94,16 +92,23 @@ const { user, logout } = useAuth();
   ? route.name === "home"
     ? {
         backgroundColor: "#1F1F1F",
-        borderTopWidth: 0.2,
-        borderTopColor: "#1F1F1F", // customize this color as needed
-        paddingBottom: 1,
-        height: 60,
+  paddingBottom: 1,
+  height: 60,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: -2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 6,
       }
     : {
-        backgroundColor: "#1F1F1F",
-        borderTopWidth: 0,
-        paddingBottom: 10,
-        height: 60,
+         backgroundColor: "#1F1F1F",
+  paddingBottom: 10,
+  height: 60,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: -2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 6,
       }
   : { display: "none" },
 
@@ -135,7 +140,10 @@ const { user, logout } = useAuth();
   />
   <Tabs.Screen
     name="workout"
-    options={{ title: "Workout" }}
+    options={{ title: "Workout", 
+        tabBarStyle: { display: "none" },
+     }}
+
   />
   <Tabs.Screen
     name="profile"
@@ -175,6 +183,5 @@ const { user, logout } = useAuth();
        
         </Tabs>
       </Box>
-    </SafeAreaView>
   );
 }

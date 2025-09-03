@@ -136,7 +136,13 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
         title="Add Exercise"
         left="Cancel"
         right="Create"
-        onPress={() => router.back()}
+      onPress={() => {
+  if (router.canGoBack()) {
+    router.back();
+  } else {
+    router.replace("/home"); // or default landing
+  }
+}}
         onRightButtonPress={handleCreate}
       />
 

@@ -80,15 +80,7 @@ useEffect(() => {
 
 
 
-  if (!workout) {
-    return (
-      <Box flex={1} justifyContent="center" alignItems="center" bg="$black">
-        <Text color="white">Loading workout...</Text>
-      </Box>
-    );
-  }
-
-  const count =
+const count =
   typeof addedExerciseCount === "string"
     ? parseInt(addedExerciseCount, 10)
     : Array.isArray(addedExerciseCount)
@@ -103,25 +95,33 @@ useEffect(() => {
       cancelText: "Keep Original Routine",
       destructive: false,
       onConfirm: async () => {
-        // Update routine logic here
         setDialogVisible(false);
-        router.push("/home");
+        router.replace("/home");
       },
       onCancel: () => {
         setDialogVisible(false);
-        router.push("/home");
+        router.replace("/home");
       },
     });
     setDialogVisible(true);
   }
-}, [addedExerciseCount]);
+}, [count]); // ✅ depend on count instead of addedExerciseCount
+
+if (!workout) {
+  return (
+    <Box flex={1} justifyContent="center" alignItems="center" bg="$black">
+      <Text color="white">Loading workout...</Text>
+    </Box>
+  );
+}
+
 
   return (
     <Box flex={1} bg="$black">
       <CustomHeader
         title="Save Workout"
         left="Cancel"
-        onPress={() => router.push("/home")}
+        onPress={() => router.replace("/home")}
         right="Save"
       onRightButtonPress={async () => {
   setDialogProps({
@@ -136,7 +136,7 @@ useEffect(() => {
         .set({ title })
         .where(eq(workouts.id, String(id)));
       setDialogVisible(false);
-      router.push("/home");
+      router.replace("/home");
     },
     onCancel: () => setDialogVisible(false),
   });

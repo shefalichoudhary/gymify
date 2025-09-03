@@ -86,13 +86,13 @@ const handleDuplicate = () => {
         };
 
         return (
-        <CustomBottomSheet ref={bottomSheetRef} snapPoints={["30%"]}>
+        <CustomBottomSheet ref={bottomSheetRef} snapPoints={["35%"]}>
             <Box >
             {/* Header-style Title */}
             <Box 
                 borderBottomWidth={1}
                 borderColor="$trueGray700"
-                pt="$1"
+                pt="$2"
                 pb="$3"
                 mb="$4"
             >
@@ -101,7 +101,7 @@ const handleDuplicate = () => {
                 </Text>
             </Box>
 
-            <VStack space="lg" px="$6" >
+            <VStack space="xl" px="$6" >
                 <Pressable  onPress={ handleDuplicate}>
                 <HStack alignItems="center" space="lg">
                     <Feather name="copy" size={18} color="white" />

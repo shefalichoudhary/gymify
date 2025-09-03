@@ -13,16 +13,23 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { AuthProvider } from "@/context/authContext"; 
 import { ActivityIndicator } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
 const MainLayout = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1 }}
+    >
       <BottomSheetModalProvider>
         <GluestackUIProvider config={config}>
           <AuthProvider>
-            <Slot />
+          <SafeAreaView
+              style={{ flex: 1, backgroundColor: "#1F1F1F" }}
+              edges={["bottom", "left", "right"]} // ✅ global safe area
+            >
+              <Slot />
+            </SafeAreaView>
           </AuthProvider>
         </GluestackUIProvider>
       </BottomSheetModalProvider>
@@ -72,7 +79,7 @@ export default function RootLayout() {
     }, 5000);
 
     return () => clearTimeout(timeout);
-  }, [success, migrationError]);
+  }, []);
 
   if (!appReady) {
     return (

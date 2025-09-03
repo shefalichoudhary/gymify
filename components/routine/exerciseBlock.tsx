@@ -44,8 +44,16 @@ export default function ExerciseBlock({
     updatedSets[index] = { ...updatedSets[index], [key]: value };
     onChange({ ...data, sets: updatedSets });
   };
+const [visibleSets, setVisibleSets] = React.useState(2);  
 
- const handleAddSet = () => {
+const handleAddSet = () => {
+  // if there are more previous sets hidden, just increase visible count
+  if (visibleSets < data.sets.length) {
+    setVisibleSets((prev) => prev + 1);
+    return;
+  }
+
+  // Otherwise, add a new empty set
   let newSet: Set;
 
   if (isWeighted) {
@@ -59,7 +67,9 @@ export default function ExerciseBlock({
   }
 
   onChange({ ...data, sets: [...data.sets, newSet] });
+  setVisibleSets((prev) => prev + 1); // make new set visible immediately
 };
+
   const isDuration = exercise.exercise_type === "Duration" || exercise.exercise_type === "Yoga";
 const isWeighted =
   exercise.exercise_type === "Weighted" ||
@@ -137,7 +147,7 @@ const isWeighted =
 </Pressable>
 
 
-      {data.sets.map((set, index) => (
+  {data.sets.slice(0, visibleSets).map((set, index) => (
         <SetRow
           key={index}
           index={index}

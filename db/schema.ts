@@ -101,7 +101,6 @@ export const userRoutineWorkout = sqliteTable("user_routine_workout", {
   routineId: text("routine_id").references(() => routines.id),
   workoutId: text("workout_id").references(() => workouts.id),
 
-  // You can also add type: 'routine' | 'workout' if you want to filter
 });
 
 // Types

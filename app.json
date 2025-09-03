@@ -9,8 +9,8 @@
     "userInterfaceStyle": "automatic",
 
    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/images/logo.png",
+      "resizeMode": "cover",
       "backgroundColor": "#1F1F1F"
   },
     "newArchEnabled": true,
@@ -24,6 +24,9 @@
     },
     "android": {
       "package": "com.shefali_choudhary.gymify",
+       "splash": {
+    "backgroundColor": "#1F1F1F"
+  },
        "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
           "backgroundColor": "#1F1F1F"

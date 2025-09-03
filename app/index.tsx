@@ -197,7 +197,6 @@ export default function LandingPage() {
             alignItems="center"
             justifyContent="flex-end"
             alignSelf="center"
-            pb="$3"
           >
             <Text
               fontSize={width > 600 ? "$2xl" : width > 400 ? "$xl" : "$2xl"}
@@ -221,7 +220,7 @@ export default function LandingPage() {
               you build strength, improve flexibility, and stay motivated.
             </Text>
           <CustomButton
-   onPress={() => router.replace("/home")}
+   onPress={() => router.navigate("/home")}
 
   iconPosition="right"
   icon={

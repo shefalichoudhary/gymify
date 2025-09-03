@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Box,
   Text,
@@ -9,21 +9,15 @@ import {
   Divider,
   Button,
   ScrollView,
-  Pressable,
 } from "@gluestack-ui/themed";
 import { useRouter } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useAuth } from "@/context/authContext";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
+
 export default function Profile() {
   const router = useRouter();
   const { user, logout } = useAuth();
-
-  useEffect(() => {
-    if (!user) {
-      // Do nothing here — we’ll handle fallback below
-    }
-  }, [user]);
 
   if (!user) {
     return (
@@ -39,39 +33,53 @@ export default function Profile() {
   }
 
   return (
-    <ScrollView flex={1} bg="$black" px="$4" py="$6">
+    <ScrollView flex={1} bg="$black" px="$5" py="$6">
       <VStack space="xl" alignItems="center">
-        {/* Gradient Avatar Block */}
+        {/* Gradient Avatar */}
         <LinearGradient
-  colors={["#4facfe", "#00f2fe"]}
-  style={{ borderRadius: 9999, padding: 6 }}
->
-          <Avatar bgColor="$black" size="2xl">
+          colors={["#4facfe", "#00f2fe"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            borderRadius: 9999,
+            padding: 2,
+          }}
+        >
+          <Avatar
+            bgColor="$black"
+            size="2xl"
+            borderWidth={2}
+            borderColor="transparent"
+          >
             <AvatarFallbackText>
               {user.username?.slice(0, 2).toUpperCase()}
             </AvatarFallbackText>
           </Avatar>
         </LinearGradient>
 
-        <Text color="$white" fontSize="$2xl" fontWeight="$bold">
+        {/* Username */}
+        <VStack space="xs" alignItems="center" w="100%" mt="$4">
+
+        <Text color="$white" fontSize="$2xl" fontWeight="$bold" >
           {user.username}
         </Text>
         <Text color="$coolGray400" fontSize="$md">
           Fitness Enthusiast
         </Text>
+        </VStack>
 
-        {/* Profile Card */}
+        {/* Profile Info Card */}
         <Box
           w="100%"
           bg="$gray900"
-          p="$5"
-          borderRadius="$xl"
+          p="$4"
+          borderRadius="$2xl"
           borderWidth={1}
           borderColor="$coolGray800"
           shadowColor="black"
           shadowOffset={{ width: 0, height: 2 }}
-          shadowOpacity={0.2}
-          shadowRadius={4}
+          shadowOpacity={0.25}
+          shadowRadius={6}
         >
           <VStack space="md">
             <ProfileItem label="Email" value={user.email} />
@@ -83,11 +91,11 @@ export default function Profile() {
         </Box>
 
         {/* Buttons */}
-        <VStack space="md" w="100%" mt="$4">
+        <VStack space="md" w="100%" >
           <Button
-            bg="$blue500"
-            borderRadius="$lg"
-            onPress={() => router.push("/home")}
+            bg="$blue600"
+            borderRadius="$xl"
+            onPress={() => router.replace("/home")}
             size="lg"
           >
             <HStack space="sm" alignItems="center">
@@ -96,18 +104,21 @@ export default function Profile() {
             </HStack>
           </Button>
 
-          <Button
-            bg="$red600"
-            borderRadius="$lg"
-            onPress={logout}
-            size="lg"
-            $pressed={{ bg: "$red700" }}
-          >
-            <HStack space="sm" alignItems="center">
-              <AntDesign name="logout" size={18} color="white" />
-              <Text color="white">Log Out</Text>
-            </HStack>
-          </Button>
+         <Button
+  bg="$red600"
+  borderRadius="$xl"
+  onPress={async () => {
+    await logout();
+    router.replace("/home");
+  }}
+  size="lg"
+  $pressed={{ bg: "$red700" }}
+>
+  <HStack space="sm" alignItems="center">
+    <AntDesign name="logout" size={18} color="white" />
+    <Text color="white">Log Out</Text>
+  </HStack>
+</Button>
         </VStack>
       </VStack>
     </ScrollView>
@@ -115,7 +126,7 @@ export default function Profile() {
 }
 
 const ProfileItem = ({ label, value }: { label: string; value: string }) => (
-  <HStack justifyContent="space-between">
+  <HStack justifyContent="space-between" alignItems="center">
     <Text color="$coolGray400" fontSize="$sm">
       {label}
     </Text>

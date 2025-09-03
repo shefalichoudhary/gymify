@@ -201,9 +201,6 @@ useEffect(() => {
 
     if (sets[setIndex]) {
       sets[setIndex].isCompleted = justCompleted;
-
-      console.log(`[${new Date().toISOString()}] ✅ Toggled Set - Exercise: ${exerciseId}, Set: ${setIndex}, Completed: ${justCompleted}`);
-
       const key = `${exerciseId}-${setIndex}`;
 
       if (justCompleted && updated[exerciseId].restTimer) {
@@ -483,13 +480,12 @@ const [workout] = await db.insert(workouts).values({
 
     setIsWorkoutActive(false);
 
-    router.push({
+    router.replace({
       pathname: "/saveWorkout",
       params: { id: workout.id, routineId, addedExerciseCount: String(Object.keys(exerciseData).length) },
     });
   } catch (err) {
     Alert.alert("Save Failed", "Could not save workout.");
-    console.error("❌ saveWorkout error:", err);
   }
 };
 
