@@ -9,6 +9,18 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    ```bash
    npm install
    ```
+ Packages installed include:
+
+Expo SDK 53
+
+Expo Router for file-based navigation
+
+Drizzle ORM + SQLite for local storage
+
+Gluestack UI for design components
+
+NativeWind / TailwindCSS for styling
+
 
 2. Start the app
 
@@ -41,6 +53,7 @@ To learn more about developing your project with Expo, look at the following res
 
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+
 
 ## Join the community
 

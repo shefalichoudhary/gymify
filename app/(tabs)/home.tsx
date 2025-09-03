@@ -105,18 +105,17 @@ export default function Home() {
           workoutsWithExercises.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
           setWorkouts(workoutsWithExercises);
-        } catch (err) {
-          console.error("Error fetching workouts:", err);
-        }
-      };
-
+         const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+        setQuote(randomQuote);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
       fetchWorkouts();
     }, [])
   );
 
-  useEffect(() => {
-    setQuote(getRandomQuote());
-  }, [workouts.length]);
+
 
   // Only show the latest workout
   const latestWorkout = workouts.length > 0 ? workouts[0] : null;

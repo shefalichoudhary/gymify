@@ -12,16 +12,9 @@ export default function Layout() {
 const { user, logout } = useAuth();
 
   useEffect(() => {
-    router.prefetch("/createRoutine");
-    router.prefetch("/addExercise");
     router.prefetch("/logWorkout");
-    router.prefetch("/saveWorkout");
     router.prefetch("/workout");
-    router.prefetch("/profile");
-    router.prefetch("/signIn");
-    router.prefetch("/signUp");
-    router.prefetch("/routine/[id]");
-    router.prefetch("/routine/edit/[id]");
+    router.prefetch("/home")
   }, []);
   return (
       <Box flex={1}>
@@ -32,7 +25,7 @@ const { user, logout } = useAuth();
 
             return {
               contentStyle: { backgroundColor: "#1F1F1F" },
-              lazy: false, // preload all tabs for smoother navigation
+              lazy: true, // preload all tabs for smoother navigation
               header: () => {
                 if (route.name === "home") {
                   return (

@@ -23,7 +23,7 @@
       
     },
     "android": {
-      "package": "com.shefali_choudhary.gymify",
+      "package": "com.shefali.gymify",
        "splash": {
     "backgroundColor": "#1F1F1F"
   },

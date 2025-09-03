@@ -3,6 +3,7 @@ import React from "react";
 import { ImageBackground, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { setupDatabase } from "../assets/db/gymify";
 import {
   Box,
   VStack,
@@ -21,7 +22,9 @@ export default function LandingPage() {
   const isLargeScreen = width > 768;
   
     useSeedExercises(); // seed only on native
-  
+  React.useEffect(() => {
+    setupDatabase();
+  }, []);
 
   // Load Inter font
   const [fontsLoaded] = useFonts({
