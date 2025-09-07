@@ -46,7 +46,7 @@ export default function CustomHeader({
             center
           ) : !isHome ? (
             <Text
-              fontSize="$md"
+              fontSize="$lg"
               fontWeight="$small"
               color="$white"
               letterSpacing={1}

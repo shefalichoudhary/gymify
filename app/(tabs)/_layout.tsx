@@ -142,6 +142,7 @@ const { user, logout } = useAuth();
     name="profile"
     options={{ title: "Profile" }}
   />
+
           <Tabs.Screen
           name="createRoutine"
           options={{ title: "CreateRoutine", href: null, headerShown: false }}

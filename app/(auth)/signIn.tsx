@@ -10,13 +10,11 @@ import {
   FormControlError,
   FormControlErrorText,
   FormControlErrorIcon,
-  FormControlHelper,
-  FormControlHelperText,
+ 
   FormControlLabelText,
   Input,
   InputField,
-  InputIcon,
-  InputSlot,
+  
   Button,
   ButtonText,
   Box,
@@ -90,7 +88,7 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
 };
 
   return (
-  <Box flex={1} bg="#1F1F1F">
+  <Box flex={1} bg="black">
   <KeyboardAwareScrollView
     enableOnAndroid
     keyboardShouldPersistTaps="handled"
@@ -100,7 +98,7 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
 
     <VStack
       flex={1}
-      pt="$48"
+      pt="$16"
       px="$5"
       space="lg" // 🔥 reduce space so "Forgot password?" isn’t pushed too far
       width="100%"

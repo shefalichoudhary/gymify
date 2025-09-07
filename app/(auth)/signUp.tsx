@@ -18,7 +18,7 @@ import {
   Text,
   Box,
   Pressable,
-  FormControlHelper,FormControlHelperText,FormControlErrorIcon
+  FormControlHelper,FormControlHelperText,
 } from "@gluestack-ui/themed";
 import { TouchableOpacity } from "react-native";
 import { useAuth } from "@/context/authContext";
@@ -49,7 +49,14 @@ function SignUp(): JSX.Element {
   const togglePassword = () => {
     setIsPasswordVisible((prev) => !prev);
   };
-
+const passwordRules = [
+    { label: "At least 6 characters", test: (pw: string) => pw.length >= 6 },
+    { label: "Uppercase letter", test: (pw: string) => /[A-Z]/.test(pw) },
+    { label: "Lowercase letter", test: (pw: string) => /[a-z]/.test(pw) },
+    { label: "Number", test: (pw: string) => /\d/.test(pw) },
+    { label: "Special character", test: (pw: string) => /[@$!%*?&#]/.test(pw) },
+  ];
+  
   const validateInput = (email: string, password: string, username: string) => {
     let valid = true;
 
@@ -123,7 +130,7 @@ function SignUp(): JSX.Element {
   };
 
   return (
-    <Box flex={1} bg="#1F1F1F">
+    <Box flex={1} bg="black">
       <KeyboardAwareScrollView
         enableOnAndroid
         keyboardShouldPersistTaps="handled"
@@ -133,15 +140,15 @@ function SignUp(): JSX.Element {
 
         <VStack
           flex={1}
-          pt="$32"
+          pt="$16"
           px="$5"
-          space="lg"
+          space="md"
           width="100%"
           maxWidth={800}
           alignSelf="center"
         >
           {/* Title */}
-          <Text size="4xl" bold color="$textLight50" textAlign="center" mb="$4">
+          <Text size="4xl" bold color="$textLight50" textAlign="center" mb="$2" lineHeight={36}>
             Create Your Account
           </Text>
 
@@ -159,7 +166,8 @@ function SignUp(): JSX.Element {
                 autoCapitalize="none"
                 value={form.username}
                 onChangeText={(text) => handleChange("username", text)}
-                color="$textLight50"
+                               color="$white"
+
               />
             </Input>
             {usernameError && (
@@ -184,7 +192,8 @@ function SignUp(): JSX.Element {
                 keyboardType="email-address"
                 value={form.email}
                 onChangeText={(text) => handleChange("email", text)}
-                color="$textLight50"
+                              color="$white"
+
               />
             </Input>
             {emailError && (
@@ -195,21 +204,21 @@ function SignUp(): JSX.Element {
           </FormControl>
 
           {/* Password */}
-          <FormControl isInvalid={!!passwordError}>
+{/* Password */}
+ <FormControl>
             <FormControlLabel>
-              <FormControlLabelText color="$textLight50">
-                Password
-              </FormControlLabelText>
+              <FormControlLabelText color="$textLight50">New Password</FormControlLabelText>
             </FormControlLabel>
             <Input bg="$backgroundDark800" rounded="$xl" borderWidth={0}>
               <InputField
-                placeholder="password"
+                placeholder="New Password"
                 placeholderTextColor="$textLight400"
                 secureTextEntry={!isPasswordVisible}
                 autoCapitalize="none"
+                color="$white"
+
                 value={form.password}
                 onChangeText={(text) => handleChange("password", text)}
-                color="$textLight50"
               />
               <TouchableOpacity
                 onPress={togglePassword}
@@ -223,17 +232,26 @@ function SignUp(): JSX.Element {
                 />
               </TouchableOpacity>
             </Input>
-             <FormControlHelper>
-    <FormControlHelperText color="$textLight400">
-      Password must be at least 6 characters long, include uppercase, lowercase, a number, and a special character.
-    </FormControlHelperText>
-  </FormControlHelper>
-            {passwordError && (
-              <FormControlError>
-                <FormControlErrorText>{passwordError}</FormControlErrorText>
-              </FormControlError>
-            )}
+
+            {/* Password rules */}
+            <VStack  space="xs">
+              {passwordRules.map((rule, idx) => {
+                const valid = rule.test(form.password);
+                return (
+                  <HStack key={idx} alignItems="center" space="sm">
+                    <Feather
+                      name={valid ? "check-circle" : "x-circle"}
+                      size={16}
+                      color={valid ? "green" : "red"}
+                    />
+                    <Text color="$textLight400">{rule.label}</Text>
+                  </HStack>
+                );
+              })}
+            </VStack>
           </FormControl>
+
+
 
           {/* Sign Up Button */}
           <Button
