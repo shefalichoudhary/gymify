@@ -1,0 +1,26 @@
+import * as FileSystem from "expo-file-system";
+import { Asset } from "expo-asset";
+import { openDatabaseSync } from "expo-sqlite";
+
+const DB_NAME = "Gymify.db";
+const DB_DIR = `${FileSystem.documentDirectory}SQLite`;
+const DB_PATH = `${DB_DIR}/${DB_NAME}`;
+
+export async function setupDatabase() {
+  await FileSystem.makeDirectoryAsync(DB_DIR, { intermediates: true });
+
+  const dbInfo = await FileSystem.getInfoAsync(DB_PATH);
+  if (!dbInfo.exists) {
+    const asset = Asset.fromModule(require("../assets/db/Gymify.db"));
+    await asset.downloadAsync();
+    await FileSystem.copyAsync({
+      from: asset.localUri!,
+      to: DB_PATH,
+    });
+    console.log("Database copied from assets!");
+  } else {
+    console.log("Database already exists.");
+  }
+
+  return openDatabaseSync(DB_NAME);
+}

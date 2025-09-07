@@ -10,7 +10,6 @@ export const useSeedExercises = () => {
     if (Platform.OS === "web") return;
 
     const seed = async () => {
-      console.log("🌱 Seeding database...");
 
       const muscleMap = new Map<string, string>();
 
@@ -65,7 +64,6 @@ export const useSeedExercises = () => {
         }
       }
 
-      console.log("✅ Seed completed.");
     };
 
     seed().catch((err) => console.error("❌ Seed failed:", err));
