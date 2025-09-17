@@ -190,7 +190,7 @@ useEffect(() => {
 }, []);
 
 
- const handleToggleSetComplete = (
+const handleToggleSetComplete = (
   exerciseId: string,
   setIndex: number,
   justCompleted: boolean
@@ -200,11 +200,38 @@ useEffect(() => {
     const sets = updated[exerciseId]?.sets ?? [];
 
     if (sets[setIndex]) {
+      // Toggle completed
       sets[setIndex].isCompleted = justCompleted;
+
+      // If checking, fill empty fields from previous values
+      if (justCompleted) {
+        sets[setIndex].weight =
+          sets[setIndex].weight ?? sets[setIndex].previousWeight ?? 0;
+
+        sets[setIndex].reps =
+          sets[setIndex].reps ?? sets[setIndex].previousReps ?? 0;
+
+        sets[setIndex].minReps =
+          sets[setIndex].minReps ?? sets[setIndex].previousMinReps ?? 0;
+
+        sets[setIndex].maxReps =
+          sets[setIndex].maxReps ?? sets[setIndex].previousMaxReps ?? 0;
+
+        sets[setIndex].duration =
+          sets[setIndex].duration ?? sets[setIndex].previousDuration ?? 0;
+
+        sets[setIndex].unit =
+          sets[setIndex].unit ?? sets[setIndex].previousUnit ?? "kg";
+
+        sets[setIndex].repsType =
+          sets[setIndex].repsType ?? sets[setIndex].previousRepsType ?? "reps";
+      }
+
       const key = `${exerciseId}-${setIndex}`;
 
       if (justCompleted && updated[exerciseId].restTimer) {
-        const restTime = updated[exerciseId].restTimeInSeconds ?? updated[exerciseId].restTimer ?? 0;
+        const restTime =
+          updated[exerciseId].restTimeInSeconds ?? updated[exerciseId].restTimer ?? 0;
 
         setRestCountdowns((prev) => ({
           ...prev,
@@ -523,10 +550,6 @@ const discardRoutineAndReset = () => {
   router.replace("/workout");
 };
 
-
-
-
-
 useFocusEffect(
   React.useCallback(() => {
     const onBackPress = () => {
@@ -558,9 +581,6 @@ useFocusEffect(
     <SafeAreaView flex={1} bg="$black">
       <CustomHeader
         title="Log Workout"
-        left="Cancel"
-          onPress={() => { router.replace("/workout")}}
-      
         right="Finish"
        onRightButtonPress={handleFinish}
       />

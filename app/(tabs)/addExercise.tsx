@@ -134,15 +134,9 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
     <Box flex={1} bg="$black">
       <CustomHeader
         title="Add Exercise"
-        left="Cancel"
+        
         right="Create"
-      onPress={() => {
-  if (router.canGoBack()) {
-    router.back();
-  } else {
-    router.replace("/home"); // or default landing
-  }
-}}
+      
         onRightButtonPress={handleCreate}
       />
 

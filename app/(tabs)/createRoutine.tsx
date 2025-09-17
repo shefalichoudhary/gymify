@@ -19,7 +19,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
       SafeAreaView,
     } from "@gluestack-ui/themed";
     import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-    import { Entypo, MaterialIcons } from "@expo/vector-icons";
+    import { AntDesign, Entypo, MaterialIcons } from "@expo/vector-icons";
     import CustomHeader from "@/components/customHeader";
     import CustomButton from "@/components/customButton";
     import ExerciseBlock from "@/components/routine/exerciseBlock";
@@ -345,17 +345,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
         <SafeAreaView flex={1} bg="$black">
           <CustomHeader
             title="Create Routine"
-            left="Cancel"
-         onPress={() =>
-    showDialog({
-      message: "Are you sure you want to discard this routine?",
-      confirmText: "Discard",
-      cancelText: "Cancel",
-      destructive: true,
-      onConfirm: discardRoutineAndReset,
-    })
-  }
-
+             
             right="Save"
             onRightButtonPress={handleSave}
           />

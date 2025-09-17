@@ -6,15 +6,20 @@ type CustomBottomSheetProps = {
   children?: React.ReactNode;
   snapPoints?: (string | number)[];
   scrollable?: boolean; // optional flag
+  onChange?: (index: number) => void; // optional callback
 };
 
 const CustomBottomSheet = forwardRef<BottomSheet, CustomBottomSheetProps>(
-  ({ children, snapPoints }, ref) => {
+  ({ children, snapPoints,onChange }, ref) => {
     const snapPointsMemo = useMemo(() => snapPoints ?? ["50%"], [snapPoints]);
 
-    const handleSheetChange = useCallback((index: number) => {
-      console.log("Sheet changed to index", index);
-    }, []);
+       const handleSheetChange = useCallback(
+      (index: number) => {
+        onChange?.(index); // notify parent
+      },
+      [onChange]
+    );
+
 
     const renderBackdrop = useCallback(
       (props: any) => (

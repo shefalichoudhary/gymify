@@ -39,10 +39,11 @@ type SetType = {
 
     type Props = {
     onRoutineDeleted: (id: string) => void;
+      onSheetChange?: (open: boolean) => void;
     };
 
     const WorkoutRoutineSheet = forwardRef<WorkoutRoutineSheetRef, Props>(
-    ({ onRoutineDeleted }, ref) => {
+    ({ onRoutineDeleted, onSheetChange }, ref) => {
         const router = useRouter();
         const bottomSheetRef = useRef<BottomSheet>(null);
         const [routine, setRoutine] = useState<Routine | null>(null);
@@ -51,9 +52,11 @@ type SetType = {
         open: (routine: Routine) => {
             setRoutine(routine); // trigger re-render with routine
             bottomSheetRef.current?.snapToIndex(0);
+              onSheetChange?.(true);
         },
         close: () => {
             bottomSheetRef.current?.close();
+            onSheetChange?.(false); 
         },
         }));
 
@@ -86,7 +89,9 @@ const handleDuplicate = () => {
         };
 
         return (
-        <CustomBottomSheet ref={bottomSheetRef} snapPoints={["35%"]}>
+        <CustomBottomSheet ref={bottomSheetRef} snapPoints={["35%"]}
+           onChange={(index: number) => onSheetChange?.(index >= 0)}
+          >
             <Box >
             {/* Header-style Title */}
             <Box 

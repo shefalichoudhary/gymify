@@ -1,23 +1,22 @@
 export type WorkoutSet = {
-  weight?: number;
+  weight?: number | null;
   reps?: number | null;
-  minReps?: number;
-  maxReps?: number;
+  minReps?: number | null;
+  maxReps?: number | null;
+  duration?: number | null;
+
   isRangeReps?: boolean;
 
-  // Previous values for prefill
-  previousWeight?: number;
-  previousReps?: number;
-  previousMinReps?: number;
-  previousMaxReps?: number;
+  previousWeight?: number | null;
+  previousReps?: number | null;
+  previousMinReps?: number | null;
+  previousMaxReps?: number | null;
   previousUnit?: "kg" | "lbs";
   previousRepsType?: "reps" | "rep range";
-  previousDuration?: number;
+  previousDuration?: number | null;
 
-  // Set metadata
   isCompleted?: boolean;
   setType?: "W" | "Normal" | "D" | "F" | string;
   unit?: "kg" | "lbs";
   repsType?: "reps" | "rep range";
-    duration?: number;
 };

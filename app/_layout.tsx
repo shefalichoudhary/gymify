@@ -21,18 +21,20 @@ const MainLayout = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}
     >
-      <BottomSheetModalProvider>
         <GluestackUIProvider config={config}>
           <AuthProvider>
+               <BottomSheetModalProvider>
+
           <SafeAreaView
               style={{ flex: 1, backgroundColor: "#1F1F1F" }}
               edges={["bottom", "left", "right"]} // ✅ global safe area
             >
               <Slot />
             </SafeAreaView>
+               </BottomSheetModalProvider>
+
           </AuthProvider>
         </GluestackUIProvider>
-      </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
 };

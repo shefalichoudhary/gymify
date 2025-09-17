@@ -12,7 +12,8 @@ import { WorkoutSet as Set } from "@/types/workoutSet";
 import { Vibration } from "react-native";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/db";
-import { workoutSets, WorkoutSet } from "@/db/schema";
+import { workoutSets } from "@/db/schema";
+import { getExerciseTypeFlags } from "@/utils/exerciseType";
 
 type SetRowProps = {
   index: number;
@@ -39,11 +40,17 @@ export default function SetRow({
 }: SetRowProps) {
   if (!set) return null;
 
-  const [previousSets, setPreviousSets] = useState<Record<string, WorkoutSet[]>>({});
+const [previousValues, setPreviousValues] = useState<{
+  weight?: number;
+  reps?: number;
+  minReps?: number;
+  maxReps?: number;
+  duration?: number;
+}>({});
   const intervalRef = useRef<number | null>(null);
   const [timerRunning, setTimerRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | undefined>(set.duration || 0);
-
+const { isDuration, isWeighted, isBodyweight } = getExerciseTypeFlags(exerciseType ?? null);
   useEffect(() => {
     if (timerRunning) {
       intervalRef.current = setInterval(() => {
@@ -60,26 +67,24 @@ export default function SetRow({
     };
   }, [timerRunning]);
 
-  useEffect(() => {
-    async function fetchHistory() {
-      const sets = await getPreviousSets(exerciseId);
-      setPreviousSets((prev) => ({ ...prev, [exerciseId]: sets }));
+useEffect(() => {
+  async function fetchHistory() {
+    const sets = await getPreviousSets(exerciseId);
+   if (sets.length > 0) {
+  const lastSet = sets[0];
+  setPreviousValues({
+    weight: lastSet.weight ?? undefined,
+    reps: lastSet.reps ?? undefined,
+    minReps: lastSet.minReps ?? undefined,
+    maxReps: lastSet.maxReps ?? undefined,
+    duration: lastSet.duration ?? undefined,
+  });
+}
+  }
+  fetchHistory();
+}, [exerciseId]);
 
-      if (sets.length > 0) {
-        const lastSet = sets[0];
-        onChange("previousWeight", lastSet.weight ?? undefined);
-        onChange("previousReps", lastSet.reps ?? undefined);
-        onChange("previousMinReps", lastSet.minReps ?? undefined);
-        onChange("previousMaxReps", lastSet.maxReps ?? undefined);
-        onChange("previousDuration", lastSet.duration ?? undefined);
-      }
-    }
-    fetchHistory();
-  }, [exerciseId]);
-
-  const isDuration = exerciseType === "Duration" || exerciseType === "Yoga";
-  const isWeighted = exerciseType === "Weighted" || exerciseType === "Assisted Bodyweight";
-  const isBodyweight = exerciseType === "Bodyweight";
+ 
 
   const handleCheckPress = () => {
     if (timerRunning) {
@@ -113,6 +118,21 @@ export default function SetRow({
         return "#fff";
     }
   };
+const placeholderWeight =
+  set.weight ?? set.previousWeight ?? previousValues.weight;
+
+const placeholderReps =
+  set.reps ?? set.previousReps ?? previousValues.reps;
+
+const placeholderMinReps =
+  set.minReps ?? set.previousMinReps ?? previousValues.minReps;
+
+const placeholderMaxReps =
+  set.maxReps ?? set.previousMaxReps ?? previousValues.maxReps;
+
+const placeholderDuration =
+  set.duration ?? set.previousDuration ?? previousValues.duration;
+
 
   async function getPreviousSets(exerciseId: string) {
     return await db
@@ -122,47 +142,49 @@ export default function SetRow({
       .limit(1);
   }
 
+
+  
   // --- Shared reps input for Weighted & Bodyweight
   const renderRepsInput = () => (
-    <Box flex={showCheckIcon ? 6 : 4}>
+    <Box flex={showCheckIcon ? 6 : 5}>
       <HStack alignItems="center" space="sm" ml="$4">
         {set.isRangeReps ? (
           <HStack alignItems="center" flex={1}>
             <Input size="sm" borderWidth={0} w="25%">
               <InputField
-                placeholder={set.previousMinReps?.toString() ?? "-"}
-                keyboardType="numeric"
-                color="$white"
-                value={set.minReps?.toString() ?? ""}
-                onChangeText={(text) =>
-                  onChange("minReps", text ? parseInt(text, 10) || 0 : undefined)
-                }
-              />
+  placeholder={placeholderMinReps?.toString() ?? "-"}
+  keyboardType="numeric"
+  color="$white"
+  value={set.minReps != null ? set.minReps.toString() : undefined}
+  onChangeText={(text) =>
+    onChange("minReps", text ? parseInt(text, 10) || 0 : undefined)
+  }
+/>
             </Input>
             <Text color="$white">to</Text>
             <Input size="sm" borderWidth={0} w="30%">
-              <InputField
-                placeholder={set.previousMaxReps?.toString() ?? "-"}
-                keyboardType="numeric"
-                color="$white"
-                value={set.maxReps?.toString() ?? ""}
-                onChangeText={(text) =>
-                  onChange("maxReps", text ? parseInt(text, 10) || 0 : undefined)
-                }
-              />
+<InputField
+  placeholder={placeholderMaxReps?.toString() ?? "-"}
+  keyboardType="numeric"
+  color="$white"
+  value={set.maxReps != null ? set.maxReps.toString() : undefined}
+  onChangeText={(text) =>
+    onChange("maxReps", text ? parseInt(text, 10) || 0 : undefined)
+  }
+/>
             </Input>
           </HStack>
         ) : (
           <Input size="sm" borderWidth={0} w="32%" ml="$2">
-            <InputField
-              placeholder={set.previousReps?.toString() ?? "-"}
-              keyboardType="numeric"
-              color="$white"
-              value={set.reps?.toString() ?? ""}
-              onChangeText={(text) =>
-                onChange("reps", text ? parseInt(text, 10) || 0 : undefined)
-              }
-            />
+           <InputField
+ placeholder={placeholderReps?.toString() ?? "-"}
+  keyboardType="numeric"
+  color="$white"
+  value={set.reps != null ? set.reps.toString() : undefined}
+  onChangeText={(text) =>
+    onChange("reps", text ? parseInt(text, 10) || 0 : undefined)
+  }
+/>
           </Input>
         )}
       </HStack>
@@ -190,13 +212,13 @@ export default function SetRow({
               <Input size="sm" borderWidth={0}>
                 <InputField
                   placeholderTextColor={"$coolGray400"}
-                  placeholder={set.previousWeight?.toString() ?? "-"}
+                   placeholder={placeholderWeight?.toString() ?? "-"}
                   keyboardType="numeric"
                   color="$white"
-                  value={set.weight?.toString() ?? ""}
-                  onChangeText={(text) =>
-                    onChange("weight", text ? parseInt(text, 10) : 0)
-                  }
+              value={set.weight != null ? set.weight.toString() : undefined}
+                 onChangeText={(text) =>
+                onChange("weight", text ? parseInt(text, 10) || 0 : undefined)
+              }
                 />
               </Input>
             </Box>
@@ -240,27 +262,30 @@ export default function SetRow({
 
             <Box alignItems="center">
               <Input size="sm" borderWidth={0} w={100}>
-                <InputField
-                  placeholder={set.previousDuration != null ? formatTime(set.previousDuration) : "00:00"}
-                  keyboardType="numeric"
-                  color="$white"
-                  textAlign="center"
-                  value={timeLeft != null ? formatTime(timeLeft) : ""}
-                  onChangeText={(text) => {
-                    const parts = text.split(":");
-                    let val: number | undefined;
-                    if (parts.length === 2) {
-                      const minutes = parseInt(parts[0], 10) || 0;
-                      const seconds = parseInt(parts[1], 10) || 0;
-                      val = minutes * 60 + seconds;
-                    } else {
-                      val = text ? parseInt(text, 10) || 0 : undefined;
-                    }
-                    const safeVal = val ?? 0;
-                    setTimeLeft(val);
-                    onChange("duration", safeVal);
-                  }}
-                />
+               <InputField
+  placeholder={
+  placeholderDuration != null ? formatTime(placeholderDuration) : "00:00"
+  }
+  keyboardType="numeric"
+  color="$white"
+  textAlign="center"
+  value={timeLeft != null ? formatTime(timeLeft) : undefined} // ✅ undefined allows placeholder
+  onChangeText={(text) => {
+    const parts = text.split(":");
+    let val: number | undefined;
+    if (parts.length === 2) {
+      const minutes = parseInt(parts[0], 10) || 0;
+      const seconds = parseInt(parts[1], 10) || 0;
+      val = minutes * 60 + seconds;
+    } else {
+      val = text ? parseInt(text, 10) || 0 : undefined;
+    }
+    const safeVal = val ?? 0;
+    setTimeLeft(val);
+    onChange("duration", safeVal);
+  }}
+/>
+
               </Input>
             </Box>
           </Box>

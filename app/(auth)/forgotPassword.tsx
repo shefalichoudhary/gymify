@@ -20,6 +20,7 @@ import {
 } from "@gluestack-ui/themed";
 import { TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import CustomButton from "@/components/customButton";
 
 interface FormState {
   email: string;
@@ -234,17 +235,14 @@ export default function ForgotPassword(): JSX.Element {
             )}
           </FormControl>
 
-          <Button
-            bg="$blue600"
-            rounded="$xl"
-            mt="$4"
+        
+          <CustomButton
             onPress={handleReset}
+            bg="$blue500"
             isDisabled={loading}
           >
-            <ButtonText color="white" bold size="lg">
-              {loading ? "Loading..." : "Reset Password"}
-            </ButtonText>
-          </Button>
+            {loading ? "Loading..." : "Reset Password"}
+          </CustomButton>
         </VStack>
       </KeyboardAwareScrollView>
 

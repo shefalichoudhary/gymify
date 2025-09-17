@@ -37,6 +37,7 @@ type RoutineWithExercises = {
 export default function WorkoutScreen() {
   const router = useRouter();
 const sheetRef = useRef<WorkoutRoutineSheetRef>(null);
+const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 const [routineList, setRoutineList] = React.useState<RoutineWithExercises[]>([]);
 
@@ -85,7 +86,7 @@ useFocusEffect(
 
 
   return (
-    <SafeAreaView flex={1} bg="$black" pt="$5" py="$6">
+    <SafeAreaView flex={1} bg="$black" pt="$5">
 
         {/* Routines */}
         <Box px="$3">
@@ -154,7 +155,9 @@ useFocusEffect(
   )}
 </Box>
 
+  <Box flex={1}>
 
+  
 <DraggableFlatList
         data={routineList}
         onDragEnd={({ data }) => {
@@ -211,8 +214,10 @@ useFocusEffect(
           </Box>
         )}
       />
+      </Box>
  <WorkoutRoutineSheet
         ref={sheetRef}
+           onSheetChange={(open: boolean) => setIsSheetOpen(open)}
         onRoutineDeleted={(id) =>
           setRoutineList((prev) => prev.filter((r) => r.id !== id))
         }

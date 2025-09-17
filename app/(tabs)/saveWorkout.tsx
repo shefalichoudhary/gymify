@@ -119,9 +119,7 @@ if (!workout) {
   return (
     <Box flex={1} bg="$black">
       <CustomHeader
-        title="Save Workout"
-        left="Cancel"
-        onPress={() => router.replace("/home")}
+      
         right="Save"
       onRightButtonPress={async () => {
   setDialogProps({

@@ -25,7 +25,7 @@ export default function AuthLayout() {
         header: () => (
           <CustomHeader
             left={
-              <Pressable onPress={() => router.back()}>
+              <Pressable onPress={() => router.push("/(tabs)/home")}>
                 <AntDesign name="arrowleft" size={24} color="white" />
               </Pressable>
             }

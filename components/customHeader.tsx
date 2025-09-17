@@ -1,7 +1,8 @@
 import React from "react";
 import { HStack, Box, Text, VStack, Pressable } from "@gluestack-ui/themed";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { useRouter } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
 interface CustomHeaderProps {
   title?: string;
   logo?: any;
@@ -12,6 +13,7 @@ interface CustomHeaderProps {
   onRightButtonPress?: () => void;
   isRightButtonDisabled?: boolean;
   isHome?: boolean;
+  homeLeft?: React.ReactNode;
 }
 
 export default function CustomHeader({
@@ -23,22 +25,24 @@ export default function CustomHeader({
   onRightButtonPress,
   isRightButtonDisabled = false,
   isHome = false,
+  homeLeft,
 }: CustomHeaderProps) {
   const insets = useSafeAreaInsets();
+   const router = useRouter();
+
+ const LeftButton = isHome
+  ? homeLeft || null
+  : (
+    <Pressable onPress={onPress || (() => router.back())}>
+      <AntDesign name="arrowleft" size={24} color="white" />
+    </Pressable>
+  );
 
   return (
     <Box w="100%" px="$4" pt={insets.top + 10} pb="$4"  bg="#1F1F1F">
       <HStack alignItems="center" justifyContent="space-between" w="100%" >
         {/* Left */}
-        <Box>
-          {typeof left === "string" ? (
-            <Pressable onPress={onPress}>
-              <Text color="$blue500" fontWeight="$medium" fontSize="$md">
-                {left}
-              </Text>
-            </Pressable>
-          ) : left}
-        </Box>
+        <Box>{LeftButton}</Box>
 
         {/* Center */}
         <Box flex={1} alignItems="center">
@@ -66,8 +70,8 @@ export default function CustomHeader({
             >
               <Text
                 color={isRightButtonDisabled ? "$gray500" : "$blue500"}
-                fontWeight="$medium"
-                fontSize="$md"
+                fontWeight="$small"
+                fontSize="$lg"
               >
                 {right}
               </Text>

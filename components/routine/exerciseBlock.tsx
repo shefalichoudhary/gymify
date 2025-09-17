@@ -1,9 +1,10 @@
 import { Box, Text, Input, InputField, Pressable, HStack } from "@gluestack-ui/themed";
-import { AntDesign, Entypo, FontAwesome } from "@expo/vector-icons";
+import { AntDesign,  } from "@expo/vector-icons";
 import SetRow from "./setRow";
 import AddSetButton from "./addSetButton";
 import { WorkoutSet as Set } from "@/types/workoutSet";
 import React from "react";
+import { getExerciseTypeFlags } from "@/utils/exerciseType";
 
 type Props = {
   exercise: {
@@ -44,37 +45,63 @@ export default function ExerciseBlock({
     updatedSets[index] = { ...updatedSets[index], [key]: value };
     onChange({ ...data, sets: updatedSets });
   };
-const [visibleSets, setVisibleSets] = React.useState(2);  
+const [visibleSets, setVisibleSets] = React.useState(data.sets.length > 0 ? data.sets.length : 1);  
 
 const handleAddSet = () => {
-  // if there are more previous sets hidden, just increase visible count
   if (visibleSets < data.sets.length) {
     setVisibleSets((prev) => prev + 1);
     return;
   }
 
-  // Otherwise, add a new empty set
-  let newSet: Set;
+  const lastFilledSet = [...data.sets]
+    .slice(0)
+    .reverse()
+    .find(
+      (s) =>
+        s.weight != null ||
+        s.reps != null ||
+        s.minReps != null ||
+        s.maxReps != null ||
+        s.duration != null
+    );
+
+  let newSet: Set = {};
 
   if (isWeighted) {
-    newSet = { weight: 0, reps: 0, isRangeReps: false };
+    newSet = {
+      weight: undefined, // leave empty for placeholder
+      reps: undefined,
+      minReps: undefined,
+      maxReps: undefined,
+      isRangeReps: lastFilledSet?.isRangeReps ?? false,
+      previousWeight: lastFilledSet?.weight ?? undefined,
+      previousReps: lastFilledSet?.reps ?? undefined,
+      previousMinReps: lastFilledSet?.minReps ?? undefined,
+      previousMaxReps: lastFilledSet?.maxReps ?? undefined,
+    };
   } else if (isBodyweight) {
-    newSet = { reps: 0, isRangeReps: false };
+    newSet = {
+      reps: undefined,
+      minReps: undefined,
+      maxReps: undefined,
+      isRangeReps: lastFilledSet?.isRangeReps ?? false,
+      previousReps: lastFilledSet?.reps ?? undefined,
+      previousMinReps: lastFilledSet?.minReps ?? undefined,
+      previousMaxReps: lastFilledSet?.maxReps ?? undefined,
+    };
   } else if (isDuration) {
-    newSet = { duration: 0 };
-  } else {
-    newSet = {}; // fallback
+    newSet = {
+      duration: undefined,
+      previousDuration: lastFilledSet?.duration ?? undefined,
+    };
   }
 
   onChange({ ...data, sets: [...data.sets, newSet] });
-  setVisibleSets((prev) => prev + 1); // make new set visible immediately
+  setVisibleSets((prev) => prev + 1);
 };
 
-  const isDuration = exercise.exercise_type === "Duration" || exercise.exercise_type === "Yoga";
-const isWeighted =
-  exercise.exercise_type === "Weighted" ||
-  exercise.exercise_type === "Assisted Bodyweight";
-  const isBodyweight = exercise.exercise_type === "Bodyweight";
+
+   const { isDuration, isWeighted, isBodyweight } = getExerciseTypeFlags(exercise.exercise_type);
 
   return (
     <Box w="$full">
@@ -147,20 +174,23 @@ const isWeighted =
 </Pressable>
 
 
-  {data.sets.slice(0, visibleSets).map((set, index) => (
-        <SetRow
-          key={index}
-          index={index}
-          set={{ ...set, isRangeReps: data.repsType === "rep range" }}
-          showCheckIcon={showCheckIcon}
-          editable={!viewOnly}
-          onChange={(key, value) => handleSetChange(index, key, value)}
-          onOpenSetType={onOpenSetType}
-          exerciseId={exercise.id}
-          exerciseType={exercise.exercise_type ?? undefined}
-          onToggleCheck={(justCompleted) => onToggleSetComplete?.(exercise.id, index, justCompleted)}
-        />
-      ))}
+{data.sets.slice(0, visibleSets).map((set, index) => {
+  return (
+    <SetRow
+      key={index}
+      index={index}
+      set={{ ...set, isRangeReps: data.repsType === "rep range" }}
+      showCheckIcon={showCheckIcon}
+      editable={!viewOnly}
+      onChange={(key, value) => handleSetChange(index, key, value)}
+      onOpenSetType={onOpenSetType}
+      exerciseId={exercise.id}
+      exerciseType={exercise.exercise_type ?? undefined}
+      onToggleCheck={(justCompleted) => onToggleSetComplete?.(exercise.id, index, justCompleted)}
+    />
+  );
+})}
+
 
       {!viewOnly && <AddSetButton onPress={handleAddSet} />}
     </Box>

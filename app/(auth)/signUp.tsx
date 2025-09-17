@@ -22,6 +22,7 @@ import {
 } from "@gluestack-ui/themed";
 import { TouchableOpacity } from "react-native";
 import { useAuth } from "@/context/authContext";
+import CustomButton from "@/components/customButton";
 
 interface FormState {
   username: string;
@@ -234,7 +235,7 @@ const passwordRules = [
             </Input>
 
             {/* Password rules */}
-            <VStack  space="xs">
+            <VStack py="$1" space="xs">
               {passwordRules.map((rule, idx) => {
                 const valid = rule.test(form.password);
                 return (
@@ -254,18 +255,14 @@ const passwordRules = [
 
 
           {/* Sign Up Button */}
-          <Button
-            bg="$blue600"
-            rounded="$xl"
-            mt="$4"
-            onPress={handleRegister}
-            size="md"
-            isDisabled={loading}
-          >
-            <ButtonText color="white" bold size="lg">
-              {loading ? "Loading..." : "Sign Up"}
-            </ButtonText>
-          </Button>
+          <CustomButton
+                 onPress={handleRegister}
+                  bg="$blue500"
+                >
+                              {loading ? "Loading..." : "Sign Up"}
+
+                </CustomButton>
+          
         </VStack>
       </KeyboardAwareScrollView>
 

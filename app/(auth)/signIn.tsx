@@ -27,6 +27,7 @@ import {
 
 import { StatusBar } from "expo-status-bar";
 import { TouchableOpacity } from "react-native";
+import CustomButton from "@/components/customButton";
 
 interface FormState {
   email: string;
@@ -117,7 +118,7 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
             Email
           </FormControlLabelText>
         </FormControlLabel>
-        <Input bg="$backgroundDark800" rounded="$xl" borderWidth={0} size="md">
+        <Input bg="$backgroundDark800" rounded="$lg" borderWidth={0} size="md">
           <InputField
             placeholder="example@gmail.com"
             placeholderTextColor="$textLight400"
@@ -145,7 +146,7 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
             Password
           </FormControlLabelText>
         </FormControlLabel>
-        <Input bg="$backgroundDark800" rounded="$xl" borderWidth={0} size="md">
+        <Input bg="$backgroundDark800" rounded="$lg" borderWidth={0} size="md">
           <InputField
             placeholder="minimum 6 characters"
             placeholderTextColor="$textLight400"
@@ -197,11 +198,13 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
       )}
 
       {/* Sign In Button */}
-      <Button bg="$blue600" rounded="$xl" mt="$4" onPress={handleSignIn} size="md">
-        <ButtonText color="white" bold size="lg">
-          Sign In
-        </ButtonText>
-      </Button>
+      <CustomButton
+        onPress={handleSignIn}
+        bg="$blue500"
+      >
+        Sign In
+      </CustomButton>
+                  
     </VStack>
   </KeyboardAwareScrollView>
 

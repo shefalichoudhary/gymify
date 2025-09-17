@@ -123,7 +123,7 @@ export default function Home() {
   return (
     <SafeAreaView  bg="#1F1F1F">
       <ScrollView pt="$2"   contentContainerStyle={{ flexGrow: 1 }} >
-        <VStack flex={1} px="$3" space="sm" pb="$8">
+        <VStack flex={1}  space="md" >
           {/* Latest Workout Card if exists */}
           {latestWorkout && (
             <Box
@@ -224,7 +224,7 @@ export default function Home() {
             >
               {/* Header with Avatar & Username */}
               <HStack alignItems="center" mb="$3" justifyContent="space-between">
-                <HStack alignItems="center" space="sm">
+                <HStack alignItems="center" space="xs">
                   <Box
                     w={40}
                     h={40}
@@ -263,7 +263,19 @@ export default function Home() {
                 {quote}
               </Text>
             </Box>
+          
+   
           ))}
+          <Box
+  alignItems="center"
+  justifyContent="center"
+  bg="$black"
+  py="$5"
+>
+  <Text color="$coolGray400" fontSize="$md">
+   No more content 😢
+  </Text>
+</Box>
         </VStack>
       </ScrollView>
     </SafeAreaView>

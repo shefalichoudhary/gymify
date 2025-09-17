@@ -8,8 +8,9 @@ import { useAuth } from "@/context/authContext";
 import { useEffect, useState } from "react";
 export default function Layout() {
   const router = useRouter();
-    const [reloadKey, setReloadKey] = useState(0);
 const { user, logout } = useAuth();
+
+  const [isSheetOpen, setIsSheetOpen] = useState(false); 
 
   useEffect(() => {
     router.prefetch("/logWorkout");
@@ -30,8 +31,8 @@ const { user, logout } = useAuth();
                 if (route.name === "home") {
                   return (
                     <CustomHeader
-                      isHome
-                      left={
+                       isHome
+  homeLeft={
                         <Pressable onPress={() => router.navigate("/")}>
                           <Text
                             color="$white"
@@ -66,42 +67,25 @@ const { user, logout } = useAuth();
 
                 return (
                   <CustomHeader
-                    left={
-                      <Pressable onPress={() => router.navigate("/home")}>
-                        <AntDesign name="arrowleft" size={24} color="white" />
-                      </Pressable>
-                    }
+                  
                     title={route.name.charAt(0).toUpperCase() + route.name.slice(1)}
-                    right={
-                     <Pressable onPress={() => setReloadKey(prev => prev + 1)}>
-  <AntDesign name="reload1" size={24} color="white" />
-</Pressable>
-                    }
+                    
                   />
                 );
               },
 
-          tabBarStyle: showTabBar
-  ? route.name === "home"
-    ? {
-        backgroundColor: "#1F1F1F",
-  paddingBottom: 1,
-  height: 60,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: -2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 6,
-      }
+        tabBarStyle: showTabBar
+  ? isSheetOpen
+    ? { display: "none" } // hide tab bar when sheet is open
     : {
-         backgroundColor: "#1F1F1F",
-  paddingBottom: 10,
-  height: 60,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: -2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 6,
+        backgroundColor: "#1F1F1F",
+        paddingBottom: 10,
+        height: 54,
+        elevation: 0,
+        borderTopWidth: 0,
+        shadowOpacity: 0,
+        shadowOffset: { width: 0, height: 0 },
+        shadowColor: "transparent",
       }
   : { display: "none" },
 
@@ -134,7 +118,6 @@ const { user, logout } = useAuth();
   <Tabs.Screen
     name="workout"
     options={{ title: "Workout", 
-        tabBarStyle: { display: "none" },
      }}
 
   />
