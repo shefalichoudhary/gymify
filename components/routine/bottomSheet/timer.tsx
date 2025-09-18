@@ -35,7 +35,10 @@ const RestTimerSheet = forwardRef<RestTimerSheetRef, RestTimerSheetProps>(
 
 const options = [
   { label: "Off", value: 0 },
+  { label: "5s", value: 5 },
+
   { label: "10s", value: 10 },
+
   { label: "30s", value: 30 },
   { label: "45s", value: 45 },
   { label: "1 min", value: 60 },
@@ -44,13 +47,12 @@ const options = [
 ];
 
     return (
-      <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "30%"]}>
+      <CustomBottomSheet ref={bottomSheetRef} snapPoints={["30%", "32%"]}>
         {/* Fixed Header */}
         <Box
           borderBottomWidth={1}
           borderColor="$trueGray700"
           pb="$3"
-          pt="$2"
           mb="$4"
         >
           <Text
@@ -83,7 +85,7 @@ const options = [
                   }}
                   bg={isActive ? "$primary600" : "#2a2a2a"}
                   px="$4"
-                  py="$2"
+                  py="$1.5"
                   borderRadius="$full"
                   borderWidth={1}
                   borderColor={isActive ? "$primary600" : "$trueGray700"}

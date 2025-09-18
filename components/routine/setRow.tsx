@@ -14,7 +14,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/db";
 import { workoutSets } from "@/db/schema";
 import { getExerciseTypeFlags } from "@/utils/exerciseType";
-
+import DurationTimer, { DurationTimerRef } from "@/utils/durationTimer";
 type SetRowProps = {
   index: number;
   set: Set;
@@ -47,25 +47,9 @@ const [previousValues, setPreviousValues] = useState<{
   maxReps?: number;
   duration?: number;
 }>({});
-  const intervalRef = useRef<number | null>(null);
-  const [timerRunning, setTimerRunning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState<number | undefined>(set.duration || 0);
-const { isDuration, isWeighted, isBodyweight } = getExerciseTypeFlags(exerciseType ?? null);
-  useEffect(() => {
-    if (timerRunning) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          const newVal = (prev || 0) + 1;
-          onChange("duration", newVal);
-          return newVal;
-        });
-      }, 1000);
-    }
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [timerRunning]);
+const { isDuration, isWeighted, isBodyweight } = getExerciseTypeFlags(exerciseType ?? null);
+   const durationTimerRef = useRef<DurationTimerRef>(null);
 
 useEffect(() => {
   async function fetchHistory() {
@@ -87,10 +71,7 @@ useEffect(() => {
  
 
   const handleCheckPress = () => {
-    if (timerRunning) {
-      setTimerRunning(false);
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
+   durationTimerRef.current?.stopTimer();
     const newValue = !set.isCompleted;
     onChange("isCompleted", newValue);
     onToggleCheck(newValue);
@@ -241,22 +222,11 @@ const placeholderDuration =
                 justifyContent="center"
                 zIndex={1}
               >
-                <Pressable
-                  onPress={() => {
-                    setTimerRunning(!timerRunning);
-                    if (intervalRef.current && timerRunning) clearInterval(intervalRef.current);
-                  }}
-                >
-                  {timerRunning ? (
-                    <AntDesign name="pausecircle" size={24} color="#3b82f6" />
-                  ) : (
-                    <Ionicons
-                      name="caret-forward-circle-outline"
-                      size={24}
-                      color="#3b82f6"
-                    />
-                  )}
-                </Pressable>
+                <DurationTimer
+                  ref={durationTimerRef}  
+      duration={set.duration ?? 0}   // ✅ start from stored duration
+      onChange={(val) => onChange("duration", val)} // keeps parent state synced
+    />
               </Box>
             )}
 
@@ -264,12 +234,12 @@ const placeholderDuration =
               <Input size="sm" borderWidth={0} w={100}>
                <InputField
   placeholder={
-  placeholderDuration != null ? formatTime(placeholderDuration) : "00:00"
+    placeholderDuration != null ? formatTime(placeholderDuration) : "00:00"
   }
   keyboardType="numeric"
   color="$white"
   textAlign="center"
-  value={timeLeft != null ? formatTime(timeLeft) : undefined} // ✅ undefined allows placeholder
+  value={set.duration != null ? formatTime(set.duration) : undefined}
   onChangeText={(text) => {
     const parts = text.split(":");
     let val: number | undefined;
@@ -280,11 +250,10 @@ const placeholderDuration =
     } else {
       val = text ? parseInt(text, 10) || 0 : undefined;
     }
-    const safeVal = val ?? 0;
-    setTimeLeft(val);
-    onChange("duration", safeVal);
+    onChange("duration", val ?? 0);
   }}
 />
+
 
               </Input>
             </Box>

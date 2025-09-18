@@ -136,7 +136,7 @@ useFocusEffect(
 
        <Box px="$5" mb="$4">
   {routineList.length > 0 ? (
-    <HStack alignItems="center" mb="$3" space="md">
+    <HStack alignItems="center"  space="sm">
       <AntDesign name="caretdown" size={12} color="#a1a1aa" />
       <Text color="$coolGray400" letterSpacing={0.5}>
         My Routines ({routineList.length})

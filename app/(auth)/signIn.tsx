@@ -24,7 +24,6 @@ import {
   Pressable,
   AlertCircleIcon,
 } from "@gluestack-ui/themed";
-
 import { StatusBar } from "expo-status-bar";
 import { TouchableOpacity } from "react-native";
 import CustomButton from "@/components/customButton";
@@ -38,7 +37,8 @@ function SignIn(): JSX.Element {
   const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [error, setError] = useState<string>("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { login } = useAuth();
+  const { login,loginWithGoogle } = useAuth();
+
   const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -204,7 +204,12 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
       >
         Sign In
       </CustomButton>
-                  
+         <CustomButton
+        onPress={loginWithGoogle}
+        bg="$blue500"
+      >
+        Sign in with Google
+      </CustomButton>
     </VStack>
   </KeyboardAwareScrollView>
 

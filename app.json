@@ -3,48 +3,49 @@
     "name": "gymify",
     "slug": "gymify",
     "version": "1.0.0",
-    "icon" : "./assets/images/icon.png",
+    "icon": "./assets/images/icon.png",
     "orientation": "portrait",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-
-   "splash": {
+    "splash": {
       "image": "./assets/images/logo.png",
       "resizeMode": "cover",
       "backgroundColor": "#1F1F1F"
-  },
+    },
     "newArchEnabled": true,
     "ios": {
+      "googleServisesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
       "bundleIdentifier": "com.shefali.gymify",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
-      
     },
     "android": {
+      "googleServisesFile": "./google-services.json",
       "package": "com.shefali.gymify",
-       "splash": {
-    "backgroundColor": "#1F1F1F"
-  },
-       "adaptiveIcon": {
+      "splash": {
+        "backgroundColor": "#1F1F1F"
+      },
+      "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-          "backgroundColor": "#1F1F1F"
-
-      }
-     
+        "backgroundColor": "#1F1F1F"
+      },
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "bundler": "metro",
       "output": "static"
-      
     },
     "plugins": [
       "expo-router",
       "expo-sqlite",
       "expo-font",
-      "expo-web-browser"
-    
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
@@ -56,9 +57,6 @@
       "eas": {
         "projectId": "0a8eae0c-2341-44cd-a769-9bfc88d1fc0b"
       }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/0a8eae0c-2341-44cd-a769-9bfc88d1fc0b"

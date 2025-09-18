@@ -22,92 +22,89 @@ export default function RestCountdownTimer({
   const soundRef = useRef<Audio.Sound | null>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const hasPlayedEndRef = useRef(false);
-
+const [soundLoaded, setSoundLoaded] = useState(false);
   // Unlock audio on first button press
-  const unlockAudio = async () => {
-    if (audioUnlocked) return;
-    try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        staysActiveInBackground: false,
-        playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-      });
-
-      const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/beep.mp3"),
-        { shouldPlay: true }
-      );
-      await sound.playAsync();
-      await sound.unloadAsync();
-
-      setAudioUnlocked(true);
-      console.log("✅ Audio unlocked");
-    } catch (e) {
-      console.error("Failed to unlock audio:", e);
+  useEffect(() => {
+  const unlockAudioOnMount = async () => {
+    if (!audioUnlocked) {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          staysActiveInBackground: false,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+        });
+        setAudioUnlocked(true);
+      } catch (e) {
+        console.error("Failed to unlock audio:", e);
+      }
     }
   };
+  unlockAudioOnMount();
+}, []);
 
   // Load beep sound
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
 
-    const loadBeep = async () => {
-      try {
-        const { sound } = await Audio.Sound.createAsync(
-          require("../../assets/sounds/beep.mp3")
-        );
-        if (isMounted) {
-          soundRef.current = sound;
-          console.log("✅ Beep sound loaded");
-        }
-      } catch (e) {
-        console.error("❌ Failed to load beep sound:", e);
-      }
-    };
-
-    loadBeep();
-
-    return () => {
-      isMounted = false;
-      soundRef.current?.unloadAsync();
-    };
-  }, []);
-
-  // Play beep + haptic
-  const playBeep = async () => {
+  const loadBeep = async () => {
     try {
-      if (soundRef.current) {
-        await soundRef.current.stopAsync(); // reset if already playing
-        await soundRef.current.playAsync();
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/beep.mp3")
+      );
+      if (isMounted) {
+        soundRef.current = sound;
+          setSoundLoaded(true); // ✅ mark loaded
+        console.log("✅ Beep sound loaded");
       }
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
-      console.error("Failed to play beep:", e);
+      console.error("❌ Failed to load beep sound:", e);
     }
   };
 
-  // Play start beep
-  useEffect(() => {
-    if (timeLeft === totalTime && audioUnlocked) {
-      playBeep();
-    }
-  }, [timeLeft, totalTime, audioUnlocked]);
+  loadBeep();
 
-  // Play end beep
-  useEffect(() => {
-    if (timeLeft <= 0 && !hasPlayedEndRef.current && audioUnlocked) {
-      hasPlayedEndRef.current = true;
-      playBeep();
+  return () => {
+    isMounted = false;
+    soundRef.current?.unloadAsync(); // unload only on unmount
+  };
+}, []);
+
+
+  // Play beep + haptic
+ const playBeep = async () => {
+  try {
+    if (soundRef.current) {
+      await soundRef.current.replayAsync(); // reset and play immediately
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
-    if (timeLeft > 0) {
-      hasPlayedEndRef.current = false;
-    }
-  }, [timeLeft, audioUnlocked]);
+  } catch (e) {
+    console.error("Failed to play beep:", e);
+  }
+};
+
+
+  // Play start beep
+useEffect(() => {
+  if (timeLeft === totalTime && audioUnlocked && soundLoaded) {
+    playBeep();
+  }
+}, [timeLeft, totalTime, audioUnlocked, soundLoaded]);
+
+// End beep
+useEffect(() => {
+  if (timeLeft <= 0 && !hasPlayedEndRef.current && audioUnlocked) {
+    hasPlayedEndRef.current = true;
+    playBeep();
+  }
+  if (timeLeft > 0) {
+    hasPlayedEndRef.current = false;
+  }
+}, [timeLeft, audioUnlocked]);
+
 
   // Skip handler
   const handleSkip = () => {
-    unlockAudio();
     playBeep(); // play end beep on skip
     onSkip();
   };
@@ -151,7 +148,6 @@ export default function RestCountdownTimer({
             px="$4"
             borderRadius="$xl"
             onPress={() => {
-              unlockAudio();
               onDecrease();
             }}
           >
@@ -176,7 +172,6 @@ export default function RestCountdownTimer({
             px="$4"
             borderRadius="$xl"
             onPress={() => {
-              unlockAudio();
               onIncrease();
             }}
           >

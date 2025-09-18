@@ -1,8 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Box, Text } from "@gluestack-ui/themed";
 import { Pressable } from "../ui/pressable";
 import { FlatList, ListRenderItem } from "react-native";
 import { Exercise } from "@/db/schema";
+import { Audio } from "expo-av";
+import { Image } from "react-native";
 
 interface Props {
   data: Exercise[];
@@ -13,6 +15,40 @@ interface Props {
 export default function ExerciseList({ data, selectedIds, toggleSelect }: Props) {
   const flatListRef = useRef<FlatList>(null);
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
+  const lastPlayRef = useRef<number>(0); // timestamp of last audio play
+  // Play local audio
+ const playAudio = async () => {
+    const now = Date.now();
+    const DEBOUNCE_DELAY = 800; // ms
+    if (now - lastPlayRef.current < DEBOUNCE_DELAY) {
+      return; // ignore rapid presses
+    }
+    lastPlayRef.current = now;
+
+    try {
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/button-press.mp3")
+      );
+      soundRef.current = sound;
+      await sound.playAsync();
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
+  };
+  // Unload sound on unmount
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
 
   // Group exercises by first letter
   const grouped: Record<string, Exercise[]> = {};
@@ -35,7 +71,7 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
     if (item.letter) {
       return (
         <Box px="$2" py="$1" bg="$gray900">
-          <Text color="$coolGray400" fontSize="$lg" fontWeight="$bold">
+          <Text color="$coolGray400" fontSize="$lg" fontWeight="$medium">
             {item.letter}
           </Text>
         </Box>
@@ -63,12 +99,22 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
           w={50}
           h={50}
           borderRadius={25}
-          bg="$coolGray600"
+          bg="#1F1F1F"
           mr="$3"
           justifyContent="center"
           alignItems="center"
-        />
-        <Pressable onPress={() => toggleSelect(exercise.id)}>
+        >
+          <Image
+    source={require("../../assets/images/logo.png")} // replace with your icon path
+    style={{ width: 100, height: 100, resizeMode: "contain" }}
+  />
+        </Box>
+        <Pressable
+          onPress={() => {
+            toggleSelect(exercise.id);
+            playAudio(); // ✅ play audio on press
+          }}
+        >
           <Box flex={1}>
             <Text color="$white" fontSize="$md" fontWeight="$medium">
               {exercise.exercise_name}
@@ -82,9 +128,8 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
     );
   };
 
-  // Scroll to letter and set active
   const handleLetterPress = (letter: string) => {
-    setActiveLetter(letter); // highlight pressed letter
+    setActiveLetter(letter);
     const index = flatData.findIndex((i) => i.letter === letter);
     if (index !== -1 && flatListRef.current) {
       flatListRef.current.scrollToIndex({ index, animated: true });

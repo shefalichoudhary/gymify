@@ -204,6 +204,14 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
     return () => subscription.remove();
   }, [])
 );
+ const handleBackPress = () => {
+  
+           setTitle("");
+           setSelectedExercises([]);
+          setExerciseData({});
+          router.replace("/workout");
+       
+};
 
     useEffect(() => {
       const fetchSelectedExercises = async () => {
@@ -278,6 +286,8 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
         alert("Please add at least one exercise");
         return;
       }
+     
+
 
 //       if (!user) {
 //         Alert.alert(
@@ -345,7 +355,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
         <SafeAreaView flex={1} bg="$black">
           <CustomHeader
             title="Create Routine"
-             
+            onPress={handleBackPress} 
             right="Save"
             onRightButtonPress={handleSave}
           />

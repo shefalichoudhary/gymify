@@ -35,8 +35,8 @@ export default function ConfirmDialog({
         bg="rgba(28,28,30,0.95)" 
         borderWidth={0}
         rounded="3xl"
-        px="$6"
-        py="$6"
+        px="$4"
+        py="$4"
         w="75%"
         alignSelf="center"
         shadowColor="$black"

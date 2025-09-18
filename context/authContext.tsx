@@ -3,10 +3,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "@/db/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import * as Crypto from 'expo-crypto';
-import * as WebBrowser from 'expo-web-browser';
-
+import * as Crypto from "expo-crypto";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
+import cuid from "cuid";  
+import { makeRedirectUri } from "expo-auth-session";
 WebBrowser.maybeCompleteAuthSession();
+
 type User = {
   username: string;
   email: string;
@@ -15,6 +18,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   loading: boolean;
@@ -26,7 +30,53 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Auto-login if token or user data exists
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    expoClientId: "756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com",
+    androidClientId: "756288749216-3oaav02buu9204ugjvp2oe6jmchq0o8c.apps.googleusercontent.com",
+    webClientId: "756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com",
+    scopes: ["profile", "email"],
+    redirectUri: makeRedirectUri({ scheme: "myapp"}),
+  } as any);
+
+   useEffect(() => {
+    const handleGoogleResponse = async () => {
+      if (response?.type === "success") {
+        const { authentication } = response;
+        if (!authentication?.accessToken) return;
+
+        const userInfoResponse = await fetch(
+          "https://www.googleapis.com/userinfo/v2/me",
+          {
+            headers: { Authorization: `Bearer ${authentication.accessToken}` },
+          }
+        );
+        const userInfo = await userInfoResponse.json();
+        const email = userInfo.email;
+        const username = userInfo.name;
+
+        // Check if user exists in DB
+        let result = await db.select().from(users).where(eq(users.email, email));
+        let dbUser = result[0];
+
+        if (!dbUser) {
+          const newUser = {
+            id: cuid(),
+            name: username,
+            email,
+            password: "", // empty for Google login
+          };
+          await db.insert(users).values(newUser);
+          dbUser = newUser;
+        }
+
+        const loggedInUser = { username: dbUser.name, email: dbUser.email };
+        setUser(loggedInUser);
+        await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
+      }
+    };
+    handleGoogleResponse();
+  }, [response]);
+  // Load user from AsyncStorage
   useEffect(() => {
     const loadUser = async () => {
       const userData = await AsyncStorage.getItem("user");
@@ -36,91 +86,78 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadUser();
   }, []);
 
- const login = async (email: string, password: string) => {
-  try {
-    // 1. Fetch user from DB by email
-    const result = await db.select().from(users).where(eq(users.email, email));
-    const foundUser = result[0];
+   
 
-    if (!foundUser) {
-      throw new Error("User not found");
+  // Google login function
+ const loginWithGoogle = async () => {
+    if (!request) throw new Error("Google Auth request not ready");
+    await promptAsync();
+  };
+
+  // Email/password login
+  const login = async (email: string, password: string) => {
+    try {
+      const result = await db.select().from(users).where(eq(users.email, email));
+      const foundUser = result[0];
+
+      if (!foundUser) throw new Error("User not found");
+
+      // Compare hashed password
+      const hashedInput = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        password
+      );
+
+      if (hashedInput !== foundUser.password) throw new Error("Incorrect password");
+
+      const loggedInUser = { username: foundUser.name, email: foundUser.email };
+      setUser(loggedInUser);
+      await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
+    } catch (error: any) {
+      throw new Error(error.message);
     }
+  };
 
-    // 2. Compare provided password with stored hash
-      const hashPassword = async (password: string) => {
-  return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
-};
-       const hashedInputPassword = await hashPassword(password);
+  // Registration
+  const register = async (username: string, email: string, password: string) => {
+    try {
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        password
+      );
 
-    if (hashedInputPassword !== foundUser.password) {
-      throw new Error("Incorrect password");
+      await db.insert(users).values({ name: username, email, password: hashedPassword });
+
+      const newUser = { username, email };
+      setUser(newUser);
+      await AsyncStorage.setItem("user", JSON.stringify(newUser));
+    } catch (error: any) {
+      if (error.message.includes("UNIQUE constraint failed: users.email")) {
+        throw new Error("Email already in use");
+      } else if (error.message.includes("UNIQUE constraint failed: users.name")) {
+        throw new Error("Username already in use");
+      } else {
+        throw new Error("Registration failed");
+      }
     }
-    // 3. Save to state and AsyncStorage (excluding password)
-    const loggedInUser = {
-      username: foundUser.name,
-      email: foundUser.email,
-    };
-    setUser(loggedInUser);
-    await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
+  };
 
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-};
-
-const register = async (username: string, email: string, password: string) => {
-  try {
-    // 1. Hash password
-    const hashPassword = async (password: string) => {
-  return await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, password);
-};
-   const hashedPassword = await hashPassword(password);
-
-    // 2. Insert into SQLite using Drizzle
-    await db.insert(users).values({
-      name: username,
-      email,
-      password: hashedPassword,
-    });
-
-    // 3. Save to state and AsyncStorage (optional)
-     const newUser = { username, email };
-    setUser(newUser);
-    await AsyncStorage.setItem("user", JSON.stringify(newUser));
-  } catch (error: any) {
-    if (error.message.includes("UNIQUE constraint failed: users.email")) {
-      throw new Error("Email already in use");
-    } else if (error.message.includes("UNIQUE constraint failed: users.name")) {
-      throw new Error("Username already in use");
-    } else {
-      throw new Error("Registration failed");
-    }
-  }
-};
-
-
- 
-
-const logout = async () => {
-  try {
+  // Logout
+  const logout = async () => {
     setUser(null);
     await AsyncStorage.removeItem("user");
-  } catch (error) {
-    console.error("Logout failed:", error);
-    throw new Error("Something went wrong while logging out");
-  }
-};
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, register,loginWithGoogle, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Hook to use auth context
+// Hook to use AuthContext
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };

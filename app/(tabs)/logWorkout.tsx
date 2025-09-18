@@ -20,7 +20,6 @@ import SetTypeModal from "@/components/routine/bottomSheet/set";
 import * as Haptics from "expo-haptics";
 import RestCountdownTimer from "@/components/routine/restCountdownTimer";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
-import { updateRoutineInDb } from "../../components/routine/updateRoutine";
 import cuid from "cuid";
 import CustomDialog from "@/components/logWorkoutDialog";
 type SetItem = {
@@ -500,11 +499,7 @@ const [workout] = await db.insert(workouts).values({
           });
         }
       }
-    // Optionally update routine with latest exercise data
-    if (updateRoutine) {
-      await updateRoutineInDb(String(routineId), String(routineTitle), exerciseData);
-    }
-
+   
     setIsWorkoutActive(false);
 
     router.replace({
@@ -577,11 +572,24 @@ useFocusEffect(
     return () => subscription.remove(); // cleanup
   }, [router])
 );
+const handleBackPress = () => {
+  // Clear workout state
+  setExerciseData({});
+  setExerciseDetails([]);
+  setLoadedExerciseIds([]);
+  setIsWorkoutStarted(false);
+  setDuration(0);
+  setRestCountdowns({});
+
+  // Navigate back
+  router.replace("/workout");
+};
   return (
     <SafeAreaView flex={1} bg="$black">
       <CustomHeader
         title="Log Workout"
         right="Finish"
+        onPress={handleBackPress}
        onRightButtonPress={handleFinish}
       />
 
