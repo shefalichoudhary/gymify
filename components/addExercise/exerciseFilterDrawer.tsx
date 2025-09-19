@@ -51,23 +51,41 @@ const ExerciseFilterDrawer = forwardRef<ExerciseFilterDrawerRef, Props>(
       },
     }));
 
-    useEffect(() => {
-      const fetchFilters = async () => {
-        const exercisesData = await db.select().from(exercises).all();
-        const uniqueEquipment = [...new Set(exercisesData.map((e) => e.equipment))];
-        setEquipmentList(uniqueEquipment);
+useEffect(() => {
+  const fetchFilters = async () => {
+    // Fetch exercises with type safety
+    const exercisesData: { equipment: string }[] = await db
+      .select({ equipment: exercises.equipment })
+      .from(exercises)
+      .all();
 
-        const muscleLinks = await db.select().from(exerciseMuscles).all();
-        const muscleIds = [...new Set(muscleLinks.map((em) => em.muscle_id))];
-        const musclesData = await db
-          .select()
-          .from(muscles)
-          .where(inArray(muscles.id, muscleIds));
-        setMuscleList(musclesData);
-      };
+    const uniqueEquipment = [...new Set(exercisesData.map((e) => e.equipment))];
+    setEquipmentList(uniqueEquipment);
 
-      fetchFilters();
-    }, []);
+    // Fetch exercise-muscle links
+    const muscleLinks: { muscle_id: string }[] = await db
+      .select({ muscle_id: exerciseMuscles.muscle_id })
+      .from(exerciseMuscles)
+      .all();
+
+    const muscleIds = [...new Set(muscleLinks.map((em) => em.muscle_id))];
+
+    if (muscleIds.length === 0) {
+      setMuscleList([]);
+      return;
+    }
+
+    // Fetch muscles by ID with proper typing
+    const musclesData: Muscle[] = await db
+      .select()
+      .from(muscles)
+      .where(inArray(muscles.id, muscleIds as string[])); // explicitly typed as string[]
+    setMuscleList(musclesData);
+  };
+
+  fetchFilters().catch((err) => console.error("Failed to fetch filters:", err));
+}, []);
+
 
     return (
      <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "50%"]}>

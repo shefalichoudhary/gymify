@@ -1,10 +1,4 @@
-// components/DurationTimer.tsx
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  forwardRef,
-} from "react";
+import React, { useEffect, useRef, forwardRef, useImperativeHandle, useState } from "react";
 import { Box, Pressable } from "@gluestack-ui/themed";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
@@ -15,54 +9,73 @@ export type DurationTimerRef = {
 };
 
 type DurationTimerProps = {
-  duration: number; // target duration in seconds
-  onChange: (value: number) => void; // update parent with elapsed seconds
+  duration: number; // parent-controlled elapsed seconds
+  onChange: (value: number) => void; // parent updates elapsed seconds
 };
 
 const DurationTimer = forwardRef<DurationTimerRef, DurationTimerProps>(
   ({ duration, onChange }, ref) => {
-    const [time, setTime] = useState(duration || 0);
     const [timerRunning, setTimerRunning] = useState(false);
-    const intervalRef = useRef<number | null>(null);
+    const intervalRef = useRef<number| null>(null);
+const [elapsed, setElapsed] = useState(duration);
+useImperativeHandle(ref, () => ({
+  stopTimer: async () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    setTimerRunning(false);
 
-    const playSound = async (file: any) => {
-      try {
-        const { sound } = await Audio.Sound.createAsync(file);
-        await sound.playAsync();
-      } catch (e) {
-        console.log("Error playing sound:", e);
-      }
-    };
+    // Play stop sound
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("@/assets/sounds/beep-end.mp3")
+      );
+      await sound.playAsync();
+    } catch (e) {
+      console.log("Error playing stop sound:", e);
+    }
 
-    const startTimer = async () => {
-      if (!timerRunning) {
-        setTimerRunning(true);
-        playSound(require("@/assets/sounds/beep.mp3"));
-        Vibration.vibrate([0, 200], false);
+    // Vibrate on stop
+    Vibration.vibrate([0, 200], false);
+  },
+}));
+     
 
-       intervalRef.current = setInterval(() => {
-  setTime((prev) => {
-    const newVal = prev + 1;
-    onChange(newVal);
-    return newVal;
-  });
-}, 1000);
-      } else {
-        stopTimer();
-      }
-    };
+   const startTimer = async () => {
+  if (!timerRunning) {
+    setTimerRunning(true);
+    try {
+      const { sound } = await Audio.Sound.createAsync(require("@/assets/sounds/beep.mp3"));
+      await sound.playAsync();
+    } catch {}
+    Vibration.vibrate([0, 200], false);
 
-    const stopTimer = () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      setTimerRunning(false);
+    intervalRef.current = setInterval(() => {
+      setElapsed((prev) => {
+        const newVal = prev + 1;
+        onChange(newVal); // notify parent
+        return newVal;
+      });
+    }, 1000);
+  } else {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = null;
+    setTimerRunning(false);
+     try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("@/assets/sounds/beep-end.mp3")
+      );
+      await sound.playAsync();
+    } catch {}
 
-      setTime(duration || 0); // reset for restart
-      playSound(require("@/assets/sounds/beep-end.mp3"));
-      Vibration.vibrate([0, 200], false);
-    };
+    Vibration.vibrate([0, 200], false);
+  }
+  
+};
 
-   
+
+useEffect(() => {
+  setElapsed(duration);
+}, [duration]);
 
     return (
       <Box flexDirection="row" alignItems="center">
@@ -70,11 +83,7 @@ const DurationTimer = forwardRef<DurationTimerRef, DurationTimerProps>(
           {timerRunning ? (
             <AntDesign name="pausecircle" size={28} color="#3b82f6" />
           ) : (
-            <Ionicons
-              name="caret-forward-circle-outline"
-              size={28}
-              color="#3b82f6"
-            />
+            <Ionicons name="caret-forward-circle-outline" size={28} color="#3b82f6" />
           )}
         </Pressable>
       </Box>

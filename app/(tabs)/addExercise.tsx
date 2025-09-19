@@ -102,11 +102,11 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
           .select()
           .from(exerciseMuscles)
           .where(inArray(exerciseMuscles.muscle_id, [selectedMuscleId]));
-        matchingIds = muscleLinks.map((m) => m.exercise_id);
+        matchingIds = muscleLinks.map((m:any) => m.exercise_id);
       }
 
       const filtered = await db.query.exercises.findMany({
-        where: (ex, { eq, inArray, and }) =>
+        where: (ex:any, { eq, inArray, and }:any) =>
           and(
             selectedEquipment ? eq(ex.equipment, selectedEquipment) : undefined,
             matchingIds ? inArray(ex.id, matchingIds) : undefined
@@ -120,15 +120,24 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   }, [selectedEquipment, selectedMuscleId]);
 
   // Fetch available muscles for label lookup
-  useEffect(() => {
-    const fetchMuscles = async () => {
-      const muscleLinks = await db.select().from(exerciseMuscles).all();
-      const uniqueIds = [...new Set(muscleLinks.map((em) => em.muscle_id))];
-      const musclesData = await db.select().from(muscles).where(inArray(muscles.id, uniqueIds));
-      setMuscleList(musclesData);
-    };
-    fetchMuscles();
-  }, []);
+useEffect(() => {
+  const fetchMuscles = async () => {
+    const muscleLinks: { muscle_id: string }[] =
+      await db.select({ muscle_id: exerciseMuscles.muscle_id }).from(exerciseMuscles).all();
+
+    const uniqueIds = [...new Set(muscleLinks.map((em) => em.muscle_id))] as string[];
+
+    if (uniqueIds.length === 0) return setMuscleList([]);
+
+    const musclesData = await db
+      .select()
+      .from(muscles)
+      .where(inArray(muscles.id, uniqueIds));
+    setMuscleList(musclesData);
+  };
+  fetchMuscles().catch(console.error);
+}, []);
+
 
   return (
     <Box flex={1} bg="$black">

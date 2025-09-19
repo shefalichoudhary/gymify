@@ -220,8 +220,14 @@ export default function LandingPage() {
               you build strength, improve flexibility, and stay motivated.
             </Text>
           <CustomButton
-   onPress={() => router.navigate("/home")}
-
+   onPress={() => router.replace("/home")}
+style={({ pressed }:any) => ({
+    backgroundColor: "#1F1F1F",
+    opacity: pressed ? 1 : 1, // same opacity prevents flash
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  })}
   iconPosition="right"
   icon={
     <AntDesign

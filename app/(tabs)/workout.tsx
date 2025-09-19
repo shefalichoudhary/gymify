@@ -55,7 +55,7 @@ useFocusEffect(
             .where(eq(routineExercises.routineId, routine.id))
             .all();
 
-          const exerciseIds = routineEx.map((re) => re.exerciseId);
+          const exerciseIds = routineEx.map((re:any) => re.exerciseId);
 
           const exDetails =
             exerciseIds.length > 0
@@ -159,10 +159,11 @@ useFocusEffect(
 
   
 <DraggableFlatList
+
         data={routineList}
         onDragEnd={({ data }) => {
           setRoutineList(data);
-          Vibration.vibrate(30);
+          Vibration.vibrate(50);
         }}
         keyExtractor={(item) => item.id}
         renderItem={({ item, drag, isActive }) => (
@@ -172,7 +173,7 @@ useFocusEffect(
             mb="$4"
             rounded="$xl"
             style={{
-              opacity: isActive ? 0.9 : 1,
+               opacity: isActive ? 0.95 : 1,
               transform: [{ scale: isActive ? 1.02 : 1 }],
             }}
           >

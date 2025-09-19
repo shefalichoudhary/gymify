@@ -288,7 +288,7 @@ const handleToggleSetComplete = (
   .where(eq(routineExercises.routineId, String(routineId)))
   .all();
 
-    const exerciseIds = routineEx.map((re) => String(re.exerciseId));
+    const exerciseIds = routineEx.map((re:any) => String(re.exerciseId));
 
     // Set placeholders immediately to show UI
     const placeholders: ExerciseData = {};
@@ -304,12 +304,12 @@ const handleToggleSetComplete = (
 }
 
     setExerciseData(placeholders);
-    setExerciseDetails(exerciseIds.map((id) => ({ id, name: "Loading...", type: "", equipment: "", exercise_type: null })));
+    setExerciseDetails(exerciseIds.map((id:any) => ({ id, name: "Loading...", type: "", equipment: "", exercise_type: null })));
 
     // Fetch details and sets in parallel
     const [routineSetRows, details] = await Promise.all([
       db.query.routineSets.findMany({
-        where: (rs, { inArray }) => inArray(rs.exerciseId, exerciseIds),
+        where: (rs:any, { inArray }:any) => inArray(rs.exerciseId, exerciseIds),
       }),
       db
         .select({
@@ -329,10 +329,10 @@ const handleToggleSetComplete = (
 
     for (const exerciseId of exerciseIds) {
       const setsForExercise = routineSetRows.filter(
-        (set) => String(set.exerciseId) === exerciseId
+        (set:any) => String(set.exerciseId) === exerciseId
       );
 
-      const routineEntry = routineEx.find((re) => String(re.exerciseId) === exerciseId);
+      const routineEntry = routineEx.find((re:any) => String(re.exerciseId) === exerciseId);
 
 grouped[exerciseId] = {
   notes: routineEntry?.notes ?? "",
@@ -399,7 +399,7 @@ try {
   .from(exercises)
   .where(inArray(exercises.id, newUniqueIds))
   .all()
-).map((ex) => ({
+).map((ex:any) => ({
   ...ex,
  exercise_type: ex.exercise_type ?? null,
 }));

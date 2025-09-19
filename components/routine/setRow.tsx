@@ -71,7 +71,9 @@ useEffect(() => {
  
 
   const handleCheckPress = () => {
-   durationTimerRef.current?.stopTimer();
+   if (!set.isCompleted) {
+    durationTimerRef.current?.stopTimer();
+  }
     const newValue = !set.isCompleted;
     onChange("isCompleted", newValue);
     onToggleCheck(newValue);
@@ -212,53 +214,50 @@ const placeholderDuration =
 
         {/* Duration = secs */}
         {isDuration && (
-          <Box flex={6} position="relative">
-            {!set.isCompleted && showCheckIcon && (
-              <Box
-                position="absolute"
-                left={38}
-                top={0}
-                bottom={0}
-                justifyContent="center"
-                zIndex={1}
-              >
-                <DurationTimer
-                  ref={durationTimerRef}  
-      duration={set.duration ?? 0}   // ✅ start from stored duration
-      onChange={(val) => onChange("duration", val)} // keeps parent state synced
-    />
-              </Box>
-            )}
+  <Box flex={6} position="relative">
+    {!set.isCompleted && showCheckIcon && (
+      <Box
+        position="absolute"
+        left={38}
+        top={0}
+        bottom={0}
+        justifyContent="center"
+        zIndex={1}
+      >
+        <DurationTimer
+          ref={durationTimerRef}
+          duration={set.duration ?? 0}      // parent-controlled
+          onChange={(val) => onChange("duration", val)}
+        />
+      </Box>
+    )}
 
-            <Box alignItems="center">
-              <Input size="sm" borderWidth={0} w={100}>
-               <InputField
-  placeholder={
-    placeholderDuration != null ? formatTime(placeholderDuration) : "00:00"
-  }
-  keyboardType="numeric"
-  color="$white"
-  textAlign="center"
-  value={set.duration != null ? formatTime(set.duration) : undefined}
-  onChangeText={(text) => {
-    const parts = text.split(":");
-    let val: number | undefined;
-    if (parts.length === 2) {
-      const minutes = parseInt(parts[0], 10) || 0;
-      const seconds = parseInt(parts[1], 10) || 0;
-      val = minutes * 60 + seconds;
-    } else {
-      val = text ? parseInt(text, 10) || 0 : undefined;
-    }
-    onChange("duration", val ?? 0);
-  }}
-/>
+    <Box alignItems="center">
+      <Input size="sm" borderWidth={0} w={100}>
+        <InputField
+          placeholder={
+            placeholderDuration != null ? formatTime(placeholderDuration) : "00:00"
+          }
+          keyboardType="numeric"
+          color="$white"
+          textAlign="center"
+          value={set.duration != null ? formatTime(set.duration) : undefined}
+          onChangeText={(text) => {
+            const parts = text.split(":");
+            let val: number | undefined;
+            if (parts.length === 2) {
+              val = (parseInt(parts[0], 10) || 0) * 60 + (parseInt(parts[1], 10) || 0);
+            } else {
+              val = text ? parseInt(text, 10) || 0 : undefined;
+            }
+            onChange("duration", val ?? 0);
+          }}
+        />
+      </Input>
+    </Box>
+  </Box>
+)}
 
-
-              </Input>
-            </Box>
-          </Box>
-        )}
 
         {/* ✅ Check Icon */}
         {showCheckIcon && (

@@ -81,7 +81,7 @@ export default function Home() {
                 );
 
               const setsCount = sets.length;
-              const exerciseVolume = sets.reduce((sum, s) => sum + (s.weight ?? 0) * (s.reps ?? 1), 0);
+              const exerciseVolume = sets.reduce((sum:number, s:any) => sum + (s.weight ?? 0) * (s.reps ?? 1), 0);
               totalVolume += exerciseVolume;
 
               exerciseList.push({

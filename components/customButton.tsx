@@ -6,12 +6,14 @@ type CustomButtonProps = {
   children: React.ReactNode;
   icon?: React.ReactElement | null;
   iconPosition?: "left" | "right";
+    $pressed?: any; 
   [key: string]: any;
 };
 
 export default function CustomButton({
   onPress,
   children,
+    $pressed,
   icon = null,
   iconPosition = "right",
   ...props
@@ -27,6 +29,11 @@ export default function CustomButton({
       alignItems="center"
       justifyContent="center"
       w="100%"
+       $pressed={{
+        bg: "$yellow300", // pressed background
+        scale: 0.97,      // subtle shrink
+        ...$pressed,      // merge user-provided pressed styles
+      }}
       {...props}
     >
       {icon && iconPosition === "left" && (

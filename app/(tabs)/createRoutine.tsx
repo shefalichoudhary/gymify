@@ -102,7 +102,7 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
           .from(routineExercises)
           .where(eq(routineExercises.routineId, id as string));
 
-        const exerciseIds = exerciseLinks.map((e) => e.exerciseId);
+        const exerciseIds = exerciseLinks.map((e:any) => e.exerciseId);
         const exerciseDetails = await db
           .select()
           .from(exercises)
@@ -113,21 +113,21 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
           .from(routineSets)
           .where(eq(routineSets.routineId, id as string));
 
-        const setsByExercise = exerciseLinks.map((link) => ({
+        const setsByExercise = exerciseLinks.map((link:any) => ({
       exerciseId: link.exerciseId,
-      sets: sets.filter((s) => s.exerciseId === link.exerciseId),
+      sets: sets.filter((s:any) => s.exerciseId === link.exerciseId),
       restTimer: link.restTimer ?? 0, // ✅ GET rest_timer here
     }));
 
         setPrefillData({
           name: `${routine.name} (Copy)`,
-          exercises: exerciseDetails.map((ex) => {
-            const matched = setsByExercise.find((s) => s.exerciseId === ex.id);
+          exercises: exerciseDetails.map((ex:any) => {
+            const matched = setsByExercise.find((s:any) => s.exerciseId === ex.id);
             return {
               ...ex,
                 rest_timer: matched?.restTimer ?? 0,
 
-              sets: (matched?.sets || []).map((s) => ({
+              sets: (matched?.sets || []).map((s:any) => ({
                 id: s.id,
                 reps: s.reps ?? 0,
                 weight: s.weight ?? 0,
@@ -228,13 +228,13 @@ import { useConfirmDialog } from "@/hooks/useConfirmDialog";
 
           setSelectedExercises((prev) => {
             const existingIds = new Set(prev.map((e) => e.id));
-            const newExercises = data.filter((e) => !existingIds.has(e.id));
+            const newExercises = data.filter((e:any) => !existingIds.has(e.id));
             return [...prev, ...newExercises];
           });
 
           setExerciseData((prev) => {
             const updated = { ...prev };
-            data.forEach((exercise) => {
+            data.forEach((exercise:any) => {
               if (!updated[exercise.id]) {
                 updated[exercise.id] = {
                   notes: "",
