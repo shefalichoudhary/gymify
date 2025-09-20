@@ -121,7 +121,7 @@ export default function Home() {
   const latestWorkout = workouts.length > 0 ? workouts[0] : null;
 
   return (
-    <SafeAreaView  bg="#1F1F1F">
+  <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }}>
       <ScrollView pt="$2"   contentContainerStyle={{ flexGrow: 1 }} >
         <VStack flex={1}  space="md" >
           {/* Latest Workout Card if exists */}
