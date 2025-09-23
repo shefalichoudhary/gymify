@@ -14,6 +14,7 @@ import {
   HStack,
   Text,
   Pressable,
+  Box,
 } from "@gluestack-ui/themed";
 import { config } from "@gluestack-ui/config";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -21,38 +22,76 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { AuthProvider } from "@/context/authContext";
 import { ActivityIndicator, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { MaterialCommunityIcons,MaterialIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons,MaterialIcons ,FontAwesome6} from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/authContext";
-
+import { useSegments } from "expo-router"; 
+import { usePathname } from "expo-router";
 SplashScreen.preventAutoHideAsync();
 
 const sidebarLinks = [
   { name: "Home", path: "/home" as const, icon: (props: any) => <Ionicons name="home-outline" {...props} /> },
   { name: "Workout", path: "/workout" as const, icon: (props: any) => <MaterialCommunityIcons name="dumbbell" {...props} /> },
   { name: "Profile", path: "/profile" as const, icon: (props: any) => <Ionicons name="person-outline" {...props} /> },
-  { name: "LogWorkout", path: "/logWorkout" as const, icon: (props: any) => <Ionicons name="settings-outline" {...props} /> },
+  { name: "Create Routine", path: "/createRoutine" as const, icon: (props: any) =>       <FontAwesome6 name="clipboard-list"   {...props} />
+ },
 ];
-const AuthConsumer = () => {
+ const AuthConsumer = () => {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
-  return user ? (
-    // User is logged in → show Logout
-    <Pressable onPress={logout}>
-    <MaterialIcons name="logout" size={26} color="white" />
-    </Pressable>
-  ) : (
-    // User is not logged in → show Login
-    <Pressable onPress={() => router.push("/signIn")}>
-      <MaterialCommunityIcons name="login" size={26} color="white" />
-    </Pressable>
+  return (
+    <VStack pt="$4" borderTopWidth={1} borderColor="$gray700">
+      <HStack alignItems="center" justifyContent="space-between">
+        <HStack alignItems="center">
+          <Box
+            w={40}
+            h={40}
+            borderRadius={20}
+            bg="$black"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Text color="$white" fontWeight="$bold">
+              {user?.username?.charAt(0).toUpperCase() || "U"}
+            </Text>
+          </Box>
+          <VStack ml="$2">
+            <Text color="$white" fontWeight="$bold" fontSize="$sm">
+              {user?.username || "Unknown User"}
+            </Text>
+           
+          </VStack>
+        </HStack>
+
+        {/* Login/Logout button */}
+        {user ? (
+          <Pressable onPress={logout}>
+            <MaterialIcons name="logout" size={26} color="white" />
+          </Pressable>
+        ) : (
+          <Pressable onPress={() => router.push("/signIn")}>
+            <MaterialCommunityIcons name="login" size={26} color="white" />
+          </Pressable>
+        )}
+      </HStack>
+    </VStack>
   );
 };
 const MainLayout = () => {
   const { width } = useWindowDimensions();
+
   const isLargeScreen = width >= 768;
   const router = useRouter();
-
+    const segments = useSegments();
+ const pathname = usePathname();
+  const segs = segments as string[];
+const hideSidebar =
+  segs.length === 0 || // index
+  segs[0] === "(auth)" ||
+  segs[0] === "signIn" ||
+  segs[0] === "signUp" ||
+  segs[0] === "forgotPassword";
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GluestackUIProvider config={config}>
@@ -61,69 +100,82 @@ const MainLayout = () => {
             <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }}  edges={["bottom", "left", "right"]}>
               <HStack flex={1}>
                 {/* Sidebar for large screens */}
-                {isLargeScreen && (
-                  <VStack
-                    w="25%"
-                    bg="$black"
-                    p="$4"
-                    borderRightWidth={1}
-                    borderColor="$gray700"
-                    justifyContent="space-between"
-                  >
-                    <VStack space="lg">
-                      <Text color="$white" fontWeight="$bold" fontSize="$lg" mb="$2">
-                        Navigation
-                      </Text>
+                {isLargeScreen && !hideSidebar && (
+  <VStack
+      w={280} // fixed width in px, won't shrink/stretch
+      h="$full"
+      bg="#1F1F1F"
+      py="$4"
+      px="$2"
+      borderRightWidth={1}
+      borderColor="$coolgray"
+      justifyContent="space-between"
+      mr="$2"
+    >
+    {/* --- Header Section --- */}
+    <VStack space="md" mb="$4">
+      <Pressable onPress={() => router.navigate("/")}>
+        <Text
+          color="$white"
+          fontWeight="$bold"
+          fontSize="$xl"
+          letterSpacing={2}
+          px="$1.5"
+        >
+          GYMIFY
+        </Text>
+      </Pressable>
+      <Box borderBottomWidth={1} borderColor="gray" />
+    </VStack>
 
-                      {sidebarLinks.map((link, idx) => {
-                        const Icon = link.icon;
-                        return (
-                          <Pressable
-                            key={idx}
-                           onPress={() => router.push(link.path )}
-                            borderRadius="$md"
-                            p="$3"
-                            flexDirection="row"
-                            alignItems="center"
-                            bg="$gray800"
-                            mb="$2"
-                          >
-                            <Icon size={20} color="white" />
-                            <Text color="$white" fontSize="$sm" ml="$3">
-                              {link.name}
-                            </Text>
-                          </Pressable>
-                        );
-                      })}
-                    </VStack>
+    {/* --- Navigation Links --- */}
+    <VStack space="xs" flex={1} 
+    >
+      {sidebarLinks.map((link, idx) => {
+        const Icon = link.icon;
+       const isActive = pathname === link.path;
 
-                    <VStack mt="auto" pt="$4" borderTopWidth={1} borderColor="$gray700">
-                      <HStack alignItems="center" justifyContent="space-between">
-                        <HStack alignItems="center">
-                          <View
-                            w={40}
-                            h={40}
-                            borderRadius={20}
-                            bg="$gray600"
-                            justifyContent="center"
-                            alignItems="center"
-                          >
-                            <Text color="$white" fontWeight="$bold">
-                              U
-                            </Text>
-                          </View>
-                          <VStack ml="$2">
-                            <Text color="$white" fontWeight="$bold" fontSize="$sm">
-                              Unknown User
-                            </Text>
-                          </VStack>
-                        </HStack>
+        return (
+          <Pressable
+            key={idx}
+            onPress={() => router.push(link.path)}
+            borderRadius="$lg"
+            p="$3"
+            flexDirection="row"
+            alignItems="center"
+            mb="$1"
+            bg={isActive ? "$gray800" : "transparent"}
+            $hover-bg="$black"
 
-                      <AuthConsumer/>
-                      </HStack>
-                    </VStack>
-                  </VStack>
-                )}
+            
+          >
+            <Icon
+              size={20}
+              color={isActive ? "#3b82f6" : "white"} // active blue, otherwise white
+            />
+            <Text
+       
+          letterSpacing={0.4}
+
+              color={isActive ? "#3b82f6" : "$white"}
+              fontSize="$md"
+              ml="$3"
+              fontWeight={isActive ? "$bold" : "$base"}
+
+            >
+              {link.name}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </VStack>
+
+    {/* --- User Section --- */}
+
+        <AuthConsumer />
+     
+  </VStack>
+)}
 
                 {/* Main content */}
                 <View style={{ flex: 1 }}>

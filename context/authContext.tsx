@@ -9,7 +9,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import cuid from "cuid";
 import { makeRedirectUri } from "expo-auth-session";
-
+import { useRouter } from "expo-router"; 
 WebBrowser.maybeCompleteAuthSession();
 
 type User = {
@@ -31,7 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-
+const router = useRouter(); 
   const redirectUri = makeRedirectUri({ scheme: "myapp" }) ?? (Platform.OS === "web" ? window.location.origin : "");
 
   const [request, response, promptAsync] = Google.useAuthRequest({
@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const loggedInUser = { username: dbUser.name ?? "Unknown", email: dbUser.email ?? "" };
           setUser(loggedInUser);
           await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
+            router.replace("/home");
         } catch (err) {
           console.error("Google login failed:", err);
         }

@@ -4,11 +4,14 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CustomHeader from "@/components/customHeader";
 import { Pressable, Text, Box, HStack } from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
-
+import { useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
+
 export default function Layout() {
   const router = useRouter();
 const { user, logout } = useAuth();
+ const { width } = useWindowDimensions();
+  const isLargeScreen = width >= 768;
 
   const [isSheetOpen, setIsSheetOpen] = useState(false); 
 
@@ -23,6 +26,12 @@ const { user, logout } = useAuth();
          
           screenOptions={({ route,    }) => {
             const showTabBar = ["home", "workout", "profile"].includes(route.name);
+  if (isLargeScreen) {
+            return {
+              headerShown: false,
+              tabBarStyle: { display: "none" },
+            };
+          }
 
             return {
               contentStyle: { backgroundColor: "#1F1F1F" },
@@ -79,7 +88,7 @@ const { user, logout } = useAuth();
     ? { display: "none" } // hide tab bar when sheet is open
     : {
         backgroundColor: "#1F1F1F",
-        paddingBottom: 4,
+        marginBottom: 2,
         height: 54,
         elevation: 0,
         borderTopWidth: 0,
