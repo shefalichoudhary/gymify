@@ -6,16 +6,16 @@ type CustomButtonProps = {
   children: React.ReactNode;
   icon?: React.ReactElement | null;
   iconPosition?: "left" | "right";
-    $pressed?: any; 
+    hover?: Record<string, any>;
   [key: string]: any;
 };
 
 export default function CustomButton({
   onPress,
   children,
-    $pressed,
   icon = null,
   iconPosition = "right",
+    hover = {}, 
   ...props
 }: CustomButtonProps) {
   return (
@@ -29,11 +29,8 @@ export default function CustomButton({
       alignItems="center"
       justifyContent="center"
       w="100%"
-       $pressed={{
-        bg: "$yellow300", // pressed background
-        scale: 0.97,      // subtle shrink
-        ...$pressed,      // merge user-provided pressed styles
-      }}
+       $hover={{ bg: "$blue400", ...hover }}
+      
       {...props}
     >
       {icon && iconPosition === "left" && (

@@ -160,7 +160,6 @@ const hideSidebar =
               color={isActive ? "#3b82f6" : "$white"}
               fontSize="$md"
               ml="$3"
-              fontWeight={isActive ? "$bold" : "$base"}
 
             >
               {link.name}

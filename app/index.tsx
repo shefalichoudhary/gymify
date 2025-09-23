@@ -15,6 +15,7 @@ import {
 import { useFonts, Inter_400Regular, Inter_700Bold, Inter_900Black } from "@expo-google-fonts/inter";
 import CustomButton from "@/components/customButton";
 import { useSeedExercises } from "../db/seed";
+import { HoverEffect } from "react-native-gesture-handler";
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -133,8 +134,28 @@ export default function LandingPage() {
                 Discover personalized fitness plans and home workouts designed to help
                 you build strength, improve flexibility, and stay motivated.
               </Text>
-              <CustomButton
-  onPress={() => router.replace("/home")}
+               <CustomButton
+   onPress={() => router.replace("/home")}
+       hover={{ bg: "$yellow300", scale: 1.05 }}
+
+style={({ pressed }:any) => ({
+    backgroundColor: "#1F1F1F",
+    opacity: pressed ? 1 : 1, // same opacity prevents flash
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+
+
+  })}
+  iconPosition="right"
+  icon={
+    <AntDesign
+      name="arrowright"
+      size={20}
+      color="white"
+      style={{ marginLeft: 8 }}
+    />
+  }
 >
   Get Started
 </CustomButton>
@@ -221,12 +242,16 @@ export default function LandingPage() {
             </Text>
           <CustomButton
    onPress={() => router.replace("/home")}
+       hover={{ bg: "$yellow300", scale: 1.05 }}
+
 style={({ pressed }:any) => ({
     backgroundColor: "#1F1F1F",
     opacity: pressed ? 1 : 1, // same opacity prevents flash
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
+
+
   })}
   iconPosition="right"
   icon={
