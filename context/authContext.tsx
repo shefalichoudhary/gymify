@@ -32,7 +32,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 const router = useRouter(); 
-  const redirectUri = makeRedirectUri({ scheme: "myapp" }) ?? (Platform.OS === "web" ? window.location.origin : "");
+const redirectUri =
+  // @ts-ignore
+  makeRedirectUri({ scheme: "myapp", useProxy: true }) ??
+  (Platform.OS === "web" ? window.location.origin : "");
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId: "756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com",

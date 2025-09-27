@@ -129,7 +129,7 @@ const placeholderDuration =
   
   // --- Shared reps input for Weighted & Bodyweight
   const renderRepsInput = () => (
-    <Box flex={showCheckIcon ? 6 : 5}>
+    <Box flex={showCheckIcon ? 6 : 4}>
       <HStack alignItems="center" space="sm" ml="$4">
         {set.isRangeReps ? (
           <HStack alignItems="center" flex={1}>

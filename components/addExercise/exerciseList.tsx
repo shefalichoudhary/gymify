@@ -110,11 +110,18 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
   />
         </Box>
         <Pressable
-          onPress={() => {
-            toggleSelect(exercise.id);
-            playAudio(); // ✅ play audio on press
-          }}
-        >
+  onPress={() => {
+    const isSelected = selectedIds.includes(exercise.id);
+
+    // Only play audio if it's being selected, not unselected
+    if (!isSelected) {
+      playAudio();
+    }
+
+    toggleSelect(exercise.id);
+  }}
+>
+
           <Box flex={1}>
             <Text color="$white" fontSize="$md" fontWeight="$medium">
               {exercise.exercise_name}

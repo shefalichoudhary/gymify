@@ -88,7 +88,8 @@ const { user, logout } = useAuth();
     ? { display: "none" } // hide tab bar when sheet is open
     : {
         backgroundColor: "#1F1F1F",
-        marginBottom: 2,
+        paddingBottom: 8,
+        marginBottom:3,
         height: 54,
         elevation: 0,
         borderTopWidth: 0,
