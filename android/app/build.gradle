@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.shefali.gymify'
+    namespace 'com.shefali_choudhary.gymify'
     defaultConfig {
-        applicationId 'com.shefali.gymify'
+        applicationId 'com.shefali_choudhary.gymify'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

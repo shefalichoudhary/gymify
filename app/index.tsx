@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import { ImageBackground, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
@@ -14,14 +14,18 @@ import {
 } from "@gluestack-ui/themed";
 import { useFonts, Inter_400Regular, Inter_700Bold, Inter_900Black } from "@expo-google-fonts/inter";
 import CustomButton from "@/components/customButton";
-import { useSeedExercises } from "../db/seed";
-import { HoverEffect } from "react-native-gesture-handler";
+import { SeedDatabase} from "../db/seed";
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isLargeScreen = width > 768;
   
-    useSeedExercises(); // seed only on native
+  useEffect(() => {
+  const runSeed = async () => {
+    await SeedDatabase(); // ensure async execution
+  };
+  runSeed();
+}, []);
 
 
   // Load Inter font

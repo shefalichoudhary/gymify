@@ -208,11 +208,11 @@ const passwordRules = [
 {/* Password */}
  <FormControl>
             <FormControlLabel>
-              <FormControlLabelText color="$textLight50">New Password</FormControlLabelText>
+              <FormControlLabelText color="$textLight50">Password</FormControlLabelText>
             </FormControlLabel>
             <Input bg="$backgroundDark800" rounded="$xl" borderWidth={0}>
               <InputField
-                placeholder="New Password"
+                placeholder="Password"
                 placeholderTextColor="$textLight400"
                 secureTextEntry={!isPasswordVisible}
                 autoCapitalize="none"

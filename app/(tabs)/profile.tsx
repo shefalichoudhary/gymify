@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Text,
@@ -9,15 +9,57 @@ import {
   Divider,
   Button,
   ScrollView,
+  Spinner,
 } from "@gluestack-ui/themed";
 import { useRouter } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
-import { useAuth } from "@/context/authContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { db } from "@/db/db"; // your Drizzle DB instance
+import { users } from "@/db/schema"; // your users table schema
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const [user, setUser] = useState<null | { id: number; name: string; email: string }>(null);
+  const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  const fetchUser = async () => {
+    try {
+      const [dbUser] = await db.select().from(users);
+      if (dbUser) {
+        setUser({
+          id: Number(dbUser.id),        // convert string id to number
+          name: dbUser.name,        // map `name` to `username`
+          email: dbUser.email,
+        });
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchUser();
+}, []);
+
+
+  const logout = async () => {
+    // Clear user data in your context/SQLite/AsyncStorage if needed
+    setUser(null);
+    router.replace("/signIn");
+  };
+
+  if (loading) {
+    return (
+      <Box flex={1} justifyContent="center" alignItems="center" bg="$black">
+        <Spinner size={24} color="$white" />
+        <Text color="$white" mt="$2">Loading profile...</Text>
+      </Box>
+    );
+  }
 
   if (!user) {
     return (
@@ -40,32 +82,17 @@ export default function Profile() {
           colors={["#4facfe", "#00f2fe"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={{
-            borderRadius: 9999,
-            padding: 2,
-          }}
+          style={{ borderRadius: 9999, padding: 2 }}
         >
-          <Avatar
-            bgColor="$black"
-            size="2xl"
-            borderWidth={2}
-            borderColor="transparent"
-          >
-            <AvatarFallbackText>
-              {user.username?.slice(0, 2).toUpperCase()}
-            </AvatarFallbackText>
+          <Avatar bgColor="$black" size="2xl" borderWidth={2} borderColor="transparent">
+            <AvatarFallbackText>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallbackText>
           </Avatar>
         </LinearGradient>
 
         {/* Username */}
         <VStack space="xs" alignItems="center" w="100%" mt="$4">
-
-        <Text color="$white" fontSize="$2xl" fontWeight="$bold" >
-          {user.username}
-        </Text>
-        <Text color="$coolGray400" fontSize="$md">
-          Fitness Enthusiast
-        </Text>
+          <Text color="$white" fontSize="$2xl" fontWeight="$bold">{user.name}</Text>
+          <Text color="$coolGray400" fontSize="$md">Fitness Enthusiast</Text>
         </VStack>
 
         {/* Profile Info Card */}
@@ -91,7 +118,7 @@ export default function Profile() {
         </Box>
 
         {/* Buttons */}
-        <VStack space="md" w="100%" >
+        <VStack space="md" w="100%">
           <Button
             bg="$blue600"
             borderRadius="$xl"
@@ -104,21 +131,18 @@ export default function Profile() {
             </HStack>
           </Button>
 
-         <Button
-  bg="$red600"
-  borderRadius="$xl"
-  onPress={async () => {
-    await logout();
-    router.replace("/home");
-  }}
-  size="lg"
-  $pressed={{ bg: "$red700" }}
->
-  <HStack space="sm" alignItems="center">
-    <AntDesign name="logout" size={18} color="white" />
-    <Text color="white">Log Out</Text>
-  </HStack>
-</Button>
+          <Button
+            bg="$red600"
+            borderRadius="$xl"
+            onPress={logout}
+            size="lg"
+            $pressed={{ bg: "$red700" }}
+          >
+            <HStack space="sm" alignItems="center">
+              <AntDesign name="logout" size={18} color="white" />
+              <Text color="white">Log Out</Text>
+            </HStack>
+          </Button>
         </VStack>
       </VStack>
     </ScrollView>
@@ -127,11 +151,7 @@ export default function Profile() {
 
 const ProfileItem = ({ label, value }: { label: string; value: string }) => (
   <HStack justifyContent="space-between" alignItems="center">
-    <Text color="$coolGray400" fontSize="$sm">
-      {label}
-    </Text>
-    <Text color="$white" fontWeight="$medium" fontSize="$sm">
-      {value}
-    </Text>
+    <Text color="$coolGray400" fontSize="$sm">{label}</Text>
+    <Text color="$white" fontWeight="$medium" fontSize="$sm">{value}</Text>
   </HStack>
 );

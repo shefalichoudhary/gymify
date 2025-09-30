@@ -27,6 +27,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/context/authContext";
 import { useSegments } from "expo-router"; 
 import { usePathname } from "expo-router";
+  import { ClerkProvider,ClerkLoaded } from '@clerk/clerk-expo'
+import { tokenCache } from '@clerk/clerk-expo/token-cache'
 SplashScreen.preventAutoHideAsync();
 
 const sidebarLinks = [
@@ -91,11 +93,18 @@ const hideSidebar =
   segs[0] === "(auth)" ||
   segs[0] === "signIn" ||
   segs[0] === "signUp" ||
+
   segs[0] === "forgotPassword";
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GluestackUIProvider config={config}>
-        <AuthProvider>
+            <ClerkProvider  publishableKey={publishableKey}tokenCache={tokenCache}>
+<ClerkLoaded>
+<AuthProvider>
+
+
           <BottomSheetModalProvider>
             <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }}  edges={["bottom", "left", "right"]}>
               <HStack flex={1}>
@@ -183,7 +192,11 @@ const hideSidebar =
               </HStack>
             </SafeAreaView>
           </BottomSheetModalProvider>
-        </AuthProvider>
+</AuthProvider>
+
+        </ClerkLoaded>
+            </ClerkProvider>
+
       </GluestackUIProvider>
     </GestureHandlerRootView>
   );

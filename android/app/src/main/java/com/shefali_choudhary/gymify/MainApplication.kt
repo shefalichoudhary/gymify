@@ -1,4 +1,4 @@
-package com.shefali.gymify
+package com.shefali_choudhary.gymify
 
 import android.app.Application
 import android.content.res.Configuration

@@ -31,6 +31,7 @@ import m0026 from './0026_faithful_toad_men.sql';
 import m0027 from './0027_long_bloodscream.sql';
 import m0028 from './0028_messy_spitfire.sql';
 import m0029 from './0029_glorious_omega_flight.sql';
+import m0030 from './0030_mean_sheva_callister.sql';
 
   export default {
     journal,
@@ -64,7 +65,8 @@ m0025,
 m0026,
 m0027,
 m0028,
-m0029
+m0029,
+m0030
     }
   }
   

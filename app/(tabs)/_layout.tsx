@@ -2,17 +2,18 @@ import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CustomHeader from "@/components/customHeader";
-import { Pressable, Text, Box, HStack } from "@gluestack-ui/themed";
+import { Pressable, Text, Box, HStack, View } from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
 import { useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-
+import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo'
+import { SignOutButton } from '@/components/signOutButtom'
 export default function Layout() {
   const router = useRouter();
-const { user, logout } = useAuth();
+const { logout } = useAuth();
  const { width } = useWindowDimensions();
   const isLargeScreen = width >= 768;
-
+  const { user } = useUser()
   const [isSheetOpen, setIsSheetOpen] = useState(false); 
 
   useEffect(() => {
@@ -56,19 +57,20 @@ const { user, logout } = useAuth();
                       }
                       
                        right={
-          user ? (
-            <Pressable onPress={logout}>
-              <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
-                Logout
-              </Text>
-            </Pressable>
-          ) : (
-            <Pressable onPress={() => router.push("/signIn")}>
+                           <View>
+      <SignedIn>
+        <SignOutButton />
+      </SignedIn>
+      <SignedOut>
+       <Pressable onPress={() => router.push("/signIn")}>
               <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
                 Login
               </Text>
             </Pressable>
-          )
+   
+      </SignedOut>
+    </View>
+        
         }
       />
     );
@@ -95,7 +97,6 @@ const { user, logout } = useAuth();
         borderTopWidth: 0,
         shadowOpacity: 0,
         shadowOffset: { width: 0, height: 0 },
-        shadowColor: "transparent",
       }
   : { display: "none" },
 

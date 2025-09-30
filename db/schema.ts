@@ -8,7 +8,8 @@ export const users = sqliteTable("users", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  password: text("password").notNull(), // hashed
+  password: text("password") ,// optional for Google users,
+  google: integer("google").$default(() => 1),
 });
 export const exercises = sqliteTable("exercises", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),

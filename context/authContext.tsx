@@ -10,6 +10,7 @@ import * as Google from "expo-auth-session/providers/google";
 import cuid from "cuid";
 import { makeRedirectUri } from "expo-auth-session";
 import { useRouter } from "expo-router"; 
+
 WebBrowser.maybeCompleteAuthSession();
 
 type User = {
@@ -33,10 +34,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 const router = useRouter(); 
 const redirectUri =
-  // @ts-ignore
-  makeRedirectUri({ scheme: "myapp", useProxy: true }) ??
-  (Platform.OS === "web" ? window.location.origin : "");
-
+  makeRedirectUri({ scheme: "myapp" }) ??
+  (Platform.OS === "web" ? window.location.origin : "https://auth.expo.dev/@shefali_choudhary/gymify");
+console.log(redirectUri)
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId: "756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com",
     androidClientId: "756288749216-3oaav02buu9204ugjvp2oe6jmchq0o8c.apps.googleusercontent.com",

@@ -1,4 +1,4 @@
-package com.shefali.gymify
+package com.shefali_choudhary.gymify
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

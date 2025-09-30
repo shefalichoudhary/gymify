@@ -3,6 +3,8 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter,useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/context/authContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { OAuthButtons } from "@/components/oAuth"
+
 // Gluestack UI
 import {
   FormControl,
@@ -204,12 +206,8 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
       >
         Sign In
       </CustomButton>
-         <CustomButton
-        onPress={loginWithGoogle}
-        bg="$blue500"
-      >
-        Sign in with Google
-      </CustomButton>
+        <OAuthButtons />
+
     </VStack>
   </KeyboardAwareScrollView>
 
