@@ -46,7 +46,66 @@ useEffect(() => {
   runSeed();
 }, []);
 ```
+## Development Process for Dev Development
 
+Follow these steps to run and develop the app locally:
+
+1. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+2. **Prepare your device or emulator**
+
+   - **Android:** Start an emulator from Android Studio before running the app.
+   - **iOS:** Use the simulator (requires macOS).
+   - **Physical device:** Install the Expo Go app and scan the QR code.
+
+3. **Start the Expo development server**
+
+   ```bash
+   npx expo start
+   ```
+
+   - This starts the Metro bundler in your terminal or VS Code.
+   - You can edit code in the app directory and hot reload will reflect changes immediately.
+
+4. **Choose your platform in the Expo CLI**
+
+   - Press `a` for Android emulator
+   - Press `i` for iOS simulator
+   - Scan the QR code for Expo Go
+
+5. **Install the app on your device or simulator**
+
+   - After the build, install the APK (Android) or IPA (iOS) on your device or emulator.
+
+6. **Keep the Metro bundler running**
+
+   - The app connects to the dev server for live reload and debugging.
+   - Any code changes in VS Code will hot reload in your installed dev build.
+
+7. **Debug and test**
+
+   - Use console logs or React Native Debugger to inspect the app.
+   - Seed the database as needed during development (see instructions above).
+   - Commit changes frequently and push to your repository.
+
+---
+
+### Build a development standalone app (EAS)
+
+To build a development version for Android or iOS:
+
+```bash
+npx eas build -p android --profile development   # for Android
+npx eas build -p ios --profile development       # for iOS
+```
+
+---
+
+> **Tip:** For Android, you may need to start an emulator from Android Studio first before running the app in development mode.
 
 ## Learn more
 
