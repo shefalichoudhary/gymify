@@ -6,14 +6,11 @@ import { Pressable, Text, Box, HStack, View } from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
 import { useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
-import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo'
-import { SignOutButton } from '@/components/signOutButtom'
 export default function Layout() {
   const router = useRouter();
-const { logout } = useAuth();
+const { user, logout } = useAuth();
  const { width } = useWindowDimensions();
   const isLargeScreen = width >= 768;
-  const { user } = useUser()
   const [isSheetOpen, setIsSheetOpen] = useState(false); 
 
   useEffect(() => {
@@ -55,23 +52,22 @@ const { logout } = useAuth();
                           </Text>
                         </Pressable>
                       }
-                      
-                       right={
-                           <View>
-      <SignedIn>
-        <SignOutButton />
-      </SignedIn>
-      <SignedOut>
-       <Pressable onPress={() => router.push("/signIn")}>
-              <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
-                Login
-              </Text>
-            </Pressable>
-   
-      </SignedOut>
-    </View>
+
+                       right={ 
+                        user?(
+                         <Pressable onPress={logout}>
+                           <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
+                             Logout
+                           </Text>
+                         </Pressable>
+                       ) : (
+                         <Pressable onPress={() => router.push("/signIn")}>
+                           <Text color="$white" letterSpacing={0.5} fontWeight="$medium">
+                             Login
+                           </Text>
+                         </Pressable>
+                       )}
         
-        }
       />
     );
                 }

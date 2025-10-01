@@ -29,6 +29,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="exp+gymify"/>
+        <data android:scheme="com.shefali_choudhary.gymify"/>
       </intent-filter>
     </activity>
   </application>

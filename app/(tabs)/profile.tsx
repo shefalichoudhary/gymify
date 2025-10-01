@@ -6,6 +6,7 @@ import {
   HStack,
   Avatar,
   AvatarFallbackText,
+  AvatarImage,
   Divider,
   Button,
   ScrollView,
@@ -14,40 +15,39 @@ import {
 import { useRouter } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { db } from "@/db/db"; // your Drizzle DB instance
-import { users } from "@/db/schema"; // your users table schema
+import { db } from "@/db/db";
+import { users } from "@/db/schema";
 
 export default function Profile() {
   const router = useRouter();
-  const [user, setUser] = useState<null | { id: number; name: string; email: string }>(null);
+  const [user, setUser] = useState<null | { id: number; name: string; email: string;  photo?: string | null  }>(null);
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const [dbUser] = await db.select().from(users);
-      if (dbUser) {
-        setUser({
-          id: Number(dbUser.id),        // convert string id to number
-          name: dbUser.name,        // map `name` to `username`
-          email: dbUser.email,
-        });
-      } else {
-        setUser(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const [dbUser] = await db.select().from(users);
+        if (dbUser) {
+          setUser({
+            id: Number(dbUser.id),
+            name: dbUser.name,
+            email: dbUser.email,
+            photo: dbUser.photo ?? null, // <- fetch photo if available
+          });
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching user:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchUser();
-}, []);
-
+    fetchUser();
+  }, []);
 
   const logout = async () => {
-    // Clear user data in your context/SQLite/AsyncStorage if needed
     setUser(null);
     router.replace("/signIn");
   };
@@ -85,7 +85,13 @@ useEffect(() => {
           style={{ borderRadius: 9999, padding: 2 }}
         >
           <Avatar bgColor="$black" size="2xl" borderWidth={2} borderColor="transparent">
-            <AvatarFallbackText>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallbackText>
+            {user.photo ? (
+              <AvatarImage source={{ uri: user.photo }} alt={user.name} /> // show photo if exists
+            ) : (
+              <AvatarFallbackText>
+                {user.name?.slice(0, 2).toUpperCase()}
+              </AvatarFallbackText>
+            )}
           </Avatar>
         </LinearGradient>
 

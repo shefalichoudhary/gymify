@@ -6,11 +6,13 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import * as Crypto from "expo-crypto";
 import * as WebBrowser from "expo-web-browser";
-import * as Google from "expo-auth-session/providers/google";
 import cuid from "cuid";
-import { makeRedirectUri } from "expo-auth-session";
 import { useRouter } from "expo-router"; 
-
+import {
+  GoogleSignin,
+  statusCodes,
+  isErrorWithCode,
+} from '@react-native-google-signin/google-signin';
 WebBrowser.maybeCompleteAuthSession();
 
 type User = {
@@ -21,7 +23,7 @@ type User = {
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   loading: boolean;
@@ -33,20 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 const router = useRouter(); 
-const redirectUri =
-  makeRedirectUri({ scheme: "myapp" }) ??
-  (Platform.OS === "web" ? window.location.origin : "https://auth.expo.dev/@shefali_choudhary/gymify");
-console.log(redirectUri)
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: "756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com",
-    androidClientId: "756288749216-3oaav02buu9204ugjvp2oe6jmchq0o8c.apps.googleusercontent.com",
-    webClientId: "756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com",
-    scopes: ["profile", "email"],
-    redirectUri,
-  } as any);
 
-  // -------------------------
-  // Helper: get user
   // -------------------------
   const getUserByEmail = async (email: string) => {
     if (!email) return null;
@@ -74,47 +63,7 @@ console.log(redirectUri)
     }
   };
 
-  // -------------------------
-  // Handle Google login response
-  // -------------------------
-  useEffect(() => {
-    const handleGoogleResponse = async () => {
-      if (response?.type === "success") {
-        const { authentication } = response;
-        if (!authentication?.accessToken) return;
 
-        try {
-          const userInfoResponse = await fetch("https://www.googleapis.com/userinfo/v2/me", {
-            headers: { Authorization: `Bearer ${authentication.accessToken}` },
-          });
-          const userInfo = await userInfoResponse.json();
-          const email = userInfo.email ?? "";
-          const username = userInfo.name ?? "Unknown";
-
-          let dbUser = await getUserByEmail(email);
-
-          if (!dbUser) {
-            const newUser = { id: cuid(), name: username, email, password: "" };
-            await insertUser(newUser);
-            dbUser = newUser;
-          }
-
-          const loggedInUser = { username: dbUser.name ?? "Unknown", email: dbUser.email ?? "" };
-          setUser(loggedInUser);
-          await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
-            router.replace("/home");
-        } catch (err) {
-          console.error("Google login failed:", err);
-        }
-      }
-    };
-
-    handleGoogleResponse();
-  }, [response]);
-
-  // -------------------------
-  // Load user from AsyncStorage
-  // -------------------------
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -131,13 +80,64 @@ console.log(redirectUri)
     loadUser();
   }, []);
 
+ // -------------------------
+  // SignInWithGoogle
   // -------------------------
-  // Google login function
-  // -------------------------
-  const loginWithGoogle = async () => {
-    if (!request) throw new Error("Google Auth request not ready");
-    await promptAsync();
-  };
+const signInWithGoogle = async () => {
+  try {
+    await GoogleSignin.hasPlayServices();
+    const response = await GoogleSignin.signIn(); // returns GoogleUser directly
+
+    const googleUser = response.data?.user;
+    const email = googleUser?.email;
+    const username = googleUser?.name ?? "Unknown";
+    const photo = googleUser?.photo ?? null;
+
+    if (!email) {
+      throw new Error("Google account has no email");
+    }
+
+    // Now TypeScript knows email is a string
+    let dbUser = await getUserByEmail(email);
+
+    if (!dbUser) {
+      const newUser = {
+        id: cuid(),
+        name: username,
+        email,
+        password: "",  // optional for Google users
+        google: 1,     // mark as Google account
+        photo
+      };
+      await insertUser(newUser);
+      dbUser = newUser;
+    }
+
+    const loggedInUser = { username: dbUser.name ?? "Unknown", email: dbUser.email ?? "" };
+    setUser(loggedInUser);
+    await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
+    router.replace("/home");
+
+  } catch (error: any) {
+    if (isErrorWithCode(error)) {
+      switch (error.code) {
+        case statusCodes.IN_PROGRESS:
+          console.log("Sign-in already in progress");
+          break;
+        case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+          console.log("Play services not available or outdated");
+          break;
+        case statusCodes.SIGN_IN_CANCELLED:
+          console.log("User cancelled sign-in");
+          break;
+        default:
+          console.error("Google Sign-In error:", error);
+      }
+    } else {
+      console.error("Unknown error during Google sign-in", error);
+    }
+  }
+};
 
   // -------------------------
   // Email/password login
@@ -186,7 +186,7 @@ console.log(redirectUri)
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, register, loginWithGoogle, loading }}
+      value={{ user, login, logout, register, signInWithGoogle, loading }}
     >
       {children}
     </AuthContext.Provider>

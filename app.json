@@ -4,13 +4,13 @@
     "slug": "gymify",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "myapp",
+    "scheme": "com.shefali_choudhary.gymify",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash":{
-      "image":"./assets/images/adaptive-icon.png",
-      "resizeMode":"contain",
-      "backgroundColor":"#000000"
+    "splash": {
+      "image": "./assets/images/adaptive-icon.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#000000"
     },
     "ios": {
       "supportsTablet": true,
@@ -23,9 +23,8 @@
     },
     "android": {
       "adaptiveIcon": {
-           "backgroundColor":"#000000",
-
-        "foregroundImage":"./assets/images/splash-icon.png"
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/images/splash-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -37,11 +36,15 @@
     },
     "plugins": [
       "expo-router",
-      
       "expo-sqlite",
       "expo-font",
       "expo-web-browser",
-      "@react-native-google-signin/google-signin"
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps._some_id_here_"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

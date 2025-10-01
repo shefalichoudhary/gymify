@@ -3,8 +3,11 @@ import { Feather } from "@expo/vector-icons";
 import { useRouter,useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/context/authContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { OAuthButtons } from "@/components/oAuth"
+import {
+  GoogleSignin,
 
+} from '@react-native-google-signin/google-signin';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 // Gluestack UI
 import {
   FormControl,
@@ -12,13 +15,11 @@ import {
   FormControlError,
   FormControlErrorText,
   FormControlErrorIcon,
- 
+
   FormControlLabelText,
   Input,
   InputField,
-  
-  Button,
-  ButtonText,
+ Image,
   Box,
   VStack,
   HStack,
@@ -34,12 +35,17 @@ interface FormState {
   email: string;
   password: string;
 }
-
+GoogleSignin.configure({
+  webClientId: '756288749216-vr6ijqcj6j368qc2s7bhr6kd2f5n4c0a.apps.googleusercontent.com', // Required for offline access / server auth
+  offlineAccess: true,
+  forceCodeForRefreshToken: true,
+  scopes: ['profile', 'email'],
+});
 function SignIn(): JSX.Element {
   const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [error, setError] = useState<string>("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const { login,loginWithGoogle } = useAuth();
+  const { login ,signInWithGoogle} = useAuth();
 
   const router = useRouter();
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
@@ -206,8 +212,16 @@ const routineData = Array.isArray(params.data) ? params.data[0] : params.data;
       >
         Sign In
       </CustomButton>
-        <OAuthButtons />
 
+<CustomButton
+        onPress={signInWithGoogle}
+        bg="$black"
+        borderWidth={1}
+        borderColor="$textLight400"
+        icon={<MaterialCommunityIcons name="google" size={20} color="white" marginLeft={2} />}
+      >
+        Continue with Google
+      </CustomButton>
     </VStack>
   </KeyboardAwareScrollView>
 

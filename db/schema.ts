@@ -10,6 +10,7 @@ export const users = sqliteTable("users", {
   email: text("email").notNull().unique(),
   password: text("password") ,// optional for Google users,
   google: integer("google").$default(() => 1),
+   photo: text("photo"), 
 });
 export const exercises = sqliteTable("exercises", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
