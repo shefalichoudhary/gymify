@@ -46,6 +46,18 @@ useEffect(() => {
   runSeed();
 }, []);
 ```
+
+### Build a development standalone app (EAS)
+
+To build a development version for Android or iOS:
+
+```bash
+npx eas build -p android --profile development   # for Android
+npx eas build -p ios --profile development       # for iOS
+```
+
+---
+
 ## Development Process for Dev Development
 
 Follow these steps to run and develop the app locally:
@@ -94,16 +106,7 @@ Follow these steps to run and develop the app locally:
 
 ---
 
-### Build a development standalone app (EAS)
 
-To build a development version for Android or iOS:
-
-```bash
-npx eas build -p android --profile development   # for Android
-npx eas build -p ios --profile development       # for iOS
-```
-
----
 
 > **Tip:** For Android, you may need to start an emulator from Android Studio first before running the app in development mode.
 
