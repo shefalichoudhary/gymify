@@ -92,6 +92,7 @@ const signInWithGoogle = async () => {
     const email = googleUser?.email;
     const username = googleUser?.name ?? "Unknown";
     const photo = googleUser?.photo ?? null;
+    const createdAt = new Date().toISOString();
 
     if (!email) {
       throw new Error("Google account has no email");
@@ -107,7 +108,8 @@ const signInWithGoogle = async () => {
         email,
         password: "",  // optional for Google users
         google: 1,     // mark as Google account
-        photo
+        photo,
+        created_at: createdAt,
       };
       await insertUser(newUser);
       dbUser = newUser;
@@ -167,11 +169,11 @@ const signInWithGoogle = async () => {
     const dbUser = await getUserByEmail(email);
 
     if (dbUser) throw new Error("Email already in use");
-
-    const newUser = { id: cuid(), name: username, email, password: hashedPassword };
+  const createdAt = new Date().toISOString(); 
+    const newUser = { id: cuid(), name: username, email, password: hashedPassword, created_at: createdAt };
     await insertUser(newUser);
 
-    const loggedInUser = { username, email };
+    const loggedInUser = { username, email, created_at: createdAt };
     setUser(loggedInUser);
     await AsyncStorage.setItem("user", JSON.stringify(loggedInUser));
   };

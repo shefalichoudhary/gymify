@@ -17,11 +17,14 @@ import { AntDesign, Feather } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { db } from "@/db/db";
 import { users } from "@/db/schema";
+import CustomButton from "@/components/customButton";
 
 export default function Profile() {
   const router = useRouter();
-  const [user, setUser] = useState<null | { id: number; name: string; email: string;  photo?: string | null  }>(null);
+  const [user, setUser] = useState<null | { id: number; name: string; email: string;  photo?: string | null ,  created_at?: string | null; }>(null);
   const [loading, setLoading] = useState(true);
+
+
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -32,7 +35,8 @@ export default function Profile() {
             id: Number(dbUser.id),
             name: dbUser.name,
             email: dbUser.email,
-            photo: dbUser.photo ?? null, // <- fetch photo if available
+            photo: dbUser.photo ?? null,
+            created_at: dbUser.created_at ?? null // <- fetch created_at if available
           });
         } else {
           setUser(null);
@@ -76,7 +80,7 @@ export default function Profile() {
 
   return (
     <ScrollView flex={1} bg="$black" px="$5" py="$6">
-      <VStack space="xl" alignItems="center">
+      <VStack space="md" alignItems="center">
         {/* Gradient Avatar */}
         <LinearGradient
           colors={["#4facfe", "#00f2fe"]}
@@ -119,36 +123,42 @@ export default function Profile() {
             <Divider bg="$coolGray800" />
             <ProfileItem label="Fitness Goal" value="Lose Fat" />
             <Divider bg="$coolGray800" />
-            <ProfileItem label="Joined" value="March 2024" />
+           <ProfileItem 
+  label="Joined" 
+  value={
+    user.created_at 
+      ? new Date(user.created_at).toLocaleString("en-US", { month: "long", year: "numeric" })
+      : "-"
+  } 
+/>
           </VStack>
         </Box>
 
         {/* Buttons */}
         <VStack space="md" w="100%">
-          <Button
-            bg="$blue600"
-            borderRadius="$xl"
-            onPress={() => router.replace("/home")}
-            size="lg"
-          >
-            <HStack space="sm" alignItems="center">
-              <Feather name="edit-3" size={18} color="white" />
-              <Text color="white">Edit Profile</Text>
-            </HStack>
-          </Button>
+         
 
-          <Button
-            bg="$red600"
-            borderRadius="$xl"
-            onPress={logout}
-            size="lg"
-            $pressed={{ bg: "$red700" }}
-          >
-            <HStack space="sm" alignItems="center">
-              <AntDesign name="logout" size={18} color="white" />
-              <Text color="white">Log Out</Text>
-            </HStack>
-          </Button>
+                  
+         <CustomButton
+                      onPress={() => router.replace("/home")}
+
+               bg="$blue600"
+               borderColor="$textLight400"
+               icon={ <AntDesign name="edit" size={18} color="white"  marginLeft={2}
+               />}
+               >
+                 Edit Profile
+               </CustomButton>
+         
+         <CustomButton
+               onPress={logout}
+               bg="$blue600"
+               borderColor="$textLight400"
+               icon={ <AntDesign name="logout" size={18} color="white"  marginLeft={2}
+               />}
+               >
+                 Logout
+               </CustomButton>
         </VStack>
       </VStack>
     </ScrollView>

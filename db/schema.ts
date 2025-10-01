@@ -11,6 +11,7 @@ export const users = sqliteTable("users", {
   password: text("password") ,// optional for Google users,
   google: integer("google").$default(() => 1),
    photo: text("photo"), 
+created_at: text("created_at").$defaultFn(() => new Date().toISOString()), 
 });
 export const exercises = sqliteTable("exercises", {
   id: text("id").primaryKey().$defaultFn(() => cuid()),
