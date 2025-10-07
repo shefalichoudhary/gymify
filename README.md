@@ -16,6 +16,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 
    ```bash
    npx expo start
+
    ```
 
 3. **Choose your platform**

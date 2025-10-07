@@ -3,13 +3,12 @@ import { InferSelectModel } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 import cuid from "cuid";
 
-// Tables
 export const users = sqliteTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => cuid()),
-  username: text("username").default("Guest").notNull(), // default username
-  email: text("email").default("guest@example.com").notNull(), // default email
+  username: text("username").default("Guest").notNull(),
+  email: text("email").default("guest@example.com").notNull(),
   password: text("password").default("").notNull(),
   google: integer("google").default(0), // 0 = normal/guest user, 1 = Google user
   photo: text("photo").default(""),

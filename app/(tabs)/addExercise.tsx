@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Box, Button, HStack, Text, Pressable } from "@gluestack-ui/themed";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
-
 import CustomHeader from "@/components/customHeader";
 import ExerciseList from "@/components/addExercise/exerciseList";
 import ExerciseSearchbar from "@/components/addExercise/exerciseSearchbar";
