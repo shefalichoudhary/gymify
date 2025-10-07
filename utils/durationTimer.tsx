@@ -9,8 +9,8 @@ export type DurationTimerRef = {
 };
 
 type DurationTimerProps = {
-  duration: number; // parent-controlled elapsed seconds
-  onChange: (value: number) => void; // parent updates elapsed seconds
+  duration: number;
+  onChange: (value: number) => void;
 };
 
 const DurationTimer = forwardRef<DurationTimerRef, DurationTimerProps>(
@@ -32,7 +32,6 @@ const DurationTimer = forwardRef<DurationTimerRef, DurationTimerProps>(
           console.log("Error playing stop sound:", e);
         }
 
-        // Vibrate on stop
         Vibration.vibrate([0, 200], false);
       },
     }));
