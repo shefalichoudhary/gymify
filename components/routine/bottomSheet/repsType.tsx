@@ -1,5 +1,3 @@
-// components/routine/bottomSheet/restTimer.tsx
-
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Text, Box, HStack, Pressable, VStack } from "@gluestack-ui/themed";
 import BottomSheet from "@gorhom/bottom-sheet";

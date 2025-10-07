@@ -5,6 +5,7 @@ import CustomBottomSheet from "./customBottomSheet";
 import { useFocusEffect } from "@react-navigation/native";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Haptics from "expo-haptics";
+
 export type RestTimerSheetRef = {
   open: () => void;
   close: () => void;

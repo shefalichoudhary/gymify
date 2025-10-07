@@ -6,6 +6,7 @@ import { Pressable, Text, Box, VStack } from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
 import { useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
+
 export default function Layout() {
   const router = useRouter();
   const { user } = useAuth();

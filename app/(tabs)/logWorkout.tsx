@@ -27,6 +27,7 @@ import RestCountdownTimer from "@/components/routine/restCountdownTimer";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
 import cuid from "cuid";
 import CustomDialog from "@/components/logWorkoutDialog";
+
 type SetItem = {
   weight?: number;
   reps?: number | null;

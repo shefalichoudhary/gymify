@@ -51,10 +51,8 @@ const WorkoutRoutineSheet = forwardRef<WorkoutRoutineSheetRef, Props>(
     const handleDeleteConfirmed = async () => {
       if (!routine) return;
 
-      // delete exercises first
       await db.delete(routineExercises).where(eq(routineExercises.routineId, routine.id));
 
-      // delete routine
       await db.delete(routines).where(eq(routines.id, routine.id));
 
       onRoutineDeleted(routine.id);

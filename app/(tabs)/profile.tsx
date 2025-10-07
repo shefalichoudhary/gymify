@@ -37,7 +37,7 @@ export default function Profile() {
         if (dbUser) {
           setUser({
             id: Number(dbUser.id),
-            name: dbUser.name,
+            name: dbUser.username,
             email: dbUser.email,
             photo: dbUser.photo ?? null,
             created_at: dbUser.created_at ?? null, // <- fetch created_at if available

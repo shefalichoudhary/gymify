@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-
+import React from "react";
 import { ImageBackground, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -11,6 +10,7 @@ import {
   Inter_900Black,
 } from "@expo-google-fonts/inter";
 import CustomButton from "@/components/customButton";
+
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();

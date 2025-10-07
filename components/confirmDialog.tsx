@@ -32,7 +32,7 @@ export default function ConfirmDialog({
 
       {/* 🔹 Dialog content */}
       <AlertDialog.Content
-        bg="rgba(28,28,30,0.95)" // frosted glass look
+        bg="rgba(28,28,30,0.95)"
         borderWidth={0}
         rounded="3xl"
         px="$6"

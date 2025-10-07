@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Text, Pressable, HStack, VStack, ScrollView, Icon } from "@gluestack-ui/themed";
+import { Box, Text, Pressable, HStack, VStack, ScrollView } from "@gluestack-ui/themed";
 import Modal from "react-native-modal";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 

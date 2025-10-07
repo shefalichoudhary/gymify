@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Box, VStack, HStack, Text, Button, ScrollView, SafeAreaView } from "@gluestack-ui/themed";
+import React, { useRef, useState } from "react";
+import { Box, VStack, HStack, Text, Button, SafeAreaView } from "@gluestack-ui/themed";
 import { Vibration } from "react-native";
 import { useFocusEffect } from "expo-router";
 import { useCallback } from "react";

@@ -7,7 +7,6 @@ import { SetTypeSheetRef } from "@/components/routine/bottomSheet/set";
 export function useExerciseOptionsManager() {
   const [activeExerciseId, setActiveExerciseId] = useState<string | null>(null);
   const [activeSetIndex, setActiveSetIndex] = useState<number | null>(null);
-
   const [exerciseData, setExerciseData] = useState<
     Record<
       string,

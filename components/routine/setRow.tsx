@@ -8,6 +8,7 @@ import { db } from "@/db/db";
 import { workoutSets } from "@/db/schema";
 import { getExerciseTypeFlags } from "@/utils/exerciseType";
 import DurationTimer, { DurationTimerRef } from "@/utils/durationTimer";
+
 type SetRowProps = {
   index: number;
   set: Set;

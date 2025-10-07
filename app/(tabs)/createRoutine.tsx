@@ -7,7 +7,6 @@ import { inArray, eq } from "drizzle-orm";
 import SetTypeModal from "@/components/routine/bottomSheet/set";
 import RestTimerSheet from "@/components/routine/bottomSheet/timer";
 import RepsTypeSheet from "@/components/routine/bottomSheet/repsType";
-import { useAuth } from "@/context/authContext";
 import {
   VStack,
   Text,

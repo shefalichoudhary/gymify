@@ -4,6 +4,7 @@ import { db } from "@/db/db";
 import { exercises, workoutExercises, workoutSets, workouts as workoutsTable } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
+
 type Workout = {
   id: string;
   name: string;

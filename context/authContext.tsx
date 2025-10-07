@@ -10,9 +10,9 @@ type User = {
   username: string;
   email: string;
   password: string;
-  google: number | null; // ✅ allow null
-  photo: string | null; // ✅ allow null
-  created_at: string | null; // ✅ allow null
+  google: number | null;
+  photo: string | null;
+  created_at: string | null;
 };
 
 type AuthContextType = {

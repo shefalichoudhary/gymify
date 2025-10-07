@@ -18,7 +18,6 @@ import SaveWorkoutSheet, {
   SaveWorkoutSheetRef,
 } from "@/components/workout/bottomSheet/saveWorkoutBottomSheet";
 import { MaterialIcons } from "@expo/vector-icons";
-import { updateRoutineInDb } from "@/components/routine/updateRoutine";
 
 const SaveWorkoutScreen = () => {
   const router = useRouter();
