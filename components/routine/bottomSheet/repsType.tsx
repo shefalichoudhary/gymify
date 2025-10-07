@@ -45,18 +45,12 @@ const RepsTypeSheet = forwardRef<RepsTypeSheetRef, RepsTypeSheetProps>(
 
     return (
       <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "20%"]}>
-        <Box
-          borderBottomWidth={1}
-          borderColor="$trueGray700"
-          pb="$3"
-          pt="$2"
-          mb="$4"
-        >
+        <Box borderBottomWidth={1} borderColor="$trueGray700" pb="$3" pt="$2" mb="$4">
           <Text fontSize="$lg" fontWeight="$bold" textAlign="center" color="white">
             Repetition Options
           </Text>
         </Box>
-        <HStack flexWrap="wrap" space="sm"  px="$2">
+        <HStack flexWrap="wrap" space="sm" px="$2">
           {options.map((opt) => {
             const isActive = selected === opt.value;
             return (

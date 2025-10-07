@@ -1,8 +1,5 @@
-import React, { useEffect, useState, useRef, } from "react";
-import {
-  Box, VStack, HStack, Text, Button, ScrollView,
-  SafeAreaView,
-} from "@gluestack-ui/themed";
+import React, { useEffect, useState, useRef } from "react";
+import { Box, VStack, HStack, Text, Button, ScrollView, SafeAreaView } from "@gluestack-ui/themed";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
 import CustomHeader from "@/components/customHeader";
@@ -11,7 +8,15 @@ import ExerciseBlock from "@/components/routine/exerciseBlock";
 import { useFocusEffect } from "@react-navigation/native";
 import { BackHandler, Alert } from "react-native";
 import { db } from "@/db/db";
-import { workouts, exercises, routineExercises,workoutExercises,workoutSets,routineSets,routines, } from "@/db/schema";
+import {
+  workouts,
+  exercises,
+  routineExercises,
+  workoutExercises,
+  workoutSets,
+  routineSets,
+  routines,
+} from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import RestTimerSheet from "@/components/routine/bottomSheet/timer";
 import WeightSheet from "@/components/routine/bottomSheet/weight";
@@ -43,8 +48,7 @@ type SetItem = {
   setType?: "W" | "Normal" | "D" | "F" | string;
   unit?: "kg" | "lbs";
   repsType?: "reps" | "rep range";
-    duration?: number;
-
+  duration?: number;
 };
 type ExerciseEntry = {
   notes: string;
@@ -57,417 +61,407 @@ type ExerciseEntry = {
 
 type ExerciseData = {
   [exerciseId: string]: ExerciseEntry;
-    
 };
 type ExerciseDetail = {
   id: string;
   name: string;
   equipment?: string;
   type?: string;
-    exercise_type: string | null
+  exercise_type: string | null;
 };
 
 export default function LogWorkoutScreen() {
-
   const router = useRouter();
-const { routineId, routineTitle, addedExerciseIds } = useLocalSearchParams();
-const {
-  activeExerciseId,
-  restSheetRef,
-  weightSheetRef,
-  repsSheetRef,
-  setTypeSheetRef,
-  activeSetIndex,
-  openRestTimer,
-  openWeightSheet,
-  openRepsSheet,
-  openSetTypeSheet,
- 
-
-} = useExerciseOptionsManager();
-const [dialogVisible, setDialogVisible] = useState(false);
-const [dialogProps, setDialogProps] = useState({
-  message: "",
-  confirmText: "OK",
-  cancelText: undefined,
-  destructive: false,
-  onConfirm: () => setDialogVisible(false),
-  onCancel: () => setDialogVisible(false),
-});
-const [loading, setLoading] = useState(true);
+  const { routineId, routineTitle, addedExerciseIds } = useLocalSearchParams();
+  const {
+    activeExerciseId,
+    restSheetRef,
+    weightSheetRef,
+    repsSheetRef,
+    setTypeSheetRef,
+    activeSetIndex,
+    openRestTimer,
+    openWeightSheet,
+    openRepsSheet,
+    openSetTypeSheet,
+  } = useExerciseOptionsManager();
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogProps, setDialogProps] = useState({
+    message: "",
+    confirmText: "OK",
+    cancelText: undefined,
+    destructive: false,
+    onConfirm: () => setDialogVisible(false),
+    onCancel: () => setDialogVisible(false),
+  });
+  const [loading, setLoading] = useState(true);
   const [duration, setDuration] = useState(0);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
   const [exerciseData, setExerciseData] = useState<ExerciseData>({});
-const [exerciseDetails, setExerciseDetails] = useState<ExerciseDetail[]>([]);
+  const [exerciseDetails, setExerciseDetails] = useState<ExerciseDetail[]>([]);
 
-const [loadedExerciseIds, setLoadedExerciseIds] = useState<string[]>([]);
+  const [loadedExerciseIds, setLoadedExerciseIds] = useState<string[]>([]);
   const [isWorkoutStarted, setIsWorkoutStarted] = useState(false);
-const { volume: totalVolume, sets: totalSets } = calculateWorkoutStats(exerciseData);
-const [restCountdowns, setRestCountdowns] = useState<{ [key: string]: number }>({});
-const handleRestDurationSelect = (duration: number) => {
-  if (!activeExerciseId) return;
+  const { volume: totalVolume, sets: totalSets } = calculateWorkoutStats(exerciseData);
+  const [restCountdowns, setRestCountdowns] = useState<{ [key: string]: number }>({});
+  const handleRestDurationSelect = (duration: number) => {
+    if (!activeExerciseId) return;
 
-  setExerciseData((prev:any) => {
-    const updated = { ...prev };
-    const exercise = updated[activeExerciseId];
-
-    if (exercise) {
-      exercise.restTimer = duration;
-      exercise.restTimeInSeconds = duration;
-    }
-
-    return updated;
-  });
-};
-const handleWeightSelect = (unit: string) => {
-  if (!activeExerciseId) return;
-  setExerciseData((prev:any) => ({
-    ...prev,
-    [activeExerciseId]: {
-      ...prev[activeExerciseId],
-      unit,
-    },
-  }));
-};
-const handleRepsTypeSelect = (type: "reps" | "rep range") => {
-  if (!activeExerciseId) return;
-  setExerciseData((prev: any) => ({
-    ...prev,
-    [activeExerciseId]: {
-      ...prev[activeExerciseId],
-      repsType: type,
-    },
-  }));
-};
-const handleSetTypeSelect = (
-  type: "W" | "Normal" | "D" | "F" | "REMOVE",
-  exerciseId?: string,
-  setIndex?: number
-) => {
-  const exId = exerciseId ?? activeExerciseId;
-  const idx = setIndex ?? activeSetIndex;
-  if (!exId || idx === null) return;
-
-  setExerciseData((prev) => {
-    const updated = { ...prev };
-    const sets = [...updated[exId].sets];
-
-    if (type === "REMOVE") {
-      // 🗑 remove the set
-      sets.splice(idx, 1);
-    } else {
-      // ✅ update set type
-      sets[idx] = { ...sets[idx], setType: type };
-    }
-
-    updated[exId].sets = sets;
-    return updated;
-  });
-};
-
-
-useEffect(() => {
-  const interval = setInterval(() => {
-    setRestCountdowns((prev) => {
+    setExerciseData((prev: any) => {
       const updated = { ...prev };
+      const exercise = updated[activeExerciseId];
 
-      Object.entries(updated).forEach(([key, timeLeft]) => {
-        if (timeLeft > 1) {
-          updated[key] = timeLeft - 1;
-        } else {
-          // timeLeft === 1 or 0, complete
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          delete updated[key];
-        }
-      });
+      if (exercise) {
+        exercise.restTimer = duration;
+        exercise.restTimeInSeconds = duration;
+      }
 
       return updated;
     });
-  }, 1000);
+  };
+  const handleWeightSelect = (unit: string) => {
+    if (!activeExerciseId) return;
+    setExerciseData((prev: any) => ({
+      ...prev,
+      [activeExerciseId]: {
+        ...prev[activeExerciseId],
+        unit,
+      },
+    }));
+  };
+  const handleRepsTypeSelect = (type: "reps" | "rep range") => {
+    if (!activeExerciseId) return;
+    setExerciseData((prev: any) => ({
+      ...prev,
+      [activeExerciseId]: {
+        ...prev[activeExerciseId],
+        repsType: type,
+      },
+    }));
+  };
+  const handleSetTypeSelect = (
+    type: "W" | "Normal" | "D" | "F" | "REMOVE",
+    exerciseId?: string,
+    setIndex?: number
+  ) => {
+    const exId = exerciseId ?? activeExerciseId;
+    const idx = setIndex ?? activeSetIndex;
+    if (!exId || idx === null) return;
 
-  return () => clearInterval(interval);
-}, []);
+    setExerciseData((prev) => {
+      const updated = { ...prev };
+      const sets = [...updated[exId].sets];
 
-
-const handleToggleSetComplete = (
-  exerciseId: string,
-  setIndex: number,
-  justCompleted: boolean
-) => {
-  setExerciseData((prev) => {
-    const updated = { ...prev };
-    const sets = updated[exerciseId]?.sets ?? [];
-
-    if (sets[setIndex]) {
-      // Toggle completed
-      sets[setIndex].isCompleted = justCompleted;
-
-      // If checking, fill empty fields from previous values
-      if (justCompleted) {
-        sets[setIndex].weight =
-          sets[setIndex].weight ?? sets[setIndex].previousWeight ?? 0;
-
-        sets[setIndex].reps =
-          sets[setIndex].reps ?? sets[setIndex].previousReps ?? 0;
-
-        sets[setIndex].minReps =
-          sets[setIndex].minReps ?? sets[setIndex].previousMinReps ?? 0;
-
-        sets[setIndex].maxReps =
-          sets[setIndex].maxReps ?? sets[setIndex].previousMaxReps ?? 0;
-
-        sets[setIndex].duration =
-          sets[setIndex].duration ?? sets[setIndex].previousDuration ?? 0;
-
-        sets[setIndex].unit =
-          sets[setIndex].unit ?? sets[setIndex].previousUnit ?? "kg";
-
-        sets[setIndex].repsType =
-          sets[setIndex].repsType ?? sets[setIndex].previousRepsType ?? "reps";
+      if (type === "REMOVE") {
+        // 🗑 remove the set
+        sets.splice(idx, 1);
+      } else {
+        // ✅ update set type
+        sets[idx] = { ...sets[idx], setType: type };
       }
 
-      const key = `${exerciseId}-${setIndex}`;
+      updated[exId].sets = sets;
+      return updated;
+    });
+  };
 
-      if (justCompleted && updated[exerciseId].restTimer) {
-        const restTime =
-          updated[exerciseId].restTimeInSeconds ?? updated[exerciseId].restTimer ?? 0;
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRestCountdowns((prev) => {
+        const updated = { ...prev };
 
-        setRestCountdowns((prev) => ({
-          ...prev,
-          [key]: restTime,
-        }));
-      } else if (!justCompleted) {
-        setRestCountdowns((prev) => {
-          const updatedCountdowns = { ...prev };
-          delete updatedCountdowns[key];
-          return updatedCountdowns;
+        Object.entries(updated).forEach(([key, timeLeft]) => {
+          if (timeLeft > 1) {
+            updated[key] = timeLeft - 1;
+          } else {
+            // timeLeft === 1 or 0, complete
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            delete updated[key];
+          }
         });
+
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleToggleSetComplete = (
+    exerciseId: string,
+    setIndex: number,
+    justCompleted: boolean
+  ) => {
+    setExerciseData((prev) => {
+      const updated = { ...prev };
+      const sets = updated[exerciseId]?.sets ?? [];
+
+      if (sets[setIndex]) {
+        // Toggle completed
+        sets[setIndex].isCompleted = justCompleted;
+
+        // If checking, fill empty fields from previous values
+        if (justCompleted) {
+          sets[setIndex].weight = sets[setIndex].weight ?? sets[setIndex].previousWeight ?? 0;
+
+          sets[setIndex].reps = sets[setIndex].reps ?? sets[setIndex].previousReps ?? 0;
+
+          sets[setIndex].minReps = sets[setIndex].minReps ?? sets[setIndex].previousMinReps ?? 0;
+
+          sets[setIndex].maxReps = sets[setIndex].maxReps ?? sets[setIndex].previousMaxReps ?? 0;
+
+          sets[setIndex].duration = sets[setIndex].duration ?? sets[setIndex].previousDuration ?? 0;
+
+          sets[setIndex].unit = sets[setIndex].unit ?? sets[setIndex].previousUnit ?? "kg";
+
+          sets[setIndex].repsType =
+            sets[setIndex].repsType ?? sets[setIndex].previousRepsType ?? "reps";
+        }
+
+        const key = `${exerciseId}-${setIndex}`;
+
+        if (justCompleted && updated[exerciseId].restTimer) {
+          const restTime =
+            updated[exerciseId].restTimeInSeconds ?? updated[exerciseId].restTimer ?? 0;
+
+          setRestCountdowns((prev) => ({
+            ...prev,
+            [key]: restTime,
+          }));
+        } else if (!justCompleted) {
+          setRestCountdowns((prev) => {
+            const updatedCountdowns = { ...prev };
+            delete updatedCountdowns[key];
+            return updatedCountdowns;
+          });
+        }
       }
+
+      return updated;
+    });
+
+    if (!isWorkoutStarted) {
+      setIsWorkoutStarted(true);
     }
-
-    return updated;
-  });
-
-  if (!isWorkoutStarted) {
-    setIsWorkoutStarted(true);
-  }
-};
-
+  };
 
   // Start time
   useEffect(() => {
+    const interval = setInterval(() => {
+      setDuration((prev) => prev + 1);
+    }, 1000);
 
-  const interval = setInterval(() => {
-    setDuration((prev) => prev + 1);
-  }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  return () => clearInterval(interval);
-}, []);
-
-   
   // Load existing routine data
- useFocusEffect(
-  React.useCallback(() => {
-    const loadRoutineData = async () => {
-  if (!routineId) return;
-  setLoading(true);
+  useFocusEffect(
+    React.useCallback(() => {
+      const loadRoutineData = async () => {
+        if (!routineId) return;
+        setLoading(true);
 
-  try {
-    const routineEx = await db
-  .select({
-    id: routineExercises.id,
-    exerciseId: routineExercises.exerciseId,
-    notes: routineExercises.notes,
-    repsType: routineExercises.repsType,
-    unit: routineExercises.unit,
-    restTimer: routineExercises.restTimer,
+        try {
+          const routineEx = await db
+            .select({
+              id: routineExercises.id,
+              exerciseId: routineExercises.exerciseId,
+              notes: routineExercises.notes,
+              repsType: routineExercises.repsType,
+              unit: routineExercises.unit,
+              restTimer: routineExercises.restTimer,
+            })
+            .from(routineExercises)
+            .where(eq(routineExercises.routineId, String(routineId)))
+            .all();
 
-    
-  })
-  .from(routineExercises)
-  .where(eq(routineExercises.routineId, String(routineId)))
-  .all();
+          const exerciseIds = routineEx.map((re: any) => String(re.exerciseId));
 
-    const exerciseIds = routineEx.map((re:any) => String(re.exerciseId));
+          // Set placeholders immediately to show UI
+          const placeholders: ExerciseData = {};
+          for (const entry of routineEx) {
+            const id = String(entry.exerciseId);
+            placeholders[id] = {
+              notes: entry.notes ?? "",
+              restTimer: entry.restTimer ?? 0,
+              unit: entry.unit ?? "kg",
+              repsType: entry.repsType ?? "reps",
+              sets: [],
+            };
+          }
 
-    // Set placeholders immediately to show UI
-    const placeholders: ExerciseData = {};
-   for (const entry of routineEx) {
-  const id = String(entry.exerciseId);
-  placeholders[id] = {
-    notes: entry.notes ?? "",
-     restTimer:entry.restTimer ?? 0,
-    unit: entry.unit ?? "kg",
-    repsType: entry.repsType ?? "reps",
-    sets: [],
-  };
-}
+          setExerciseData(placeholders);
+          setExerciseDetails(
+            exerciseIds.map((id: any) => ({
+              id,
+              name: "Loading...",
+              type: "",
+              equipment: "",
+              exercise_type: null,
+            }))
+          );
 
-    setExerciseData(placeholders);
-    setExerciseDetails(exerciseIds.map((id:any) => ({ id, name: "Loading...", type: "", equipment: "", exercise_type: null })));
+          // Fetch details and sets in parallel
+          const [routineSetRows, details] = await Promise.all([
+            db.query.routineSets.findMany({
+              where: (rs: any, { inArray }: any) => inArray(rs.exerciseId, exerciseIds),
+            }),
+            db
+              .select({
+                id: exercises.id,
+                name: exercises.exercise_name,
+                equipment: exercises.equipment,
+                type: exercises.type,
+                exercise_type: exercises.exercise_type,
+              })
+              .from(exercises)
+              .where(inArray(exercises.id, exerciseIds))
+              .all(),
+          ]);
 
-    // Fetch details and sets in parallel
-    const [routineSetRows, details] = await Promise.all([
-      db.query.routineSets.findMany({
-        where: (rs:any, { inArray }:any) => inArray(rs.exerciseId, exerciseIds),
-      }),
-      db
-        .select({
-          id: exercises.id,
-          name: exercises.exercise_name,
-          equipment: exercises.equipment,
-          type: exercises.type,
-            exercise_type: exercises.exercise_type,
-        })
-        .from(exercises)
-        .where(inArray(exercises.id, exerciseIds))
-        .all(),
-    ]);
+          // Now update state with real data
+          const grouped: ExerciseData = { ...placeholders };
 
-    // Now update state with real data
-    const grouped: ExerciseData = { ...placeholders };
+          for (const exerciseId of exerciseIds) {
+            const setsForExercise = routineSetRows.filter(
+              (set: any) => String(set.exerciseId) === exerciseId
+            );
 
-    for (const exerciseId of exerciseIds) {
-      const setsForExercise = routineSetRows.filter(
-        (set:any) => String(set.exerciseId) === exerciseId
-      );
+            const routineEntry = routineEx.find((re: any) => String(re.exerciseId) === exerciseId);
 
-      const routineEntry = routineEx.find((re:any) => String(re.exerciseId) === exerciseId);
+            grouped[exerciseId] = {
+              notes: routineEntry?.notes ?? "",
+              unit: routineEntry?.unit ?? "kg",
+              repsType: routineEntry?.repsType ?? "reps",
+              restTimer: routineEntry?.restTimer ?? 0,
+              restTimeInSeconds: routineEntry?.restTimer ?? 0,
+              sets: setsForExercise.map((s: any) => ({
+                weight: s.weight ?? 0,
+                rest_timer: s.restTimer ?? "off",
+                reps: s.reps ?? 0,
+                minReps: s.minReps,
+                maxReps: s.maxReps,
+                setType: s.setType ?? "normal",
+                isRangeReps: s.isRangeReps ?? false,
+                duration: s.duration ?? 0,
+              })),
+            };
+          }
+          setExerciseData(grouped);
+          setExerciseDetails(details);
+          setLoadedExerciseIds(exerciseIds);
+        } catch (err) {
+          console.error("❌ Error loading routine:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
 
-grouped[exerciseId] = {
-  notes: routineEntry?.notes ?? "",
-  unit: routineEntry?.unit ?? "kg",
-  repsType: routineEntry?.repsType ?? "reps",
-  restTimer: routineEntry?.restTimer ?? 0,
-   restTimeInSeconds: routineEntry?.restTimer ?? 0,
-  sets: setsForExercise.map((s: any) => ({
-    weight: s.weight ?? 0,
-    rest_timer: s.restTimer ?? "off",
-    reps: s.reps ?? 0,
-    minReps: s.minReps,
-    maxReps: s.maxReps,
-    setType:s.setType ?? "normal",
-    isRangeReps: s.isRangeReps ?? false,
-    duration: s.duration ?? 0,
-  })),
-};
+      loadRoutineData();
+    }, [routineId])
+  );
+  useEffect(() => {
+    const fetchNewExercises = async () => {
+      if (!addedExerciseIds) return;
 
-    }
-    setExerciseData(grouped);
-    setExerciseDetails(details);
-    setLoadedExerciseIds(exerciseIds);
-  } catch (err) {
-    console.error("❌ Error loading routine:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+      let newIds: string[] = [];
 
-
-    loadRoutineData();
-  }, [routineId])
-);
-useEffect(() => {
-  const fetchNewExercises = async () => {
-    if (!addedExerciseIds) return;
-
-   let newIds: string[] = [];
-
-try {
-  newIds = Array.isArray(addedExerciseIds)
-    ? addedExerciseIds
-    : JSON.parse(addedExerciseIds);
-} catch (err) {
-  console.warn("❌ Failed to parse addedExerciseIds", err);
-  newIds = [];
-}
-
-    const newUniqueIds = newIds.filter((id: string) => !loadedExerciseIds.includes(id));
-
-    if (newUniqueIds.length === 0) return;
-
-    try {
-      // Fetch full exercise details
-     const details = (await db
-  .select({
-    id: exercises.id,
-    name: exercises.exercise_name,
-    equipment: exercises.equipment,
-    type: exercises.type,
-    exercise_type: exercises.exercise_type,
-  })
-  .from(exercises)
-  .where(inArray(exercises.id, newUniqueIds))
-  .all()
-).map((ex:any) => ({
-  ...ex,
- exercise_type: ex.exercise_type ?? null,
-}));
-
-      // Default ExerciseData values
-      const newData: ExerciseData = {};
-      for (const id of newUniqueIds) {
-        newData[id] = {
-          notes: "",
-          restTimer: 0,
-          unit: "kg",
-          repsType: "reps",
-          sets: [],
-        };
+      try {
+        newIds = Array.isArray(addedExerciseIds) ? addedExerciseIds : JSON.parse(addedExerciseIds);
+      } catch (err) {
+        console.warn("❌ Failed to parse addedExerciseIds", err);
+        newIds = [];
       }
 
-      setExerciseData((prev) => ({ ...prev, ...newData }));
-      setExerciseDetails((prev) => [...prev, ...details]);
-      setLoadedExerciseIds((prev) => [...prev, ...newUniqueIds]);
-    } catch (err) {
-      console.error("❌ Error loading added exercises", err);
-    }
-  };
+      const newUniqueIds = newIds.filter((id: string) => !loadedExerciseIds.includes(id));
 
-  fetchNewExercises();
-}, [addedExerciseIds]);
+      if (newUniqueIds.length === 0) return;
 
+      try {
+        // Fetch full exercise details
+        const details = (
+          await db
+            .select({
+              id: exercises.id,
+              name: exercises.exercise_name,
+              equipment: exercises.equipment,
+              type: exercises.type,
+              exercise_type: exercises.exercise_type,
+            })
+            .from(exercises)
+            .where(inArray(exercises.id, newUniqueIds))
+            .all()
+        ).map((ex: any) => ({
+          ...ex,
+          exercise_type: ex.exercise_type ?? null,
+        }));
 
-function getRoutineId(id: string | string[] | undefined): string | undefined {
-  if (!id) return undefined;
-  return Array.isArray(id) ? id[0] : id;
-}
+        // Default ExerciseData values
+        const newData: ExerciseData = {};
+        for (const id of newUniqueIds) {
+          newData[id] = {
+            notes: "",
+            restTimer: 0,
+            unit: "kg",
+            repsType: "reps",
+            sets: [],
+          };
+        }
 
-const saveWorkout = async (updateRoutine: boolean) => {
-  const { volume, sets } = calculateWorkoutStats(exerciseData);
+        setExerciseData((prev) => ({ ...prev, ...newData }));
+        setExerciseDetails((prev) => [...prev, ...details]);
+        setLoadedExerciseIds((prev) => [...prev, ...newUniqueIds]);
+      } catch (err) {
+        console.error("❌ Error loading added exercises", err);
+      }
+    };
 
-  let titleToUse = "Workout";
+    fetchNewExercises();
+  }, [addedExerciseIds]);
 
-if (routineId) {
-  try {
-    const routine = await db
-      .select({ title: routines.name })
-      .from(routines)
-      .where(eq(routines.id, String(routineId)))
-      .get();
-
-    if (routine?.title) titleToUse = routine.title;
-  } catch (err) {
-    console.warn("Could not fetch routine title:", err);
+  function getRoutineId(id: string | string[] | undefined): string | undefined {
+    if (!id) return undefined;
+    return Array.isArray(id) ? id[0] : id;
   }
-} else if (routineTitle) {
-  titleToUse = String(routineTitle);
-}
 
-  try {
-    // Insert workout
-   const normalizedRoutineId = getRoutineId(routineId);
+  const saveWorkout = async (updateRoutine: boolean) => {
+    const { volume, sets } = calculateWorkoutStats(exerciseData);
 
-const [workout] = await db.insert(workouts).values({
-  routineId: normalizedRoutineId, // string or undefined
-  date: new Date().toISOString(), // string
-  title: titleToUse ? titleToUse : "Workout", // string
-  duration: Number(duration), // number
-  volume: Number(volume),
-      sets: Number(sets), // number
-}).returning();
+    let titleToUse = "Workout";
 
-   for (const [exerciseId, exData] of Object.entries(exerciseData)) {
+    if (routineId) {
+      try {
+        const routine = await db
+          .select({ title: routines.name })
+          .from(routines)
+          .where(eq(routines.id, String(routineId)))
+          .get();
+
+        if (routine?.title) titleToUse = routine.title;
+      } catch (err) {
+        console.warn("Could not fetch routine title:", err);
+      }
+    } else if (routineTitle) {
+      titleToUse = String(routineTitle);
+    }
+
+    try {
+      // Insert workout
+      const normalizedRoutineId = getRoutineId(routineId);
+
+      const [workout] = await db
+        .insert(workouts)
+        .values({
+          routineId: normalizedRoutineId, // string or undefined
+          date: new Date().toISOString(), // string
+          title: titleToUse ? titleToUse : "Workout", // string
+          duration: Number(duration), // number
+          volume: Number(volume),
+          sets: Number(sets), // number
+        })
+        .returning();
+
+      for (const [exerciseId, exData] of Object.entries(exerciseData)) {
         const workoutExerciseId = cuid();
         await db.insert(workoutExercises).values({
           id: workoutExerciseId,
@@ -478,7 +472,7 @@ const [workout] = await db.insert(workouts).values({
           repsType: exData.repsType,
           restTimer: exData.restTimer,
         });
- for (const set of exData.sets) {
+        for (const set of exData.sets) {
           await db.insert(workoutSets).values({
             id: cuid(),
             workoutId: workout.id,
@@ -488,170 +482,181 @@ const [workout] = await db.insert(workouts).values({
             minReps: set.minReps ?? 0,
             maxReps: set.maxReps ?? 0,
             duration: set.duration ?? 0,
-      setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
-    previousWeight: set.previousWeight ?? null,
-    previousReps: set.previousReps ?? null,
-    previousMinReps: set.previousMinReps ?? null,
-    previousMaxReps: set.previousMaxReps ?? null,
-    previousUnit: set.previousUnit ?? null,
-    previousRepsType: set.previousRepsType ?? null,
-    previousDuration: set.previousDuration ?? null,
+            setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
+            previousWeight: set.previousWeight ?? null,
+            previousReps: set.previousReps ?? null,
+            previousMinReps: set.previousMinReps ?? null,
+            previousMaxReps: set.previousMaxReps ?? null,
+            previousUnit: set.previousUnit ?? null,
+            previousRepsType: set.previousRepsType ?? null,
+            previousDuration: set.previousDuration ?? null,
           });
         }
       }
-   
-    setIsWorkoutActive(false);
 
-    router.replace({
-      pathname: "/saveWorkout",
-      params: { id: workout.id, routineId, addedExerciseCount: String(Object.keys(exerciseData).length) },
-    });
-  } catch (err) {
-    Alert.alert("Save Failed", "Could not save workout.");
-  }
-};
+      setIsWorkoutActive(false);
 
+      router.replace({
+        pathname: "/saveWorkout",
+        params: {
+          id: workout.id,
+          routineId,
+          addedExerciseCount: String(Object.keys(exerciseData).length),
+        },
+      });
+    } catch (err) {
+      Alert.alert("Save Failed", "Could not save workout.");
+    }
+  };
 
-const handleFinish = () => {
-  const { sets } = calculateWorkoutStats(exerciseData);
+  const handleFinish = () => {
+    const { sets } = calculateWorkoutStats(exerciseData);
 
-  if (sets === 0) {
-    setDialogProps({
-      message: "No Completed Sets. Please complete at least one set.",
-      confirmText: "OK",
-      cancelText: undefined,
-      destructive: false,
-      onConfirm: () => setDialogVisible(false),
-      onCancel: () => setDialogVisible(false),
-    });
-    setDialogVisible(true);
-  } else {
-    // Directly save and navigate, no dialog
-    saveWorkout(true);
-  }
-};
+    if (sets === 0) {
+      setDialogProps({
+        message: "No Completed Sets. Please complete at least one set.",
+        confirmText: "OK",
+        cancelText: undefined,
+        destructive: false,
+        onConfirm: () => setDialogVisible(false),
+        onCancel: () => setDialogVisible(false),
+      });
+      setDialogVisible(true);
+    } else {
+      // Directly save and navigate, no dialog
+      saveWorkout(true);
+    }
+  };
 
+  const discardRoutineAndReset = () => {
+    // Reset any temporary workout state if needed
+    setExerciseData({});
+    setExerciseDetails([]);
+    setLoadedExerciseIds([]);
+    setIsWorkoutStarted(false);
+    setDuration(0);
+    setRestCountdowns({});
 
-const discardRoutineAndReset = () => {
-  // Reset any temporary workout state if needed
-  setExerciseData({});
-  setExerciseDetails([]);
-  setLoadedExerciseIds([]);
-  setIsWorkoutStarted(false);
-  setDuration(0);
-  setRestCountdowns({});
+    // Navigate back to the workout page
+    router.replace("/workout");
+  };
 
-  // Navigate back to the workout page
-  router.replace("/workout");
-};
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        // Directly navigate to the workout page
+        setDialogProps({
+          message: "Are you sure you want to discard this workout? All progress will be lost.",
+          confirmText: "Discard",
+          cancelText: undefined,
+          destructive: true,
+          onConfirm: () => {
+            setDialogVisible(false);
+            discardRoutineAndReset();
+          },
+          onCancel: () => setDialogVisible(false),
+        });
+        setDialogVisible(true);
+        return true;
+      };
 
-useFocusEffect(
-  React.useCallback(() => {
-    const onBackPress = () => {
-      // Directly navigate to the workout page
-       setDialogProps({
-      message: "Are you sure you want to discard this workout? All progress will be lost.",
-      confirmText: "Discard",
-      cancelText: undefined,
-      destructive: true,
-      onConfirm: () => {
-        setDialogVisible(false);
-        discardRoutineAndReset();
-      },
-      onCancel: () => setDialogVisible(false),
-    });
-    setDialogVisible(true);
-      return true;
-    };
+      const subscription = BackHandler.addEventListener("hardwareBackPress", onBackPress);
 
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      onBackPress
-    );
+      return () => subscription.remove(); // cleanup
+    }, [router])
+  );
+  const handleBackPress = () => {
+    // Clear workout state
+    setExerciseData({});
+    setExerciseDetails([]);
+    setLoadedExerciseIds([]);
+    setIsWorkoutStarted(false);
+    setDuration(0);
+    setRestCountdowns({});
 
-    return () => subscription.remove(); // cleanup
-  }, [router])
-);
-const handleBackPress = () => {
-  // Clear workout state
-  setExerciseData({});
-  setExerciseDetails([]);
-  setLoadedExerciseIds([]);
-  setIsWorkoutStarted(false);
-  setDuration(0);
-  setRestCountdowns({});
-
-  // Navigate back
-  router.replace("/workout");
-};
+    // Navigate back
+    router.replace("/workout");
+  };
   return (
     <SafeAreaView flex={1} bg="$black">
       <CustomHeader
         title="Log Workout"
         right="Finish"
         onPress={handleBackPress}
-       onRightButtonPress={handleFinish}
+        onRightButtonPress={handleFinish}
       />
 
       {/* Stats */}
       <VStack px="$3" py="$5" space="xs" mb="$2" borderBottomWidth={0.2} borderColor="$coolGray400">
         <HStack px="$3" justifyContent="space-between">
-          <Text color="$coolGray400" fontSize="$xs">Duration</Text>
-          <Text color="$coolGray400" fontSize="$xs">Volume</Text>
-          <Text color="$coolGray400" fontSize="$xs">Sets</Text>
+          <Text color="$coolGray400" fontSize="$xs">
+            Duration
+          </Text>
+          <Text color="$coolGray400" fontSize="$xs">
+            Volume
+          </Text>
+          <Text color="$coolGray400" fontSize="$xs">
+            Sets
+          </Text>
         </HStack>
         <HStack px="$5" justifyContent="space-between">
-          <Text color="$blue500"fontSize="$sm" >{duration}s</Text>
-          <Text color="$white"fontSize="$sm" >{Math.round(totalVolume)} kg</Text>
-          <Text color="$white" fontSize="$sm">{totalSets}</Text>
+          <Text color="$blue500" fontSize="$sm">
+            {duration}s
+          </Text>
+          <Text color="$white" fontSize="$sm">
+            {Math.round(totalVolume)} kg
+          </Text>
+          <Text color="$white" fontSize="$sm">
+            {totalSets}
+          </Text>
         </HStack>
       </VStack>
 
       {/* Body */}
       <ScrollView px="$2" pt="$2">
-       {exerciseDetails.map((ex) => {
-  const id = String(ex.id);
-  const data = exerciseData[id];
-  if (!data) return null;
+        {exerciseDetails.map((ex) => {
+          const id = String(ex.id);
+          const data = exerciseData[id];
+          if (!data) return null;
 
-  return (
-    <Box key={id} pb="$6">
-      <ExerciseBlock
-        exercise={{
-          id,
-          exercise_name: ex.name || "Unknown",
-          equipment: ex.equipment ?? "unknown",
-          exercise_type: ex.exercise_type ?? "Weighted",
-        }}
-        data={data}
-        showCheckIcon={true}
-       onChange={(newData) =>
-  setExerciseData((prev) => ({
-    ...prev,
-    [id]: newData as ExerciseEntry,
-  }))
-}
-   
+          return (
+            <Box key={id} pb="$6">
+              <ExerciseBlock
+                exercise={{
+                  id,
+                  exercise_name: ex.name || "Unknown",
+                  equipment: ex.equipment ?? "unknown",
+                  exercise_type: ex.exercise_type ?? "Weighted",
+                }}
+                data={data}
+                showCheckIcon={true}
+                onChange={(newData) =>
+                  setExerciseData((prev) => ({
+                    ...prev,
+                    [id]: newData as ExerciseEntry,
+                  }))
+                }
                 onOpenRestTimer={openRestTimer}
-      onOpenWeight={openWeightSheet}
-      onOpenRepsType={openRepsSheet}
-      onOpenSetType={(exerciseId, setIndex) => {
-        if (setIndex === undefined) return; // or handle default
-        openSetTypeSheet(exerciseId, setIndex);
-      }}
-      onOpenRepRange={() => {}}
-   onToggleSetComplete={(exerciseId: string, setIndex: number, justCompleted: boolean) => handleToggleSetComplete(exerciseId, setIndex, justCompleted)} 
-    
+                onOpenWeight={openWeightSheet}
+                onOpenRepsType={openRepsSheet}
+                onOpenSetType={(exerciseId, setIndex) => {
+                  if (setIndex === undefined) return; // or handle default
+                  openSetTypeSheet(exerciseId, setIndex);
+                }}
+                onOpenRepRange={() => {}}
+                onToggleSetComplete={(
+                  exerciseId: string,
+                  setIndex: number,
+                  justCompleted: boolean
+                ) => handleToggleSetComplete(exerciseId, setIndex, justCompleted)}
+              />
+            </Box>
+          );
+        })}
 
-      />
-    
-    </Box>
-  );
-})}
-
-         {/* Add & Actions */}
+        {/* Add & Actions */}
         <VStack space="lg">
-          <Box >
+          <Box>
             <HStack space="lg" alignItems="center">
               <CustomButton
                 onPress={() =>
@@ -673,115 +678,100 @@ const handleBackPress = () => {
             {/* New Routine Button */}
             <Button
               flex={1}
-                 bg="#1F1F1F"
-          
+              bg="#1F1F1F"
               size="md"
               borderRadius="$lg" // adds sufficient rounding
               justifyContent="center" // aligns content to the left
               px="$4"
               py="$1.5"
-            onPress={ () => console.log("settings")}
-          
+              onPress={() => console.log("settings")}
             >
               <HStack alignItems="center" space="sm" px="$1">
                 <Text color="$white">Settings</Text>
               </HStack>
             </Button>
-          
-           <Button
-  flex={1}
-  bg="#1F1F1F"
-  size="md"
-  borderRadius="$lg"
-  justifyContent="flex-start"
-  px="$4"
-  py="$1.5"
-  onPress={
-  () => {
-    setDialogProps({
-      message: "Are you sure you want to discard this workout? All progress will be lost.",
-      confirmText: "Discard",
-      cancelText: undefined,
-      destructive: true,
-      onConfirm: () => {
-        setDialogVisible(false);
-        discardRoutineAndReset();
-      },
-      onCancel: () => setDialogVisible(false),
-    });
-    setDialogVisible(true);
-  }
-}
->
-  <HStack alignItems="center" space="sm">
-    <Text color="$red">Discard Workout</Text>
-  </HStack>
-</Button>
 
+            <Button
+              flex={1}
+              bg="#1F1F1F"
+              size="md"
+              borderRadius="$lg"
+              justifyContent="flex-start"
+              px="$4"
+              py="$1.5"
+              onPress={() => {
+                setDialogProps({
+                  message:
+                    "Are you sure you want to discard this workout? All progress will be lost.",
+                  confirmText: "Discard",
+                  cancelText: undefined,
+                  destructive: true,
+                  onConfirm: () => {
+                    setDialogVisible(false);
+                    discardRoutineAndReset();
+                  },
+                  onCancel: () => setDialogVisible(false),
+                });
+                setDialogVisible(true);
+              }}
+            >
+              <HStack alignItems="center" space="sm">
+                <Text color="$red">Discard Workout</Text>
+              </HStack>
+            </Button>
           </HStack>
-
-          
         </VStack>
       </ScrollView>
       {Object.entries(restCountdowns).map(([key, timeLeft]) => {
-  const [exerciseId] = key.split("-");
-  const data = exerciseData[exerciseId];
-  const totalTime = data?.restTimeInSeconds ?? 0;
+        const [exerciseId] = key.split("-");
+        const data = exerciseData[exerciseId];
+        const totalTime = data?.restTimeInSeconds ?? 0;
 
-  if (typeof timeLeft === "number" && timeLeft > 0) {
-    return (
-      <RestCountdownTimer
-        key={key}
-        timeLeft={timeLeft}
-        totalTime={totalTime}
-        onSkip={() =>
-          setRestCountdowns((prev) => {
-            const updated = { ...prev };
-            delete updated[key];
-            return updated;
-          })
+        if (typeof timeLeft === "number" && timeLeft > 0) {
+          return (
+            <RestCountdownTimer
+              key={key}
+              timeLeft={timeLeft}
+              totalTime={totalTime}
+              onSkip={() =>
+                setRestCountdowns((prev) => {
+                  const updated = { ...prev };
+                  delete updated[key];
+                  return updated;
+                })
+              }
+              onIncrease={() =>
+                setRestCountdowns((prev) => ({
+                  ...prev,
+                  [key]: (prev[key] || 0) + 10,
+                }))
+              }
+              onDecrease={() =>
+                setRestCountdowns((prev) => ({
+                  ...prev,
+                  [key]: Math.max((prev[key] || 0) - 10, 0),
+                }))
+              }
+            />
+          );
         }
-        onIncrease={() =>
-          setRestCountdowns((prev) => ({
-            ...prev,
-            [key]: (prev[key] || 0) + 10,
-          }))
-        }
-        onDecrease={() =>
-          setRestCountdowns((prev) => ({
-            ...prev,
-            [key]: Math.max((prev[key] || 0) - 10, 0),
-          }))
-        }
-      />
-    );
-  }
 
-  return null;
-})}
-<RestTimerSheet
-        ref={restSheetRef}
-        onSelectDuration={handleRestDurationSelect}
-      />
-      <WeightSheet
-        ref={weightSheetRef}
-        onSelectWeight={handleWeightSelect}
-      />
-      <RepsTypeSheet
-        ref={repsSheetRef}
-        onSelectRepsType={handleRepsTypeSelect}
-      />
-       <SetTypeModal
+        return null;
+      })}
+      <RestTimerSheet ref={restSheetRef} onSelectDuration={handleRestDurationSelect} />
+      <WeightSheet ref={weightSheetRef} onSelectWeight={handleWeightSelect} />
+      <RepsTypeSheet ref={repsSheetRef} onSelectRepsType={handleRepsTypeSelect} />
+      <SetTypeModal
         ref={setTypeSheetRef}
         selectedType={
           exerciseData[activeExerciseId ?? ""]?.sets?.[activeSetIndex ?? 0]?.setType || "Normal"
         }
-          onSelect={(type:any) => {
+        onSelect={(type: any) => {
           handleSetTypeSelect(type, activeExerciseId!, activeSetIndex!); // explicitly pass IDs
           setTypeSheetRef.current?.close();
         }}
-        />
-        <CustomDialog {...dialogProps} visible={dialogVisible} />
+      />
+      <CustomDialog {...dialogProps} visible={dialogVisible} />
     </SafeAreaView>
   );
 }
@@ -813,4 +803,3 @@ const calculateWorkoutStats = (exerciseData: ExerciseData) => {
     sets: totalSets,
   };
 };
-

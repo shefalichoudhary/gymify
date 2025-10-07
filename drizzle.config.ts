@@ -5,5 +5,4 @@ export default defineConfig({
   driver: "expo",
   schema: "./db/schema.ts",
   out: "./drizzle",
-  
 });

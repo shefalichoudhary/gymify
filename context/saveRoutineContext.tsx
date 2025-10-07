@@ -11,11 +11,7 @@ const HeaderActionContext = createContext<HeaderActionContextType>({
   setOnRightPress: () => {},
 });
 
-export const HeaderActionProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const HeaderActionProvider = ({ children }: { children: React.ReactNode }) => {
   const [onRightPress, setOnRightPress] = useState<() => void>();
 
   return (

@@ -1,19 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  Box,
-  Text,
-  VStack,
-  HStack,
-  ScrollView,
-  SafeAreaView,
-} from "@gluestack-ui/themed";
+import { Box, Text, VStack, HStack, ScrollView, SafeAreaView } from "@gluestack-ui/themed";
 import { db } from "@/db/db";
-import {
-  exercises,
-  workoutExercises,
-  workoutSets,
-  workouts as workoutsTable,
-} from "@/db/schema";
+import { exercises, workoutExercises, workoutSets, workouts as workoutsTable } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { useFocusEffect } from "expo-router";
 type Workout = {
@@ -74,14 +62,14 @@ export default function Home() {
                 .select()
                 .from(workoutSets)
                 .where(
-                  and(
-                    eq(workoutSets.workoutId, w.id),
-                    eq(workoutSets.exerciseId, we.exerciseId)
-                  )
+                  and(eq(workoutSets.workoutId, w.id), eq(workoutSets.exerciseId, we.exerciseId))
                 );
 
               const setsCount = sets.length;
-              const exerciseVolume = sets.reduce((sum:number, s:any) => sum + (s.weight ?? 0) * (s.reps ?? 1), 0);
+              const exerciseVolume = sets.reduce(
+                (sum: number, s: any) => sum + (s.weight ?? 0) * (s.reps ?? 1),
+                0
+              );
               totalVolume += exerciseVolume;
 
               exerciseList.push({
@@ -102,28 +90,29 @@ export default function Home() {
           }
 
           // Sort workouts by date descending
-          workoutsWithExercises.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          workoutsWithExercises.sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
 
           setWorkouts(workoutsWithExercises);
-         const randomQuote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
-        setQuote(randomQuote);
-      } catch (err) {
-        console.error("Error fetching data:", err);
-      }
-    };
+          const randomQuote =
+            MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+          setQuote(randomQuote);
+        } catch (err) {
+          console.error("Error fetching data:", err);
+        }
+      };
       fetchWorkouts();
     }, [])
   );
-
-
 
   // Only show the latest workout
   const latestWorkout = workouts.length > 0 ? workouts[0] : null;
 
   return (
-  <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }}>
-      <ScrollView pt="$2"   contentContainerStyle={{ flexGrow: 1 }} >
-        <VStack flex={1}  space="md" >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#1F1F1F" }}>
+      <ScrollView pt="$2" contentContainerStyle={{ flexGrow: 1 }}>
+        <VStack flex={1} space="md">
           {/* Latest Workout Card if exists */}
           {latestWorkout && (
             <Box
@@ -174,7 +163,9 @@ export default function Home() {
               {/* Stats */}
               <HStack justifyContent="space-between" mb="$3">
                 <VStack>
-                  <Text color="$coolGray400" fontSize="$xs">Duration</Text>
+                  <Text color="$coolGray400" fontSize="$xs">
+                    Duration
+                  </Text>
                   <Text color="$blue500" fontSize="$sm">
                     {latestWorkout.time < 60
                       ? `${latestWorkout.time} sec`
@@ -182,8 +173,12 @@ export default function Home() {
                   </Text>
                 </VStack>
                 <VStack alignItems="flex-end">
-                  <Text color="$coolGray400" fontSize="$xs" mr="$1.5">Volume</Text>
-                  <Text color="$white" fontSize="$sm">{latestWorkout.totalVolume}</Text>
+                  <Text color="$coolGray400" fontSize="$xs" mr="$1.5">
+                    Volume
+                  </Text>
+                  <Text color="$white" fontSize="$sm">
+                    {latestWorkout.totalVolume}
+                  </Text>
                 </VStack>
               </HStack>
 
@@ -210,7 +205,6 @@ export default function Home() {
             </Box>
           )}
 
-          
           {/* Motivational Quotes Feed */}
           {MOTIVATIONAL_QUOTES.map((quote, idx) => (
             <Box
@@ -263,19 +257,12 @@ export default function Home() {
                 {quote}
               </Text>
             </Box>
-          
-   
           ))}
-          <Box
-  alignItems="center"
-  justifyContent="center"
-  bg="$black"
-  py="$5"
->
-  <Text color="$coolGray400" fontSize="$md">
-   No more content 😢
-  </Text>
-</Box>
+          <Box alignItems="center" justifyContent="center" bg="$black" py="$5">
+            <Text color="$coolGray400" fontSize="$md">
+              No more content 😢
+            </Text>
+          </Box>
         </VStack>
       </ScrollView>
     </SafeAreaView>

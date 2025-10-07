@@ -22,86 +22,81 @@ export default function RestCountdownTimer({
   const soundRef = useRef<Audio.Sound | null>(null);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const hasPlayedEndRef = useRef(false);
-const [soundLoaded, setSoundLoaded] = useState(false);
+  const [soundLoaded, setSoundLoaded] = useState(false);
   // Unlock audio on first button press
   useEffect(() => {
-  const unlockAudioOnMount = async () => {
-    if (!audioUnlocked) {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          staysActiveInBackground: false,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-        });
-        setAudioUnlocked(true);
-      } catch (e) {
-        console.error("Failed to unlock audio:", e);
+    const unlockAudioOnMount = async () => {
+      if (!audioUnlocked) {
+        try {
+          await Audio.setAudioModeAsync({
+            allowsRecordingIOS: false,
+            staysActiveInBackground: false,
+            playsInSilentModeIOS: true,
+            shouldDuckAndroid: true,
+          });
+          setAudioUnlocked(true);
+        } catch (e) {
+          console.error("Failed to unlock audio:", e);
+        }
       }
-    }
-  };
-  unlockAudioOnMount();
-}, []);
+    };
+    unlockAudioOnMount();
+  }, []);
 
   // Load beep sound
-useEffect(() => {
-  let isMounted = true;
+  useEffect(() => {
+    let isMounted = true;
 
-  const loadBeep = async () => {
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/beep.mp3")
-      );
-      if (isMounted) {
-        soundRef.current = sound;
+    const loadBeep = async () => {
+      try {
+        const { sound } = await Audio.Sound.createAsync(require("../../assets/sounds/beep.mp3"));
+        if (isMounted) {
+          soundRef.current = sound;
           setSoundLoaded(true); // ✅ mark loaded
-        console.log("✅ Beep sound loaded");
+          console.log("✅ Beep sound loaded");
+        }
+      } catch (e) {
+        console.error("❌ Failed to load beep sound:", e);
       }
-    } catch (e) {
-      console.error("❌ Failed to load beep sound:", e);
-    }
-  };
+    };
 
-  loadBeep();
+    loadBeep();
 
-  return () => {
-    isMounted = false;
-    soundRef.current?.unloadAsync(); // unload only on unmount
-  };
-}, []);
-
+    return () => {
+      isMounted = false;
+      soundRef.current?.unloadAsync(); // unload only on unmount
+    };
+  }, []);
 
   // Play beep + haptic
- const playBeep = async () => {
-  try {
-    if (soundRef.current) {
-      await soundRef.current.replayAsync(); // reset and play immediately
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  const playBeep = async () => {
+    try {
+      if (soundRef.current) {
+        await soundRef.current.replayAsync(); // reset and play immediately
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    } catch (e) {
+      console.error("Failed to play beep:", e);
     }
-  } catch (e) {
-    console.error("Failed to play beep:", e);
-  }
-};
-
+  };
 
   // Play start beep
-useEffect(() => {
-  if (timeLeft === totalTime && audioUnlocked && soundLoaded) {
-    playBeep();
-  }
-}, [timeLeft, totalTime, audioUnlocked, soundLoaded]);
+  useEffect(() => {
+    if (timeLeft === totalTime && audioUnlocked && soundLoaded) {
+      playBeep();
+    }
+  }, [timeLeft, totalTime, audioUnlocked, soundLoaded]);
 
-// End beep
-useEffect(() => {
-  if (timeLeft <= 0 && !hasPlayedEndRef.current && audioUnlocked) {
-    hasPlayedEndRef.current = true;
-    playBeep();
-  }
-  if (timeLeft > 0) {
-    hasPlayedEndRef.current = false;
-  }
-}, [timeLeft, audioUnlocked]);
-
+  // End beep
+  useEffect(() => {
+    if (timeLeft <= 0 && !hasPlayedEndRef.current && audioUnlocked) {
+      hasPlayedEndRef.current = true;
+      playBeep();
+    }
+    if (timeLeft > 0) {
+      hasPlayedEndRef.current = false;
+    }
+  }, [timeLeft, audioUnlocked]);
 
   // Skip handler
   const handleSkip = () => {
@@ -110,7 +105,9 @@ useEffect(() => {
   };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const mins = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
     const secs = (seconds % 60).toString().padStart(2, "0");
     return `${mins}:${secs}`;
   };
@@ -130,13 +127,7 @@ useEffect(() => {
       zIndex={999}
     >
       <VStack space="md" width="100%" mb="$4">
-        <Progress
-          value={progress * 100}
-          size="xs"
-          bg="#2a2a2a"
-          width="100%"
-          borderRadius={5}
-        >
+        <Progress value={progress * 100} size="xs" bg="#2a2a2a" width="100%" borderRadius={5}>
           <Progress.FilledTrack bg="$blue600" />
         </Progress>
 
@@ -151,7 +142,9 @@ useEffect(() => {
               onDecrease();
             }}
           >
-            <Text fontSize="$md" color="$white">-10s</Text>
+            <Text fontSize="$md" color="$white">
+              -10s
+            </Text>
           </Button>
 
           <Text
@@ -175,7 +168,9 @@ useEffect(() => {
               onIncrease();
             }}
           >
-            <Text fontSize="$md" color="$white">+10s</Text>
+            <Text fontSize="$md" color="$white">
+              +10s
+            </Text>
           </Button>
 
           <Button

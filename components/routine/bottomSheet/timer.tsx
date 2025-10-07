@@ -33,34 +33,24 @@ const RestTimerSheet = forwardRef<RestTimerSheetRef, RestTimerSheetProps>(
       }, [])
     );
 
-const options = [
-  { label: "Off", value: 0 },
-  { label: "5s", value: 5 },
+    const options = [
+      { label: "Off", value: 0 },
+      { label: "5s", value: 5 },
 
-  { label: "10s", value: 10 },
+      { label: "10s", value: 10 },
 
-  { label: "30s", value: 30 },
-  { label: "45s", value: 45 },
-  { label: "1 min", value: 60 },
-  { label: "1.5 min", value: 90 },
-  { label: "2 min", value: 120 },
-];
+      { label: "30s", value: 30 },
+      { label: "45s", value: 45 },
+      { label: "1 min", value: 60 },
+      { label: "1.5 min", value: 90 },
+      { label: "2 min", value: 120 },
+    ];
 
     return (
       <CustomBottomSheet ref={bottomSheetRef} snapPoints={["30%", "32%"]}>
         {/* Fixed Header */}
-        <Box
-          borderBottomWidth={1}
-          borderColor="$trueGray700"
-          pb="$3"
-          mb="$4"
-        >
-          <Text
-            fontSize="$lg"
-            fontWeight="$bold"
-            textAlign="center"
-            color="white"
-          >
+        <Box borderBottomWidth={1} borderColor="$trueGray700" pb="$3" mb="$4">
+          <Text fontSize="$lg" fontWeight="$bold" textAlign="center" color="white">
             Rest Timer
           </Text>
         </Box>
@@ -77,8 +67,7 @@ const options = [
                 <Pressable
                   key={opt.value}
                   onPress={() => {
-                    
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                     setSelected(opt.value);
                     onSelectDuration(opt.value);
                     bottomSheetRef.current?.close();

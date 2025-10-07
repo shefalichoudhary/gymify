@@ -6,7 +6,7 @@ type CustomButtonProps = {
   children: React.ReactNode;
   icon?: React.ReactElement | null;
   iconPosition?: "left" | "right";
-    hover?: Record<string, any>;
+  hover?: Record<string, any>;
   [key: string]: any;
 };
 
@@ -15,7 +15,7 @@ export default function CustomButton({
   children,
   icon = null,
   iconPosition = "right",
-    hover = {}, 
+  hover = {},
   ...props
 }: CustomButtonProps) {
   return (
@@ -29,20 +29,14 @@ export default function CustomButton({
       alignItems="center"
       justifyContent="center"
       w="100%"
-       $hover={{ bg: "$blue400", ...hover }}
-      
+      $hover={{ bg: "$blue400", ...hover }}
       {...props}
     >
       {icon && iconPosition === "left" && (
         <Box mr="$2">{icon}</Box> // 👈 marginRight wrapper
       )}
 
-      <ButtonText
-        color="$white"
-        
-        fontWeight="$medium"
-        fontSize="$md"
-      >
+      <ButtonText color="$white" fontWeight="$medium" fontSize="$md">
         {children}
       </ButtonText>
 

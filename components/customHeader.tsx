@@ -17,7 +17,7 @@ interface CustomHeaderProps {
 }
 
 export default function CustomHeader({
-  title ,
+  title,
   left,
   onPress,
   center,
@@ -28,19 +28,19 @@ export default function CustomHeader({
   homeLeft,
 }: CustomHeaderProps) {
   const insets = useSafeAreaInsets();
-   const router = useRouter();
+  const router = useRouter();
 
- const LeftButton = isHome
-  ? homeLeft || null
-  : (
+  const LeftButton = isHome ? (
+    homeLeft || null
+  ) : (
     <Pressable onPress={onPress || (() => router.back())}>
       <AntDesign name="arrowleft" size={24} color="white" />
     </Pressable>
   );
 
   return (
-    <Box w="100%" px="$4" pt={insets.top + 10} pb="$4"  bg="#1F1F1F">
-      <HStack alignItems="center" justifyContent="space-between" w="100%" >
+    <Box w="100%" px="$4" pt={insets.top + 10} pb="$4" bg="#1F1F1F">
+      <HStack alignItems="center" justifyContent="space-between" w="100%">
         {/* Left */}
         <Box>{LeftButton}</Box>
 
@@ -64,10 +64,7 @@ export default function CustomHeader({
         {/* Right */}
         <Box>
           {typeof right === "string" ? (
-            <Pressable
-              onPress={onRightButtonPress}
-              disabled={isRightButtonDisabled}
-            >
+            <Pressable onPress={onRightButtonPress} disabled={isRightButtonDisabled}>
               <Text
                 color={isRightButtonDisabled ? "$gray500" : "$blue500"}
                 fontWeight="$small"
@@ -76,7 +73,9 @@ export default function CustomHeader({
                 {right}
               </Text>
             </Pressable>
-          ) : right}
+          ) : (
+            right
+          )}
         </Box>
       </HStack>
     </Box>

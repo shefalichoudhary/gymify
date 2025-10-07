@@ -232,6 +232,20 @@
       "when": 1759348906728,
       "tag": "0032_strange_warpath",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1759866511519,
+      "tag": "0033_hesitant_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1759867440621,
+      "tag": "0034_soft_mister_fear",
+      "breakpoints": true
     }
   ]
 }

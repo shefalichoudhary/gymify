@@ -46,26 +46,20 @@ const SaveWorkoutSheet = forwardRef<SaveWorkoutSheetRef, SaveWorkoutSheetProps>(
         </Text>
 
         {/* Buttons Row */}
-       <VStack mt="$4" space="md">
+        <VStack mt="$4" space="md">
           <Pressable onPress={onKeepOriginal}>
-            <Box
-              bg="$coolGray600"
-              py="$3"
-              borderRadius="$md"
-              alignItems="center"
-            >
-              <Text color="$white" fontWeight="$medium">Keep Original Routine</Text>
+            <Box bg="$coolGray600" py="$3" borderRadius="$md" alignItems="center">
+              <Text color="$white" fontWeight="$medium">
+                Keep Original Routine
+              </Text>
             </Box>
           </Pressable>
 
           <Pressable onPress={onUpdate}>
-            <Box
-              bg="$blue500"
-              py="$3"
-              borderRadius="$md"
-              alignItems="center"
-            >
-              <Text color="$white" fontWeight="$medium">Update Routine</Text>
+            <Box bg="$blue500" py="$3" borderRadius="$md" alignItems="center">
+              <Text color="$white" fontWeight="$medium">
+                Update Routine
+              </Text>
             </Box>
           </Pressable>
         </VStack>

@@ -16,66 +16,59 @@ type DurationTimerProps = {
 const DurationTimer = forwardRef<DurationTimerRef, DurationTimerProps>(
   ({ duration, onChange }, ref) => {
     const [timerRunning, setTimerRunning] = useState(false);
-    const intervalRef = useRef<number| null>(null);
-const [elapsed, setElapsed] = useState(duration);
-useImperativeHandle(ref, () => ({
-  stopTimer: async () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = null;
-    setTimerRunning(false);
+    const intervalRef = useRef<number | null>(null);
+    const [elapsed, setElapsed] = useState(duration);
+    useImperativeHandle(ref, () => ({
+      stopTimer: async () => {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        setTimerRunning(false);
 
-    // Play stop sound
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        require("@/assets/sounds/beep-end.mp3")
-      );
-      await sound.playAsync();
-    } catch (e) {
-      console.log("Error playing stop sound:", e);
-    }
+        // Play stop sound
+        try {
+          const { sound } = await Audio.Sound.createAsync(require("@/assets/sounds/beep-end.mp3"));
+          await sound.playAsync();
+        } catch (e) {
+          console.log("Error playing stop sound:", e);
+        }
 
-    // Vibrate on stop
-    Vibration.vibrate([0, 200], false);
-  },
-}));
-     
+        // Vibrate on stop
+        Vibration.vibrate([0, 200], false);
+      },
+    }));
 
-   const startTimer = async () => {
-  if (!timerRunning) {
-    setTimerRunning(true);
-    try {
-      const { sound } = await Audio.Sound.createAsync(require("@/assets/sounds/beep.mp3"));
-      await sound.playAsync();
-    } catch {}
-    Vibration.vibrate([0, 200], false);
+    const startTimer = async () => {
+      if (!timerRunning) {
+        setTimerRunning(true);
+        try {
+          const { sound } = await Audio.Sound.createAsync(require("@/assets/sounds/beep.mp3"));
+          await sound.playAsync();
+        } catch {}
+        Vibration.vibrate([0, 200], false);
 
-    intervalRef.current = setInterval(() => {
-      setElapsed((prev) => {
-        const newVal = prev + 1;
-        onChange(newVal); // notify parent
-        return newVal;
-      });
-    }, 1000);
-  } else {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = null;
-    setTimerRunning(false);
-     try {
-      const { sound } = await Audio.Sound.createAsync(
-        require("@/assets/sounds/beep-end.mp3")
-      );
-      await sound.playAsync();
-    } catch {}
+        intervalRef.current = setInterval(() => {
+          setElapsed((prev) => {
+            const newVal = prev + 1;
+            onChange(newVal); // notify parent
+            return newVal;
+          });
+        }, 1000);
+      } else {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        setTimerRunning(false);
+        try {
+          const { sound } = await Audio.Sound.createAsync(require("@/assets/sounds/beep-end.mp3"));
+          await sound.playAsync();
+        } catch {}
 
-    Vibration.vibrate([0, 200], false);
-  }
-  
-};
+        Vibration.vibrate([0, 200], false);
+      }
+    };
 
-
-useEffect(() => {
-  setElapsed(duration);
-}, [duration]);
+    useEffect(() => {
+      setElapsed(duration);
+    }, [duration]);
 
     return (
       <Box flexDirection="row" alignItems="center">

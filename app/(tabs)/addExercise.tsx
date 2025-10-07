@@ -6,9 +6,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import CustomHeader from "@/components/customHeader";
 import ExerciseList from "@/components/addExercise/exerciseList";
 import ExerciseSearchbar from "@/components/addExercise/exerciseSearchbar";
-import ExerciseFilterDrawer, { ExerciseFilterDrawerRef } from "@/components/addExercise/exerciseFilterDrawer";
+import ExerciseFilterDrawer, {
+  ExerciseFilterDrawerRef,
+} from "@/components/addExercise/exerciseFilterDrawer";
 import CustomButton from "@/components/customButton";
-
 import { db } from "@/db/db";
 import { exercises, Exercise, exerciseMuscles, muscles } from "@/db/schema";
 import { inArray } from "drizzle-orm";
@@ -16,9 +17,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 export default function AddExercise() {
   const router = useRouter();
-const { from, routineId: rawId, routineTitle } = useLocalSearchParams();
-const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
-
+  const { from, routineId: rawId } = useLocalSearchParams();
+  const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   const [exerciseList, setExerciseList] = useState<Exercise[]>([]);
   const [filteredList, setFilteredList] = useState<Exercise[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -29,39 +29,35 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
 
   const filterRef = useRef<ExerciseFilterDrawerRef>(null);
 
- const handleCreate = () => {
-  if (from === "logWorkout") {
-    router.push({
-      pathname: "/logWorkout",
-       params: {
-        id: routineId,
-        addedExerciseIds: JSON.stringify(selectedIds),
-      },
-    });
-  } else if (from === "editRoutine") {
-    router.push({
-      pathname: "/routine/edit/[id]",
-      params: {
-        id: routineId,
-        addedExerciseIds: JSON.stringify(selectedIds),
-      },
-    });
-  } else {
-    router.push({
-      pathname: "/createRoutine",
-      params: {
-        selected: JSON.stringify(selectedIds),
-      },
-    });
-  }
-};
-
-
+  const handleCreate = () => {
+    if (from === "logWorkout") {
+      router.push({
+        pathname: "/logWorkout",
+        params: {
+          id: routineId,
+          addedExerciseIds: JSON.stringify(selectedIds),
+        },
+      });
+    } else if (from === "editRoutine") {
+      router.push({
+        pathname: "/routine/edit/[id]",
+        params: {
+          id: routineId,
+          addedExerciseIds: JSON.stringify(selectedIds),
+        },
+      });
+    } else {
+      router.push({
+        pathname: "/createRoutine",
+        params: {
+          selected: JSON.stringify(selectedIds),
+        },
+      });
+    }
+  };
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
   };
 
   // Initial load
@@ -102,11 +98,11 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
           .select()
           .from(exerciseMuscles)
           .where(inArray(exerciseMuscles.muscle_id, [selectedMuscleId]));
-        matchingIds = muscleLinks.map((m:any) => m.exercise_id);
+        matchingIds = muscleLinks.map((m: any) => m.exercise_id);
       }
 
       const filtered = await db.query.exercises.findMany({
-        where: (ex:any, { eq, inArray, and }:any) =>
+        where: (ex: any, { eq, inArray, and }: any) =>
           and(
             selectedEquipment ? eq(ex.equipment, selectedEquipment) : undefined,
             matchingIds ? inArray(ex.id, matchingIds) : undefined
@@ -120,100 +116,80 @@ const routineId = Array.isArray(rawId) ? rawId[0] : rawId;
   }, [selectedEquipment, selectedMuscleId]);
 
   // Fetch available muscles for label lookup
-useEffect(() => {
-  const fetchMuscles = async () => {
-    const muscleLinks: { muscle_id: string }[] =
-      await db.select({ muscle_id: exerciseMuscles.muscle_id }).from(exerciseMuscles).all();
+  useEffect(() => {
+    const fetchMuscles = async () => {
+      const muscleLinks: { muscle_id: string }[] = await db
+        .select({ muscle_id: exerciseMuscles.muscle_id })
+        .from(exerciseMuscles)
+        .all();
 
-    const uniqueIds = [...new Set(muscleLinks.map((em) => em.muscle_id))] as string[];
+      const uniqueIds = [...new Set(muscleLinks.map((em) => em.muscle_id))] as string[];
 
-    if (uniqueIds.length === 0) return setMuscleList([]);
+      if (uniqueIds.length === 0) return setMuscleList([]);
 
-    const musclesData = await db
-      .select()
-      .from(muscles)
-      .where(inArray(muscles.id, uniqueIds));
-    setMuscleList(musclesData);
-  };
-  fetchMuscles().catch(console.error);
-}, []);
-
+      const musclesData = await db.select().from(muscles).where(inArray(muscles.id, uniqueIds));
+      setMuscleList(musclesData);
+    };
+    fetchMuscles().catch(console.error);
+  }, []);
 
   return (
     <Box flex={1} bg="$black">
-      <CustomHeader
-        title="Add Exercise"
-        
-        right="Create"
-      
-        onRightButtonPress={handleCreate}
-      />
+      <CustomHeader title="Add Exercise" right="Create" onRightButtonPress={handleCreate} />
 
       <ExerciseSearchbar query={query} setQuery={setQuery} />
 
       <HStack space="xs" mb="$4" px="$4" alignItems="center">
-  <Button
-    onPress={() => filterRef.current?.open("equipment")}
-    flex={1}
-    bg={selectedEquipment ? "$blue500" : "#29282a"}
-    borderRadius="$lg"
-    px="$4"
-  >
-    <Text color="$white">
-      {selectedEquipment ?? "All Equipment"}
-    </Text>
-  </Button>
+        <Button
+          onPress={() => filterRef.current?.open("equipment")}
+          flex={1}
+          bg={selectedEquipment ? "$blue500" : "#29282a"}
+          borderRadius="$lg"
+          px="$4"
+        >
+          <Text color="$white">{selectedEquipment ?? "All Equipment"}</Text>
+        </Button>
 
-  <Button
-    onPress={() => filterRef.current?.open("muscle")}
-    flex={1}
-    bg={selectedMuscleId ? "$blue500" : "#29282a"}
-    borderRadius="$lg"
-    px="$4"
-  >
-    <Text color="$white">
-      {selectedMuscleId
-        ? muscleList.find((m) => m.id === selectedMuscleId)?.name ?? "Selected"
-        : "All Muscles"}
-    </Text>
-  </Button>
+        <Button
+          onPress={() => filterRef.current?.open("muscle")}
+          flex={1}
+          bg={selectedMuscleId ? "$blue500" : "#29282a"}
+          borderRadius="$lg"
+          px="$4"
+        >
+          <Text color="$white">
+            {selectedMuscleId
+              ? (muscleList.find((m) => m.id === selectedMuscleId)?.name ?? "Selected")
+              : "All Muscles"}
+          </Text>
+        </Button>
 
-  {(selectedEquipment || selectedMuscleId) && (
-    <Pressable
-      onPress={() => {
-        setSelectedEquipment(null);
-        setSelectedMuscleId(null);
-      }}
-      hitSlop={10}
-    >
-      <Box
-       bg="$white"
-    p={4} // adjust for size
-    borderRadius={999} // full circle
-    alignItems="center"
-    justifyContent="center"
-      >
-        <MaterialIcons name="clear" size={14} color="black" />
-      </Box>
-    </Pressable>
-  )}
-</HStack>
+        {(selectedEquipment || selectedMuscleId) && (
+          <Pressable
+            onPress={() => {
+              setSelectedEquipment(null);
+              setSelectedMuscleId(null);
+            }}
+            hitSlop={10}
+          >
+            <Box
+              bg="$white"
+              p={4} // adjust for size
+              borderRadius={999} // full circle
+              alignItems="center"
+              justifyContent="center"
+            >
+              <MaterialIcons name="clear" size={14} color="black" />
+            </Box>
+          </Pressable>
+        )}
+      </HStack>
 
-
-      <ExerciseList
-        data={filteredList}
-        selectedIds={selectedIds}
-        toggleSelect={toggleSelect}
-      />
+      <ExerciseList data={filteredList} selectedIds={selectedIds} toggleSelect={toggleSelect} />
 
       {selectedIds.length > 0 && (
         <Box position="absolute" bottom={16} left={0} right={0} px="$4">
-          <CustomButton
-            bg="$blue500"
-            borderRadius="$lg"
-            size="lg"
-            onPress={handleCreate}
-          >
+          <CustomButton bg="$blue500" borderRadius="$lg" size="lg" onPress={handleCreate}>
             Add {selectedIds.length} Exercise{selectedIds.length > 1 ? "s" : ""}
           </CustomButton>
         </Box>

@@ -7,8 +7,8 @@ const seedExercises = [
     muscles: [
       { name: "Pectoralis Major", role: "Primary" },
       { name: "Triceps Brachii", role: "Secondary" },
-      { name: "Anterior Deltoid", role: "Secondary" }
-    ]
+      { name: "Anterior Deltoid", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Incline Bench Press",
@@ -17,8 +17,8 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Anterior Deltoid", role: "Secondary" },
-      { name: "Triceps Brachii", role: "Secondary" }
-    ]
+      { name: "Triceps Brachii", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Dumbbell Bench Press",
@@ -28,8 +28,8 @@ const seedExercises = [
     muscles: [
       { name: "Pectoralis Major", role: "Primary" },
       { name: "Triceps Brachii", role: "Secondary" },
-      { name: "Anterior Deltoid", role: "Secondary" }
-    ]
+      { name: "Anterior Deltoid", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Barbell Squat",
@@ -39,8 +39,8 @@ const seedExercises = [
     muscles: [
       { name: "Quadriceps", role: "Primary" },
       { name: "Gluteus Maximus", role: "Secondary" },
-      { name: "Hamstrings", role: "Secondary" }
-    ]
+      { name: "Hamstrings", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Leg Press",
@@ -50,8 +50,8 @@ const seedExercises = [
     muscles: [
       { name: "Quadriceps", role: "Primary" },
       { name: "Gluteus Maximus", role: "Secondary" },
-      { name: "Hamstrings", role: "Secondary" }
-    ]
+      { name: "Hamstrings", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Deadlift",
@@ -62,8 +62,8 @@ const seedExercises = [
       { name: "Gluteus Maximus", role: "Primary" },
       { name: "Hamstrings", role: "Secondary" },
       { name: "Erector Spinae", role: "Secondary" },
-      { name: "Trapezius", role: "Other" }
-    ]
+      { name: "Trapezius", role: "Other" },
+    ],
   },
   {
     exercise_name: "Romanian Deadlift",
@@ -73,8 +73,8 @@ const seedExercises = [
     muscles: [
       { name: "Hamstrings", role: "Primary" },
       { name: "Gluteus Maximus", role: "Secondary" },
-      { name: "Erector Spinae", role: "Secondary" }
-    ]
+      { name: "Erector Spinae", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Overhead Press",
@@ -84,8 +84,8 @@ const seedExercises = [
     muscles: [
       { name: "Deltoids", role: "Primary" },
       { name: "Triceps Brachii", role: "Secondary" },
-      { name: "Trapezius", role: "Secondary" }
-    ]
+      { name: "Trapezius", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Lateral Raise",
@@ -94,8 +94,8 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Lateral Deltoid", role: "Primary" },
-      { name: "Supraspinatus", role: "Secondary" }
-    ]
+      { name: "Supraspinatus", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Front Raise",
@@ -104,8 +104,8 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Anterior Deltoid", role: "Primary" },
-      { name: "Serratus Anterior", role: "Secondary" }
-    ]
+      { name: "Serratus Anterior", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Rear Delt Fly",
@@ -114,8 +114,8 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Posterior Deltoid", role: "Primary" },
-      { name: "Rhomboids", role: "Secondary" }
-    ]
+      { name: "Rhomboids", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Pull-up",
@@ -125,8 +125,8 @@ const seedExercises = [
     muscles: [
       { name: "Latissimus Dorsi", role: "Primary" },
       { name: "Biceps Brachii", role: "Secondary" },
-      { name: "Rhomboids", role: "Other" }
-    ]
+      { name: "Rhomboids", role: "Other" },
+    ],
   },
   {
     exercise_name: "Assisted Pull-up",
@@ -135,8 +135,8 @@ const seedExercises = [
     exercise_type: "Assisted Bodyweight",
     muscles: [
       { name: "Latissimus Dorsi", role: "Primary" },
-      { name: "Biceps Brachii", role: "Secondary" }
-    ]
+      { name: "Biceps Brachii", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Lat Pulldown",
@@ -146,8 +146,8 @@ const seedExercises = [
     muscles: [
       { name: "Latissimus Dorsi", role: "Primary" },
       { name: "Biceps Brachii", role: "Secondary" },
-      { name: "Teres Major", role: "Other" }
-    ]
+      { name: "Teres Major", role: "Other" },
+    ],
   },
   {
     exercise_name: "Seated Row",
@@ -157,8 +157,8 @@ const seedExercises = [
     muscles: [
       { name: "Rhomboids", role: "Primary" },
       { name: "Latissimus Dorsi", role: "Secondary" },
-      { name: "Biceps Brachii", role: "Other" }
-    ]
+      { name: "Biceps Brachii", role: "Other" },
+    ],
   },
   {
     exercise_name: "Plank",
@@ -168,8 +168,8 @@ const seedExercises = [
     muscles: [
       { name: "Rectus Abdominis", role: "Primary" },
       { name: "Transverse Abdominis", role: "Secondary" },
-      { name: "Obliques", role: "Secondary" }
-    ]
+      { name: "Obliques", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Dips",
@@ -179,8 +179,8 @@ const seedExercises = [
     muscles: [
       { name: "Triceps Brachii", role: "Primary" },
       { name: "Pectoralis Major", role: "Secondary" },
-      { name: "Anterior Deltoid", role: "Secondary" }
-    ]
+      { name: "Anterior Deltoid", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Assisted Dips",
@@ -189,26 +189,22 @@ const seedExercises = [
     exercise_type: "Assisted Bodyweight",
     muscles: [
       { name: "Triceps Brachii", role: "Primary" },
-      { name: "Pectoralis Major", role: "Secondary" }
-    ]
+      { name: "Pectoralis Major", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Leg Extension",
     equipment: "Machine",
     type: "Isolation",
     exercise_type: "Weighted",
-    muscles: [
-      { name: "Quadriceps", role: "Primary" }
-    ]
+    muscles: [{ name: "Quadriceps", role: "Primary" }],
   },
   {
     exercise_name: "Leg Curl",
     equipment: "Machine",
     type: "Isolation",
     exercise_type: "Weighted",
-    muscles: [
-      { name: "Hamstrings", role: "Primary" }
-    ]
+    muscles: [{ name: "Hamstrings", role: "Primary" }],
   },
   {
     exercise_name: "Calf Raise",
@@ -217,8 +213,8 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Gastrocnemius", role: "Primary" },
-      { name: "Soleus", role: "Secondary" }
-    ]
+      { name: "Soleus", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Face Pull",
@@ -228,8 +224,8 @@ const seedExercises = [
     muscles: [
       { name: "Posterior Deltoid", role: "Primary" },
       { name: "Trapezius", role: "Secondary" },
-      { name: "Rhomboids", role: "Secondary" }
-    ]
+      { name: "Rhomboids", role: "Secondary" },
+    ],
   },
 
   {
@@ -237,18 +233,14 @@ const seedExercises = [
     equipment: "Cable",
     type: "Isolation",
     exercise_type: "Weighted",
-    muscles: [
-      { name: "Triceps Brachii", role: "Primary" }
-    ]
+    muscles: [{ name: "Triceps Brachii", role: "Primary" }],
   },
   {
     exercise_name: "Skullcrusher",
     equipment: "Barbell",
     type: "Isolation",
     exercise_type: "Weighted",
-    muscles: [
-      { name: "Triceps Brachii", role: "Primary" }
-    ]
+    muscles: [{ name: "Triceps Brachii", role: "Primary" }],
   },
   {
     exercise_name: "Hammer Curl",
@@ -257,8 +249,8 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Brachialis", role: "Primary" },
-      { name: "Biceps Brachii", role: "Secondary" }
-    ]
+      { name: "Biceps Brachii", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Barbell Curl",
@@ -267,10 +259,10 @@ const seedExercises = [
     exercise_type: "Weighted",
     muscles: [
       { name: "Biceps Brachii", role: "Primary" },
-      { name: "Brachialis", role: "Secondary" }
-    ]
+      { name: "Brachialis", role: "Secondary" },
+    ],
   },
-    {
+  {
     exercise_name: "Child's Pose",
     equipment: "Bodyweight",
     type: "Stretching",
@@ -278,8 +270,8 @@ const seedExercises = [
     muscles: [
       { name: "Erector Spinae", role: "Primary" },
       { name: "Latissimus Dorsi", role: "Secondary" },
-      { name: "Gluteus Maximus", role: "Secondary" }
-    ]
+      { name: "Gluteus Maximus", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Downward Dog",
@@ -289,8 +281,8 @@ const seedExercises = [
     muscles: [
       { name: "Hamstrings", role: "Primary" },
       { name: "Gastrocnemius", role: "Primary" },
-      { name: "Shoulders", role: "Secondary" }
-    ]
+      { name: "Shoulders", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Cobra Pose",
@@ -300,8 +292,8 @@ const seedExercises = [
     muscles: [
       { name: "Erector Spinae", role: "Primary" },
       { name: "Abdominals", role: "Secondary" },
-      { name: "Chest", role: "Secondary" }
-    ]
+      { name: "Chest", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Standing Forward Bend",
@@ -311,8 +303,8 @@ const seedExercises = [
     muscles: [
       { name: "Hamstrings", role: "Primary" },
       { name: "Calves", role: "Secondary" },
-      { name: "Lower Back", role: "Secondary" }
-    ]
+      { name: "Lower Back", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Seated Spinal Twist",
@@ -322,8 +314,8 @@ const seedExercises = [
     muscles: [
       { name: "Obliques", role: "Primary" },
       { name: "Erector Spinae", role: "Secondary" },
-      { name: "Gluteus Maximus", role: "Secondary" }
-    ]
+      { name: "Gluteus Maximus", role: "Secondary" },
+    ],
   },
   {
     exercise_name: "Cat-Cow Stretch",
@@ -333,9 +325,9 @@ const seedExercises = [
     muscles: [
       { name: "Erector Spinae", role: "Primary" },
       { name: "Abdominals", role: "Secondary" },
-      { name: "Neck", role: "Secondary" }
-    ]
-  }
+      { name: "Neck", role: "Secondary" },
+    ],
+  },
 ];
 
 export default seedExercises;

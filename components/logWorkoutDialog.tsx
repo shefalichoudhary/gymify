@@ -32,7 +32,7 @@ export default function ConfirmDialog({
 
       {/* Dialog content */}
       <AlertDialog.Content
-        bg="rgba(28,28,30,0.95)" 
+        bg="rgba(28,28,30,0.95)"
         borderWidth={0}
         rounded="3xl"
         px="$4"
@@ -56,12 +56,7 @@ export default function ConfirmDialog({
 
         {/* Message */}
         <AlertDialog.Body>
-          <Text
-            fontSize="$md"
-            color="$coolGray100"
-            textAlign="center"
-            lineHeight={22}
-          >
+          <Text fontSize="$md" color="$coolGray100" textAlign="center" lineHeight={22}>
             {message}
           </Text>
         </AlertDialog.Body>

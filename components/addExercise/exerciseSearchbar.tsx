@@ -25,15 +25,15 @@ export default function ExerciseSearchbar({ query, setQuery }: Props) {
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")}>
-               <Box
-    bg="$white"
-    p={4} // adjust for size
-    borderRadius={999} // full circle
-    alignItems="center"
-    justifyContent="center"
-  >
-    <MaterialIcons name="clear" size={12} color="black" />
-  </Box>
+              <Box
+                bg="$white"
+                p={4} // adjust for size
+                borderRadius={999} // full circle
+                alignItems="center"
+                justifyContent="center"
+              >
+                <MaterialIcons name="clear" size={12} color="black" />
+              </Box>
             </Pressable>
           )}
         </HStack>

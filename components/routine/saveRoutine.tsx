@@ -18,7 +18,7 @@ type ExerciseData = Record<
 export const saveRoutineToDb = async (
   title: string,
   selectedExercises: Exercise[],
-  exerciseData: ExerciseData,
+  exerciseData: ExerciseData
 ) => {
   const routineId = cuid();
 
@@ -41,13 +41,7 @@ export const saveRoutineToDb = async (
       continue;
     }
 
-    const {
-      notes,
-      restTimer,
-      unit = "kg",
-      repsType = "reps",
-      sets = [],
-    } = exerciseEntry;
+    const { notes, restTimer, unit = "kg", repsType = "reps", sets = [] } = exerciseEntry;
 
     // Insert into routineExercises
     await db.insert(routineExercises).values({
@@ -57,8 +51,7 @@ export const saveRoutineToDb = async (
       notes,
       repsType,
       unit,
-       restTimer: restTimer 
-
+      restTimer: restTimer,
     });
 
     console.log(`📦 Exercise "${exercise.exercise_name}" inserted with ID: ${routineExerciseId}`);
@@ -74,7 +67,7 @@ export const saveRoutineToDb = async (
         minReps: set.minReps ?? 0,
         maxReps: set.maxReps ?? 0,
         duration: set.duration ?? 0,
-      setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
+        setType: (set.setType as "W" | "Normal" | "D" | "F") ?? "Normal",
       });
 
       console.log(

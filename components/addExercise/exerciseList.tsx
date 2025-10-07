@@ -18,7 +18,7 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
   const soundRef = useRef<Audio.Sound | null>(null);
   const lastPlayRef = useRef<number>(0); // timestamp of last audio play
   // Play local audio
- const playAudio = async () => {
+  const playAudio = async () => {
     const now = Date.now();
     const DEBOUNCE_DELAY = 800; // ms
     if (now - lastPlayRef.current < DEBOUNCE_DELAY) {
@@ -67,7 +67,7 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
     grouped[letter].forEach((ex) => flatData.push({ item: ex }));
   });
 
-  const renderItem: ListRenderItem<typeof flatData[0]> = ({ item }) => {
+  const renderItem: ListRenderItem<(typeof flatData)[0]> = ({ item }) => {
     if (item.letter) {
       return (
         <Box px="$2" py="$1" bg="$gray900">
@@ -105,23 +105,22 @@ export default function ExerciseList({ data, selectedIds, toggleSelect }: Props)
           alignItems="center"
         >
           <Image
-    source={require("../../assets/images/logo.png")} // replace with your icon path
-    style={{ width: 100, height: 100, resizeMode: "contain" }}
-  />
+            source={require("../../assets/images/logo.png")} // replace with your icon path
+            style={{ width: 100, height: 100, resizeMode: "contain" }}
+          />
         </Box>
         <Pressable
-  onPress={() => {
-    const isSelected = selectedIds.includes(exercise.id);
+          onPress={() => {
+            const isSelected = selectedIds.includes(exercise.id);
 
-    // Only play audio if it's being selected, not unselected
-    if (!isSelected) {
-      playAudio();
-    }
+            // Only play audio if it's being selected, not unselected
+            if (!isSelected) {
+              playAudio();
+            }
 
-    toggleSelect(exercise.id);
-  }}
->
-
+            toggleSelect(exercise.id);
+          }}
+        >
           <Box flex={1}>
             <Text color="$white" fontSize="$md" fontWeight="$medium">
               {exercise.exercise_name}

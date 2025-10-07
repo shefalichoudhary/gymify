@@ -1,5 +1,5 @@
 import { Box, Text, Input, InputField, Pressable, HStack } from "@gluestack-ui/themed";
-import { AntDesign,  } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import SetRow from "./setRow";
 import AddSetButton from "./addSetButton";
 import { WorkoutSet as Set } from "@/types/workoutSet";
@@ -10,13 +10,23 @@ type Props = {
   exercise: {
     id: string;
     exercise_name: string;
- exercise_type: string | null; // "Weighted", "Bodyweight", "Duration", etc
+    exercise_type: string | null; // "Weighted", "Bodyweight", "Duration", etc
     equipment: string;
   };
-  data: { notes: string; restTimer: number; sets: Set[]; unit: "lbs" | "kg"; repsType: "reps" | "rep range"; };
-  onChange: (
-    newData: { notes: string; restTime?: number; sets: Set[]; unit: "lbs" | "kg"; repsType: "reps" | "rep range"; }
-  ) => void;
+  data: {
+    notes: string;
+    restTimer: number;
+    sets: Set[];
+    unit: "lbs" | "kg";
+    repsType: "reps" | "rep range";
+  };
+  onChange: (newData: {
+    notes: string;
+    restTime?: number;
+    sets: Set[];
+    unit: "lbs" | "kg";
+    repsType: "reps" | "rep range";
+  }) => void;
   onStartTimer?: () => void;
   onOpenRepRange: (exerciseId: string, setIndex: number) => void;
   showCheckIcon?: boolean;
@@ -45,68 +55,75 @@ export default function ExerciseBlock({
     updatedSets[index] = { ...updatedSets[index], [key]: value };
     onChange({ ...data, sets: updatedSets });
   };
-const [visibleSets, setVisibleSets] = React.useState(data.sets.length > 0 ? data.sets.length : 1);  
+  const [visibleSets, setVisibleSets] = React.useState(data.sets.length > 0 ? data.sets.length : 1);
 
-const handleAddSet = () => {
-  if (visibleSets < data.sets.length) {
+  const handleAddSet = () => {
+    if (visibleSets < data.sets.length) {
+      setVisibleSets((prev) => prev + 1);
+      return;
+    }
+
+    const lastFilledSet = [...data.sets]
+      .slice(0)
+      .reverse()
+      .find(
+        (s) =>
+          s.weight != null ||
+          s.reps != null ||
+          s.minReps != null ||
+          s.maxReps != null ||
+          s.duration != null
+      );
+
+    let newSet: Set = {};
+
+    if (isWeighted) {
+      newSet = {
+        weight: undefined, // leave empty for placeholder
+        reps: undefined,
+        minReps: undefined,
+        maxReps: undefined,
+        isRangeReps: lastFilledSet?.isRangeReps ?? false,
+        previousWeight: lastFilledSet?.weight ?? undefined,
+        previousReps: lastFilledSet?.reps ?? undefined,
+        previousMinReps: lastFilledSet?.minReps ?? undefined,
+        previousMaxReps: lastFilledSet?.maxReps ?? undefined,
+      };
+    } else if (isBodyweight) {
+      newSet = {
+        reps: undefined,
+        minReps: undefined,
+        maxReps: undefined,
+        isRangeReps: lastFilledSet?.isRangeReps ?? false,
+        previousReps: lastFilledSet?.reps ?? undefined,
+        previousMinReps: lastFilledSet?.minReps ?? undefined,
+        previousMaxReps: lastFilledSet?.maxReps ?? undefined,
+      };
+    } else if (isDuration) {
+      newSet = {
+        duration: undefined,
+        previousDuration: lastFilledSet?.duration ?? undefined,
+      };
+    }
+
+    onChange({ ...data, sets: [...data.sets, newSet] });
     setVisibleSets((prev) => prev + 1);
-    return;
-  }
+  };
 
-  const lastFilledSet = [...data.sets]
-    .slice(0)
-    .reverse()
-    .find(
-      (s) =>
-        s.weight != null ||
-        s.reps != null ||
-        s.minReps != null ||
-        s.maxReps != null ||
-        s.duration != null
-    );
-
-  let newSet: Set = {};
-
-  if (isWeighted) {
-    newSet = {
-      weight: undefined, // leave empty for placeholder
-      reps: undefined,
-      minReps: undefined,
-      maxReps: undefined,
-      isRangeReps: lastFilledSet?.isRangeReps ?? false,
-      previousWeight: lastFilledSet?.weight ?? undefined,
-      previousReps: lastFilledSet?.reps ?? undefined,
-      previousMinReps: lastFilledSet?.minReps ?? undefined,
-      previousMaxReps: lastFilledSet?.maxReps ?? undefined,
-    };
-  } else if (isBodyweight) {
-    newSet = {
-      reps: undefined,
-      minReps: undefined,
-      maxReps: undefined,
-      isRangeReps: lastFilledSet?.isRangeReps ?? false,
-      previousReps: lastFilledSet?.reps ?? undefined,
-      previousMinReps: lastFilledSet?.minReps ?? undefined,
-      previousMaxReps: lastFilledSet?.maxReps ?? undefined,
-    };
-  } else if (isDuration) {
-    newSet = {
-      duration: undefined,
-      previousDuration: lastFilledSet?.duration ?? undefined,
-    };
-  }
-
-  onChange({ ...data, sets: [...data.sets, newSet] });
-  setVisibleSets((prev) => prev + 1);
-};
-
-
-   const { isDuration, isWeighted, isBodyweight } = getExerciseTypeFlags(exercise.exercise_type);
+  const { isDuration, isWeighted, isBodyweight } = getExerciseTypeFlags(exercise.exercise_type);
 
   return (
     <Box w="$full">
       <HStack alignItems="center" ml="$1">
-        <Box w={42} h={42} borderRadius={30} bg="#1F1F1F" mr="$3" justifyContent="center" alignItems="center" />
+        <Box
+          w={42}
+          h={42}
+          borderRadius={30}
+          bg="#1F1F1F"
+          mr="$3"
+          justifyContent="center"
+          alignItems="center"
+        />
         <Text color="$blue500" fontSize="$lg" fontWeight="$medium">
           {exercise.exercise_name}
         </Text>
@@ -132,65 +149,62 @@ const handleAddSet = () => {
         </Pressable>
       )}
 
-<Pressable>
-  <HStack px="$3" alignItems="center">
-    <Box flex={showCheckIcon ? 2 : 1} >
-      <Text size="xs" color="$coolGray400" fontWeight="$small">SET</Text>
-    </Box>
+      <Pressable>
+        <HStack px="$3" alignItems="center">
+          <Box flex={showCheckIcon ? 2 : 1}>
+            <Text size="xs" color="$coolGray400" fontWeight="$small">
+              SET
+            </Text>
+          </Box>
 
-   
+          {isWeighted && !isBodyweight && !viewOnly && (
+            <Pressable flex={showCheckIcon ? 2 : 1} onPress={() => onOpenWeight?.(exercise.id)}>
+              <Text size="xs" color="$coolGray400" fontWeight="$small">
+                {data.unit.toUpperCase()}
+              </Text>
+            </Pressable>
+          )}
 
-    {isWeighted  && !isBodyweight && !viewOnly && (
-      <Pressable flex={showCheckIcon ? 2 : 1} onPress={() => onOpenWeight?.(exercise.id)}>
-        <Text size="xs" color="$coolGray400" fontWeight="$small">
-          {data.unit.toUpperCase()}
-        </Text>
+          {(isWeighted || isBodyweight) && !viewOnly && (
+            <Pressable flex={showCheckIcon ? 5 : 3} onPress={() => onOpenRepsType?.(exercise.id)}>
+              <HStack alignItems="center" space="xs">
+                <Text size="xs" color="$coolGray400" fontWeight="$small">
+                  {data.repsType.toUpperCase()}
+                </Text>
+                <AntDesign name="caretdown" size={10} color="gray" style={{ marginLeft: 2 }} />
+              </HStack>
+            </Pressable>
+          )}
+
+          {/* Duration → show time */}
+          {isDuration && (
+            <Box flex={showCheckIcon ? 2 : 1}>
+              <Text size="xs" color="$coolGray400" fontWeight="$small">
+                TIME
+              </Text>
+            </Box>
+          )}
+        </HStack>
       </Pressable>
-    )}
 
-  
-
-    {(isWeighted  || isBodyweight) && !viewOnly &&(
-  <Pressable
-  flex={showCheckIcon ? 5 : 3}
-    onPress={() => onOpenRepsType?.(exercise.id)}
-  >
-    <HStack alignItems="center" space="xs">
-      <Text size="xs" color="$coolGray400" fontWeight="$small">
-        {data.repsType.toUpperCase()}
-      </Text>
-      <AntDesign name="caretdown" size={10} color="gray" style={{ marginLeft: 2 }} />
-    </HStack>
-  </Pressable>
-)}
-
-    {/* Duration → show time */}
-    {isDuration && (
-      <Box flex={showCheckIcon ? 2: 1} >
-        <Text size="xs" color="$coolGray400" fontWeight="$small" >TIME</Text>
-      </Box>
-    )}
-  </HStack>
-</Pressable>
-
-
-{data.sets.slice(0, visibleSets).map((set, index) => {
-  return (
-    <SetRow
-      key={index}
-      index={index}
-      set={{ ...set, isRangeReps: data.repsType === "rep range" }}
-      showCheckIcon={showCheckIcon}
-      editable={!viewOnly}
-      onChange={(key, value) => handleSetChange(index, key, value)}
-      onOpenSetType={onOpenSetType}
-      exerciseId={exercise.id}
-      exerciseType={exercise.exercise_type ?? undefined}
-      onToggleCheck={(justCompleted) => onToggleSetComplete?.(exercise.id, index, justCompleted)}
-    />
-  );
-})}
-
+      {data.sets.slice(0, visibleSets).map((set, index) => {
+        return (
+          <SetRow
+            key={index}
+            index={index}
+            set={{ ...set, isRangeReps: data.repsType === "rep range" }}
+            showCheckIcon={showCheckIcon}
+            editable={!viewOnly}
+            onChange={(key, value) => handleSetChange(index, key, value)}
+            onOpenSetType={onOpenSetType}
+            exerciseId={exercise.id}
+            exerciseType={exercise.exercise_type ?? undefined}
+            onToggleCheck={(justCompleted) =>
+              onToggleSetComplete?.(exercise.id, index, justCompleted)
+            }
+          />
+        );
+      })}
 
       {!viewOnly && <AddSetButton onPress={handleAddSet} />}
     </Box>

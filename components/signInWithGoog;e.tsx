@@ -3,20 +3,19 @@ import {
   GoogleSignin,
   statusCodes,
   isErrorWithCode,
-  isSuccessResponse
-} from '@react-native-google-signin/google-signin';
+  isSuccessResponse,
+} from "@react-native-google-signin/google-signin";
 
 // Somewhere in your code
 export const signInWithGoogle = async () => {
   try {
     await GoogleSignin.hasPlayServices();
-     const response = await GoogleSignin.signIn();
+    const response = await GoogleSignin.signIn();
     if (isSuccessResponse(response)) {
       console.log({ userInfo: response.data });
     } else {
       // sign in was cancelled by user
     }
-
   } catch (error) {
     if (isErrorWithCode(error)) {
       switch (error.code) {

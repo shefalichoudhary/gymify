@@ -10,16 +10,15 @@ type CustomBottomSheetProps = {
 };
 
 const CustomBottomSheet = forwardRef<BottomSheet, CustomBottomSheetProps>(
-  ({ children, snapPoints,onChange }, ref) => {
+  ({ children, snapPoints, onChange }, ref) => {
     const snapPointsMemo = useMemo(() => snapPoints ?? ["50%"], [snapPoints]);
 
-       const handleSheetChange = useCallback(
+    const handleSheetChange = useCallback(
       (index: number) => {
         onChange?.(index); // notify parent
       },
       [onChange]
     );
-
 
     const renderBackdrop = useCallback(
       (props: any) => (

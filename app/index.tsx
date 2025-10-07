@@ -3,30 +3,18 @@ import React, { useEffect } from "react";
 import { ImageBackground, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { Box, VStack, HStack, Text, Image, Center } from "@gluestack-ui/themed";
 import {
-  Box,
-  VStack,
-  HStack,
-  Text,
- 
-  Image,
-  Center,
-} from "@gluestack-ui/themed";
-import { useFonts, Inter_400Regular, Inter_700Bold, Inter_900Black } from "@expo-google-fonts/inter";
+  useFonts,
+  Inter_400Regular,
+  Inter_700Bold,
+  Inter_900Black,
+} from "@expo-google-fonts/inter";
 import CustomButton from "@/components/customButton";
-import { SeedDatabase} from "../db/seed";
 export default function LandingPage() {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isLargeScreen = width > 768;
-  
-  useEffect(() => {
-  const runSeed = async () => {
-    await SeedDatabase(); // ensure async execution
-  };
-  runSeed();
-}, []);
-
 
   // Load Inter font
   const [fontsLoaded] = useFonts({
@@ -39,12 +27,7 @@ export default function LandingPage() {
   });
   if (!fontsLoaded) return null;
 
-  const fontSizeTitle =
-    width > 1400 ? "$3xl"
-    : width > 1200 ? "$2xl"
-    : width > 900 ? "$xl"
-    : "$xl";
-
+  const fontSizeTitle = width > 1400 ? "$3xl" : width > 1200 ? "$2xl" : width > 900 ? "$xl" : "$xl";
 
   if (isLargeScreen) {
     // SPLIT LAYOUT FOR LARGE SCREENS
@@ -73,7 +56,6 @@ export default function LandingPage() {
               opacity={0.3}
               zIndex={1}
             />
-         
           </ImageBackground>
         </Box>
         {/* Right: Content */}
@@ -127,42 +109,32 @@ export default function LandingPage() {
                 Unleash Your Potential with Gymify
               </Text>
               <Text
-              fontSize={width > 1200 ? "$sm" : "$xs"}
-
+                fontSize={width > 1200 ? "$sm" : "$xs"}
                 color="$white"
                 textAlign="left"
                 px="$2"
                 fontFamily="Inter"
-                
               >
-                Discover personalized fitness plans and home workouts designed to help
-                you build strength, improve flexibility, and stay motivated.
+                Discover personalized fitness plans and home workouts designed to help you build
+                strength, improve flexibility, and stay motivated.
               </Text>
-               <CustomButton
-   onPress={() => router.replace("/home")}
-       hover={{ bg: "$yellow300", scale: 1.05 }}
-
-style={({ pressed }:any) => ({
-    backgroundColor: "#1F1F1F",
-    opacity: pressed ? 1 : 1, // same opacity prevents flash
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-
-
-  })}
-  iconPosition="right"
-  icon={
-    <AntDesign
-      name="arrowright"
-      size={20}
-      color="white"
-      style={{ marginLeft: 8 }}
-    />
-  }
->
-  Get Started
-</CustomButton>
+              <CustomButton
+                onPress={() => router.replace("/home")}
+                hover={{ bg: "$yellow300", scale: 1.05 }}
+                style={({ pressed }: any) => ({
+                  backgroundColor: "#1F1F1F",
+                  opacity: pressed ? 1 : 1, // same opacity prevents flash
+                  paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  borderRadius: 12,
+                })}
+                iconPosition="right"
+                icon={
+                  <AntDesign name="arrowright" size={20} color="white" style={{ marginLeft: 8 }} />
+                }
+              >
+                Get Started
+              </CustomButton>
             </VStack>
           </VStack>
         </Center>
@@ -192,7 +164,14 @@ style={({ pressed }:any) => ({
           opacity={0.6} // Increased opacity for better text visibility
           zIndex={1}
         />
-        <VStack flex={1} justifyContent="space-between" zIndex={2} px="$2" py="$8" alignItems="center">
+        <VStack
+          flex={1}
+          justifyContent="space-between"
+          zIndex={2}
+          px="$2"
+          py="$8"
+          alignItems="center"
+        >
           {/* Top: Logo and Name */}
           <HStack alignItems="center" space="lg" mt="$4">
             <Image
@@ -241,34 +220,26 @@ style={({ pressed }:any) => ({
               lineHeight={17}
               letterSpacing={0.4}
             >
-              Discover personalized fitness plans and home workouts designed to help
-              you build strength, improve flexibility, and stay motivated.
+              Discover personalized fitness plans and home workouts designed to help you build
+              strength, improve flexibility, and stay motivated.
             </Text>
-          <CustomButton
-   onPress={() => router.replace("/home")}
-       hover={{ bg: "$yellow300", scale: 1.05 }}
-
-style={({ pressed }:any) => ({
-    backgroundColor: "#1F1F1F",
-    opacity: pressed ? 1 : 1, // same opacity prevents flash
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-
-
-  })}
-  iconPosition="right"
-  icon={
-    <AntDesign
-      name="arrowright"
-      size={20}
-      color="white"
-      style={{ marginLeft: 8 }}
-    />
-  }
->
-  Get Started
-</CustomButton>
+            <CustomButton
+              onPress={() => router.replace("/home")}
+              hover={{ bg: "$yellow300", scale: 1.05 }}
+              style={({ pressed }: any) => ({
+                backgroundColor: "#1F1F1F",
+                opacity: pressed ? 1 : 1, // same opacity prevents flash
+                paddingVertical: 12,
+                paddingHorizontal: 20,
+                borderRadius: 12,
+              })}
+              iconPosition="right"
+              icon={
+                <AntDesign name="arrowright" size={20} color="white" style={{ marginLeft: 8 }} />
+              }
+            >
+              Get Started
+            </CustomButton>
           </VStack>
         </VStack>
       </ImageBackground>

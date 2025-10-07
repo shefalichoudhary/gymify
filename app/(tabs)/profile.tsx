@@ -21,10 +21,14 @@ import CustomButton from "@/components/customButton";
 
 export default function Profile() {
   const router = useRouter();
-  const [user, setUser] = useState<null | { id: number; name: string; email: string;  photo?: string | null ,  created_at?: string | null; }>(null);
+  const [user, setUser] = useState<null | {
+    id: number;
+    name: string;
+    email: string;
+    photo?: string | null;
+    created_at?: string | null;
+  }>(null);
   const [loading, setLoading] = useState(true);
-
-
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -36,7 +40,7 @@ export default function Profile() {
             name: dbUser.name,
             email: dbUser.email,
             photo: dbUser.photo ?? null,
-            created_at: dbUser.created_at ?? null // <- fetch created_at if available
+            created_at: dbUser.created_at ?? null, // <- fetch created_at if available
           });
         } else {
           setUser(null);
@@ -60,7 +64,9 @@ export default function Profile() {
     return (
       <Box flex={1} justifyContent="center" alignItems="center" bg="$black">
         <Spinner size={24} color="$white" />
-        <Text color="$white" mt="$2">Loading profile...</Text>
+        <Text color="$white" mt="$2">
+          Loading profile...
+        </Text>
       </Box>
     );
   }
@@ -92,17 +98,19 @@ export default function Profile() {
             {user.photo ? (
               <AvatarImage source={{ uri: user.photo }} alt={user.name} /> // show photo if exists
             ) : (
-              <AvatarFallbackText>
-                {user.name?.slice(0, 2).toUpperCase()}
-              </AvatarFallbackText>
+              <AvatarFallbackText>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallbackText>
             )}
           </Avatar>
         </LinearGradient>
 
         {/* Username */}
         <VStack space="xs" alignItems="center" w="100%" mt="$4">
-          <Text color="$white" fontSize="$2xl" fontWeight="$bold">{user.name}</Text>
-          <Text color="$coolGray400" fontSize="$md">Fitness Enthusiast</Text>
+          <Text color="$white" fontSize="$2xl" fontWeight="$bold">
+            {user.name}
+          </Text>
+          <Text color="$coolGray400" fontSize="$md">
+            Fitness Enthusiast
+          </Text>
         </VStack>
 
         {/* Profile Info Card */}
@@ -123,42 +131,39 @@ export default function Profile() {
             <Divider bg="$coolGray800" />
             <ProfileItem label="Fitness Goal" value="Lose Fat" />
             <Divider bg="$coolGray800" />
-           <ProfileItem 
-  label="Joined" 
-  value={
-    user.created_at 
-      ? new Date(user.created_at).toLocaleString("en-US", { month: "long", year: "numeric" })
-      : "-"
-  } 
-/>
+            <ProfileItem
+              label="Joined"
+              value={
+                user.created_at
+                  ? new Date(user.created_at).toLocaleString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : "-"
+              }
+            />
           </VStack>
         </Box>
 
         {/* Buttons */}
         <VStack space="md" w="100%">
-         
+          <CustomButton
+            onPress={() => router.replace("/home")}
+            bg="$blue600"
+            borderColor="$textLight400"
+            icon={<AntDesign name="edit" size={18} color="white" marginLeft={2} />}
+          >
+            Edit Profile
+          </CustomButton>
 
-                  
-         <CustomButton
-                      onPress={() => router.replace("/home")}
-
-               bg="$blue600"
-               borderColor="$textLight400"
-               icon={ <AntDesign name="edit" size={18} color="white"  marginLeft={2}
-               />}
-               >
-                 Edit Profile
-               </CustomButton>
-         
-         <CustomButton
-               onPress={logout}
-               bg="$blue600"
-               borderColor="$textLight400"
-               icon={ <AntDesign name="logout" size={18} color="white"  marginLeft={2}
-               />}
-               >
-                 Logout
-               </CustomButton>
+          <CustomButton
+            onPress={logout}
+            bg="$blue600"
+            borderColor="$textLight400"
+            icon={<AntDesign name="logout" size={18} color="white" marginLeft={2} />}
+          >
+            Logout
+          </CustomButton>
         </VStack>
       </VStack>
     </ScrollView>
@@ -167,7 +172,11 @@ export default function Profile() {
 
 const ProfileItem = ({ label, value }: { label: string; value: string }) => (
   <HStack justifyContent="space-between" alignItems="center">
-    <Text color="$coolGray400" fontSize="$sm">{label}</Text>
-    <Text color="$white" fontWeight="$medium" fontSize="$sm">{value}</Text>
+    <Text color="$coolGray400" fontSize="$sm">
+      {label}
+    </Text>
+    <Text color="$white" fontWeight="$medium" fontSize="$sm">
+      {value}
+    </Text>
   </HStack>
 );

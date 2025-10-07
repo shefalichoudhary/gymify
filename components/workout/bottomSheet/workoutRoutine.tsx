@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Box, VStack, HStack, Text } from "@gluestack-ui/themed";
 import BottomSheet from "@gorhom/bottom-sheet";
 import { Pressable } from "@/components/ui/pressable";
@@ -57,9 +52,7 @@ const WorkoutRoutineSheet = forwardRef<WorkoutRoutineSheetRef, Props>(
       if (!routine) return;
 
       // delete exercises first
-      await db
-        .delete(routineExercises)
-        .where(eq(routineExercises.routineId, routine.id));
+      await db.delete(routineExercises).where(eq(routineExercises.routineId, routine.id));
 
       // delete routine
       await db.delete(routines).where(eq(routines.id, routine.id));
@@ -97,19 +90,8 @@ const WorkoutRoutineSheet = forwardRef<WorkoutRoutineSheetRef, Props>(
         >
           <Box>
             {/* Header */}
-            <Box
-              borderBottomWidth={1}
-              borderColor="$trueGray700"
-              pt="$2"
-              pb="$3"
-              mb="$4"
-            >
-              <Text
-                color="$white"
-                fontSize="$lg"
-                fontWeight="$bold"
-                textAlign="center"
-              >
+            <Box borderBottomWidth={1} borderColor="$trueGray700" pt="$2" pb="$3" mb="$4">
+              <Text color="$white" fontSize="$lg" fontWeight="$bold" textAlign="center">
                 {routine?.name || "Routine Details"}
               </Text>
             </Box>
@@ -132,13 +114,13 @@ const WorkoutRoutineSheet = forwardRef<WorkoutRoutineSheetRef, Props>(
               </Pressable>
 
               {/* Delete */}
-             <Pressable
-  onPress={() => {
-    bottomSheetRef.current?.close();
-    // wait a bit for sheet close animation before showing dialog
-    setTimeout(() => setShowConfirm(true), 100); 
-  }}
->
+              <Pressable
+                onPress={() => {
+                  bottomSheetRef.current?.close();
+                  // wait a bit for sheet close animation before showing dialog
+                  setTimeout(() => setShowConfirm(true), 100);
+                }}
+              >
                 <HStack alignItems="center" space="lg">
                   <MaterialIcons name="clear" size={24} color="red" />
                   <Text color="$red500">Delete Routine</Text>

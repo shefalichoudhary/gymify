@@ -4,9 +4,7 @@ export type WorkoutSet = {
   minReps?: number | null;
   maxReps?: number | null;
   duration?: number | null;
-
   isRangeReps?: boolean;
-
   previousWeight?: number | null;
   previousReps?: number | null;
   previousMinReps?: number | null;
@@ -14,7 +12,6 @@ export type WorkoutSet = {
   previousUnit?: "kg" | "lbs";
   previousRepsType?: "reps" | "rep range";
   previousDuration?: number | null;
-
   isCompleted?: boolean;
   setType?: "W" | "Normal" | "D" | "F" | string;
   unit?: "kg" | "lbs";

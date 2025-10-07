@@ -4,7 +4,7 @@
     "slug": "gymify",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "com.shefali_choudhary.gymify",
+    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {

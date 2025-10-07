@@ -62,47 +62,45 @@ export default function ConfirmDialog({
         </AlertDialog.Body>
 
         {/* 🔹 Buttons */}
-    <AlertDialog.Footer >
-  <HStack space="xs" justifyContent="center">
-    {/* Cancel */}
-    <Button
-      variant="outline"
-      rounded="2xl"
-      flex={1}           // equal width
-      onPress={onCancel}
-      bg="rgba(255,255,255,0.1)"
-      borderWidth={0}
-    >
-      <HStack space="xs" alignItems="center" justifyContent="center">
-        <Ionicons name="close" size={14} color="#D1D5DB" />
-        <Text color="$coolGray200" fontSize="$sm" fontWeight="medium">
-          {cancelText}
-        </Text>
-      </HStack>
-    </Button>
+        <AlertDialog.Footer>
+          <HStack space="xs" justifyContent="center">
+            {/* Cancel */}
+            <Button
+              variant="outline"
+              rounded="2xl"
+              flex={1} // equal width
+              onPress={onCancel}
+              bg="rgba(255,255,255,0.1)"
+              borderWidth={0}
+            >
+              <HStack space="xs" alignItems="center" justifyContent="center">
+                <Ionicons name="close" size={14} color="#D1D5DB" />
+                <Text color="$coolGray200" fontSize="$sm" fontWeight="medium">
+                  {cancelText}
+                </Text>
+              </HStack>
+            </Button>
 
-    {/* Confirm */}
-    <Button
-      rounded="xl"
-      flex={1}           // equal width
-      onPress={onConfirm}
-      bg={destructive ? "$blue500" : "$black"}
-    >
-      <HStack space="xs" alignItems="center" justifyContent="center">
-        <Ionicons
-          name={destructive ? "trash-outline" : "checkmark"}
-          size={14}
-          color="white"
-        />
-        <Text color="white" fontSize="$sm" fontWeight="semibold">
-          {confirmText}
-        </Text>
-      </HStack>
-    </Button>
-  </HStack>
-</AlertDialog.Footer>
-
-
+            {/* Confirm */}
+            <Button
+              rounded="xl"
+              flex={1} // equal width
+              onPress={onConfirm}
+              bg={destructive ? "$blue500" : "$black"}
+            >
+              <HStack space="xs" alignItems="center" justifyContent="center">
+                <Ionicons
+                  name={destructive ? "trash-outline" : "checkmark"}
+                  size={14}
+                  color="white"
+                />
+                <Text color="white" fontSize="$sm" fontWeight="semibold">
+                  {confirmText}
+                </Text>
+              </HStack>
+            </Button>
+          </HStack>
+        </AlertDialog.Footer>
       </AlertDialog.Content>
     </AlertDialog>
   );

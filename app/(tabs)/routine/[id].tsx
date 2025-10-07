@@ -1,11 +1,4 @@
-import {
-  Box,
-  Text,
-  VStack,
-  HStack,
-  ScrollView,
-  Pressable,
-} from "@gluestack-ui/themed";
+import { Box, Text, VStack, HStack, ScrollView, Pressable } from "@gluestack-ui/themed";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import CustomHeader from "@/components/customHeader";
@@ -166,9 +159,7 @@ export default function RoutineDetails() {
           Exercises
         </Text>
         <Pressable
-          onPress={() =>
-            router.push({ pathname: "/routine/edit/[id]", params: { id: routineId } })
-          }
+          onPress={() => router.push({ pathname: "/routine/edit/[id]", params: { id: routineId } })}
         >
           <Text color="$blue400" fontWeight={"$small"} fontSize="$md">
             Edit Routine
@@ -215,7 +206,7 @@ export default function RoutineDetails() {
                     </Text>
                   </Box>
 
-                  {exercise.  exerciseType === "Duration" ? (
+                  {exercise.exerciseType === "Duration" ? (
                     <Box flex={4}>
                       <Text size="xs" color="$coolGray400" fontWeight="$small">
                         Duration
@@ -277,7 +268,7 @@ export default function RoutineDetails() {
                             <Text color="$white">
                               {exercise.repsType === "rep range"
                                 ? `${set.minReps ?? "-"}-${set.maxReps ?? "-"}`
-                                : set.reps ?? "-"}
+                                : (set.reps ?? "-")}
                             </Text>
                           </Box>
                         </>

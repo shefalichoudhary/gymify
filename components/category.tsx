@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Text,
-  Pressable,
-  HStack,
-  VStack,
-  ScrollView,
-  Icon,
-} from "@gluestack-ui/themed";
+import { Box, Text, Pressable, HStack, VStack, ScrollView, Icon } from "@gluestack-ui/themed";
 import Modal from "react-native-modal";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 
@@ -29,9 +21,7 @@ export default function Category({
   onSelectMuscle,
 }: ExerciseFilterProps) {
   const [isModalVisible, setModalVisible] = useState(false);
-  const [modalType, setModalType] = useState<"equipment" | "muscle">(
-    "equipment"
-  );
+  const [modalType, setModalType] = useState<"equipment" | "muscle">("equipment");
 
   const openFilterModal = (type: "equipment" | "muscle") => {
     setModalType(type);
@@ -47,11 +37,9 @@ export default function Category({
     setModalVisible(false);
   };
 
-  const shouldShowReset =
-    selectedEquipment !== "All Equipment" || selectedMuscle !== "All Muscle";
+  const shouldShowReset = selectedEquipment !== "All Equipment" || selectedMuscle !== "All Muscle";
 
-  const currentSelected =
-    modalType === "equipment" ? selectedEquipment : selectedMuscle;
+  const currentSelected = modalType === "equipment" ? selectedEquipment : selectedMuscle;
 
   return (
     <>
@@ -84,10 +72,12 @@ export default function Category({
           </Pressable>
 
           {shouldShowReset && (
-            <Pressable onPress={() => {
-              onSelectEquipment("All Equipment");
-              onSelectMuscle("All Muscle");
-            }}>
+            <Pressable
+              onPress={() => {
+                onSelectEquipment("All Equipment");
+                onSelectMuscle("All Muscle");
+              }}
+            >
               <MaterialIcons name="cancel" size={24} color="white" />
             </Pressable>
           )}
@@ -103,7 +93,14 @@ export default function Category({
         backdropOpacity={0.8}
         backdropColor="black"
       >
-        <Box bg="$zinc800" borderTopLeftRadius="$2xl" borderTopRightRadius="$2xl" pb="$4" maxHeight="75%" w="100%">
+        <Box
+          bg="$zinc800"
+          borderTopLeftRadius="$2xl"
+          borderTopRightRadius="$2xl"
+          pb="$4"
+          maxHeight="75%"
+          w="100%"
+        >
           <VStack alignItems="center" py="$2" mt="$2">
             <Box w={48} h={1.5} bg="$gray400" borderRadius="$full" mb="$2" />
             <Text color="$white" size="xl" fontWeight="$bold" py="$2">

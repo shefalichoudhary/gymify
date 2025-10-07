@@ -30,77 +30,57 @@ const setTypes: SetType[] = [
   { key: "REMOVE", label: "Remove Set", icon: <Ionicons name="close" size={20} color="red" /> }, // ❌
 ];
 
-const SetTypeSheet = forwardRef<SetTypeSheetRef, Props>(
-  ({ selectedType, onSelect }, ref) => {
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const [selected, setSelected] = useState<string>(selectedType);
+const SetTypeSheet = forwardRef<SetTypeSheetRef, Props>(({ selectedType, onSelect }, ref) => {
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const [selected, setSelected] = useState<string>(selectedType);
 
-    useImperativeHandle(ref, () => ({
-      open: () => bottomSheetRef.current?.snapToIndex(1),
-      close: () => bottomSheetRef.current?.close(),
-    }));
+  useImperativeHandle(ref, () => ({
+    open: () => bottomSheetRef.current?.snapToIndex(1),
+    close: () => bottomSheetRef.current?.close(),
+  }));
 
-    return (
-      <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "35%"]}>
-        <Box
-          borderBottomWidth={1}
-          borderColor="$trueGray700"
-          pb="$3"
-          pt="$2"
-          mb="$4"
-        >
-          <Text
-            fontSize="$lg"
-            fontWeight="$bold"
-            textAlign="center"
-            color="white"
-          >
-            Select Set Type
-          </Text>
-        </Box>
+  return (
+    <CustomBottomSheet ref={bottomSheetRef} snapPoints={["20%", "35%"]}>
+      <Box borderBottomWidth={1} borderColor="$trueGray700" pb="$3" pt="$2" mb="$4">
+        <Text fontSize="$lg" fontWeight="$bold" textAlign="center" color="white">
+          Select Set Type
+        </Text>
+      </Box>
 
-        <BottomSheetScrollView
-          contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
-        >
-          <HStack flexWrap="wrap" space="sm">
-            {setTypes.map((type) => {
-              const isActive = selected === type.key;
-              return (
-                <Pressable
-                  key={type.key}
-                  onPress={() => {
-                    Haptics.notificationAsync(
-                      Haptics.NotificationFeedbackType.Success
-                    );
-                    setSelected(type.key);
-                    onSelect(type.key);
-                    bottomSheetRef.current?.close();
-                  }}
-                  bg={isActive ? "$primary600" : "#2a2a2a"}
-                  px="$4"
-                  py="$2"
-                  borderRadius="$full"
-                  borderWidth={1}
-                  borderColor={isActive ? "$primary600" : "$trueGray700"}
-                  m="$1"
-                >
-                  <HStack alignItems="center" space="sm">
-                    {type.icon}
-                    <Text
-                      fontWeight="$medium"
-                      color={isActive ? "white" : "$trueGray400"}
-                    >
-                      {type.label}
-                    </Text>
-                  </HStack>
-                </Pressable>
-              );
-            })}
-          </HStack>
-        </BottomSheetScrollView>
-      </CustomBottomSheet>
-    );
-  }
-);
+      <BottomSheetScrollView contentContainerStyle={{ padding: 12, paddingBottom: 30 }}>
+        <HStack flexWrap="wrap" space="sm">
+          {setTypes.map((type) => {
+            const isActive = selected === type.key;
+            return (
+              <Pressable
+                key={type.key}
+                onPress={() => {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  setSelected(type.key);
+                  onSelect(type.key);
+                  bottomSheetRef.current?.close();
+                }}
+                bg={isActive ? "$primary600" : "#2a2a2a"}
+                px="$4"
+                py="$2"
+                borderRadius="$full"
+                borderWidth={1}
+                borderColor={isActive ? "$primary600" : "$trueGray700"}
+                m="$1"
+              >
+                <HStack alignItems="center" space="sm">
+                  {type.icon}
+                  <Text fontWeight="$medium" color={isActive ? "white" : "$trueGray400"}>
+                    {type.label}
+                  </Text>
+                </HStack>
+              </Pressable>
+            );
+          })}
+        </HStack>
+      </BottomSheetScrollView>
+    </CustomBottomSheet>
+  );
+});
 
 export default SetTypeSheet;

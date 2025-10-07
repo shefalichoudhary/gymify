@@ -1,12 +1,7 @@
 import { db } from "@/db/db";
-import {
-  routines,
-  routineExercises,
-  routineSets,
-} from "@/db/schema";
+import { routines, routineExercises, routineSets } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { WorkoutSet as Set } from "@/types/workoutSet";
-
 
 type ExerciseUpdateData = {
   notes: string;
@@ -28,9 +23,7 @@ export const updateRoutineInDb = async (
   console.log("New exercise data:", exerciseData);
 
   // 1️⃣ Update routine title
-  await db.update(routines)
-    .set({ name: newTitle })
-    .where(eq(routines.id, routineId));
+  await db.update(routines).set({ name: newTitle }).where(eq(routines.id, routineId));
 
   for (const [exerciseId, data] of Object.entries(exerciseData)) {
     // 2️⃣ Check if exercise exists in routineExercises
@@ -38,10 +31,7 @@ export const updateRoutineInDb = async (
       .select()
       .from(routineExercises)
       .where(
-        and(
-          eq(routineExercises.routineId, routineId),
-          eq(routineExercises.exerciseId, exerciseId)
-        )
+        and(eq(routineExercises.routineId, routineId), eq(routineExercises.exerciseId, exerciseId))
       )
       .get();
 
@@ -55,7 +45,8 @@ export const updateRoutineInDb = async (
         repsType: data.repsType ?? "reps",
       });
     } else {
-      await db.update(routineExercises)
+      await db
+        .update(routineExercises)
         .set({
           notes: data.notes ?? "",
           restTimer: data.restTimer ?? 0,
@@ -71,13 +62,9 @@ export const updateRoutineInDb = async (
     }
 
     // 3️⃣ DELETE old sets for this exercise
-    await db.delete(routineSets)
-      .where(
-        and(
-          eq(routineSets.routineId, routineId),
-          eq(routineSets.exerciseId, exerciseId)
-        )
-      );
+    await db
+      .delete(routineSets)
+      .where(and(eq(routineSets.routineId, routineId), eq(routineSets.exerciseId, exerciseId)));
 
     // 4️⃣ Insert new sets
     for (let i = 0; i < data.sets.length; i++) {

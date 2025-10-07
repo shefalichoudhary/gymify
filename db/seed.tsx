@@ -23,18 +23,12 @@ export const SeedDatabase = async () => {
       let muscleId;
 
       // Check if muscle exists
-      const existingMuscle = await db
-        .select()
-        .from(muscles)
-        .where(eq(muscles.name, m.name));
+      const existingMuscle = await db.select().from(muscles).where(eq(muscles.name, m.name));
 
       if (existingMuscle.length > 0) {
         muscleId = existingMuscle[0].id;
       } else {
-        const insertedMuscle = await db
-          .insert(muscles)
-          .values({ name: m.name })
-          .returning();
+        const insertedMuscle = await db.insert(muscles).values({ name: m.name }).returning();
         muscleId = insertedMuscle[0].id;
       }
 
@@ -49,3 +43,7 @@ export const SeedDatabase = async () => {
 
   console.log("✅ Database seeding complete!");
 };
+// ✅ Auto-run when executed directly
+SeedDatabase()
+  .then(() => console.log("✅ Done seeding!"))
+  .catch((err) => console.error("❌ Error seeding:", err));
