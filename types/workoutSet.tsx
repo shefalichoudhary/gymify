@@ -11,7 +11,6 @@ export type WorkoutSet = {
   previousMaxReps?: number | null;
   previousUnit?: "kg" | "lbs";
   previousRepsType?: "reps" | "rep range";
-  previousDuration?: number | null;
   isCompleted?: boolean;
   setType?: "W" | "Normal" | "D" | "F" | string;
   unit?: "kg" | "lbs";
