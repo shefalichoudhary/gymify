@@ -246,6 +246,34 @@
       "when": 1759867440621,
       "tag": "0034_soft_mister_fear",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "6",
+      "when": 1760211642502,
+      "tag": "0035_open_vargas",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1760211695388,
+      "tag": "0036_fantastic_sauron",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1760211707314,
+      "tag": "0037_brainy_viper",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1760211922551,
+      "tag": "0038_acoustic_ravenous",
+      "breakpoints": true
     }
   ]
 }

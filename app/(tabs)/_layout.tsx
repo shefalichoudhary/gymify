@@ -2,17 +2,25 @@ import { Tabs, useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CustomHeader from "@/components/customHeader";
-import { Pressable, Text, Box, VStack } from "@gluestack-ui/themed";
+import {
+  Pressable,
+  Text,
+  Box,
+  HStack,
+  Avatar,
+  AvatarFallbackText,
+  AvatarImage,
+} from "@gluestack-ui/themed";
 import { useAuth } from "@/context/authContext";
 import { useWindowDimensions } from "react-native";
 import { useEffect, useState } from "react";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Layout() {
   const router = useRouter();
   const { user } = useAuth();
   const { width } = useWindowDimensions();
   const isLargeScreen = width >= 768;
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     router.prefetch("/logWorkout");
@@ -45,7 +53,7 @@ export default function Layout() {
                           color="$white"
                           fontWeight="$xl"
                           fontSize="$lg"
-                          $md-fontWeight="$bold"
+                          $md-fontWeight="$medium"
                           letterSpacing={3}
                         >
                           GYMIFY
@@ -54,14 +62,40 @@ export default function Layout() {
                     }
                     right={
                       user ? (
-                        <VStack alignItems="flex-end" space="sm">
-                          <Text color="$white" fontWeight="$medium" fontSize="$sm">
+                        <HStack alignItems="center" space="md">
+                          <Text
+                            color="$white"
+                            fontWeight="$medium"
+                            fontSize="$md"
+                            letterSpacing={1}
+                            lineHeight={18}
+                          >
                             Hello
                           </Text>
-                          <Text color="$white" fontWeight="$bold" fontSize="$md">
-                            {user.username}
-                          </Text>
-                        </VStack>
+                          <Pressable onPress={() => router.navigate("/profile")}>
+                            <LinearGradient
+                              colors={["#4facfe", "#00f2fe"]}
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 1, y: 1 }}
+                              style={{
+                                borderRadius: 9999,
+                                padding: 1,
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Avatar bgColor="$black" size="sm" borderWidth={0}>
+                                {user.photo ? (
+                                  <AvatarImage source={{ uri: user.photo }} alt={user.username} />
+                                ) : (
+                                  <AvatarFallbackText size="md">
+                                    {user.username?.slice(0, 2).toUpperCase()}
+                                  </AvatarFallbackText>
+                                )}
+                              </Avatar>
+                            </LinearGradient>
+                          </Pressable>
+                        </HStack>
                       ) : null
                     }
                   />
@@ -74,18 +108,16 @@ export default function Layout() {
             },
 
             tabBarStyle: showTabBar
-              ? isSheetOpen
-                ? { display: "none" } // hide tab bar when sheet is open
-                : {
-                    backgroundColor: "#1F1F1F",
-                    paddingBottom: 8,
-                    marginBottom: 3,
-                    height: 54,
-                    elevation: 0,
-                    borderTopWidth: 0,
-                    shadowOpacity: 0,
-                    shadowOffset: { width: 0, height: 0 },
-                  }
+              ? {
+                  backgroundColor: "#1F1F1F",
+                  paddingBottom: 8,
+                  marginBottom: 3,
+                  height: 54,
+                  elevation: 0,
+                  borderTopWidth: 0,
+                  shadowOpacity: 0,
+                  shadowOffset: { width: 0, height: 0 },
+                }
               : { display: "none" },
 
             tabBarLabelStyle: {
@@ -144,6 +176,7 @@ export default function Layout() {
           name="saveWorkout"
           options={{ title: "SaveWorkout", href: null, headerShown: false }}
         />
+        <Tabs.Screen name="editProfile" options={{ title: "EditProfile", href: null }} />
       </Tabs>
     </Box>
   );

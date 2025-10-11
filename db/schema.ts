@@ -12,6 +12,7 @@ export const users = sqliteTable("users", {
   password: text("password").default("").notNull(),
   google: integer("google").default(0), // 0 = normal/guest user, 1 = Google user
   photo: text("photo").default(""),
+  fitness_goal: text("fitness_goal").default("lose fat").notNull(),
   created_at: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 

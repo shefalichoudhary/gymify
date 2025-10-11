@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Text,
@@ -8,57 +8,58 @@ import {
   AvatarFallbackText,
   AvatarImage,
   Divider,
-  Button,
   ScrollView,
   Spinner,
 } from "@gluestack-ui/themed";
-import { useRouter } from "expo-router";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { useFocusEffect, useRouter } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { db } from "@/db/db";
 import { users } from "@/db/schema";
 import CustomButton from "@/components/customButton";
 
+type UserType = {
+  id: string;
+  username: string;
+  email: string;
+  photo?: string | null;
+  created_at?: string | null;
+  fitness_goal: string;
+};
+
 export default function Profile() {
   const router = useRouter();
-  const [user, setUser] = useState<null | {
-    id: number;
-    name: string;
-    email: string;
-    photo?: string | null;
-    created_at?: string | null;
-  }>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const [dbUser] = await db.select().from(users);
-        if (dbUser) {
-          setUser({
-            id: Number(dbUser.id),
-            name: dbUser.username,
-            email: dbUser.email,
-            photo: dbUser.photo ?? null,
-            created_at: dbUser.created_at ?? null, // <- fetch created_at if available
-          });
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      } finally {
-        setLoading(false);
+  const fetchUser = async () => {
+    try {
+      const [dbUser] = await db.select().from(users).limit(1);
+      if (dbUser) {
+        setUser({
+          id: dbUser.id,
+          username: dbUser.username,
+          email: dbUser.email,
+          photo: dbUser.photo ?? null,
+          fitness_goal: dbUser.fitness_goal,
+          created_at: dbUser.created_at ?? null,
+        });
+      } else {
+        setUser(null);
       }
-    };
-
-    fetchUser();
-  }, []);
-
-  const logout = async () => {
-    setUser(null);
-    router.replace("/signIn");
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  // 🔁 Re-fetch whenever this screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchUser();
+    }, [])
+  );
 
   if (loading) {
     return (
@@ -77,9 +78,6 @@ export default function Profile() {
         <Text color="$white" fontSize="$lg" fontWeight="$bold" mb="$4">
           You are logged out.
         </Text>
-        <Button bg="$blue600" onPress={() => router.replace("/signIn")}>
-          <Text color="white">Login</Text>
-        </Button>
       </Box>
     );
   }
@@ -96,9 +94,9 @@ export default function Profile() {
         >
           <Avatar bgColor="$black" size="2xl" borderWidth={2} borderColor="transparent">
             {user.photo ? (
-              <AvatarImage source={{ uri: user.photo }} alt={user.name} /> // show photo if exists
+              <AvatarImage source={{ uri: user.photo }} alt={user.username} /> // show photo if exists
             ) : (
-              <AvatarFallbackText>{user.name?.slice(0, 2).toUpperCase()}</AvatarFallbackText>
+              <AvatarFallbackText>{user.username?.slice(0, 2).toUpperCase()}</AvatarFallbackText>
             )}
           </Avatar>
         </LinearGradient>
@@ -106,7 +104,7 @@ export default function Profile() {
         {/* Username */}
         <VStack space="xs" alignItems="center" w="100%" mt="$4">
           <Text color="$white" fontSize="$2xl" fontWeight="$bold">
-            {user.name}
+            {user.username}
           </Text>
           <Text color="$coolGray400" fontSize="$md">
             Fitness Enthusiast
@@ -129,7 +127,7 @@ export default function Profile() {
           <VStack space="md">
             <ProfileItem label="Email" value={user.email} />
             <Divider bg="$coolGray800" />
-            <ProfileItem label="Fitness Goal" value="Lose Fat" />
+            <ProfileItem label="Fitness Goal" value={user.fitness_goal} />
             <Divider bg="$coolGray800" />
             <ProfileItem
               label="Joined"
@@ -148,21 +146,12 @@ export default function Profile() {
         {/* Buttons */}
         <VStack space="md" w="100%">
           <CustomButton
-            onPress={() => router.replace("/home")}
+            onPress={() => router.replace("/editProfile")}
             bg="$blue600"
             borderColor="$textLight400"
             icon={<AntDesign name="edit" size={18} color="white" marginLeft={2} />}
           >
             Edit Profile
-          </CustomButton>
-
-          <CustomButton
-            onPress={logout}
-            bg="$blue600"
-            borderColor="$textLight400"
-            icon={<AntDesign name="logout" size={18} color="white" marginLeft={2} />}
-          >
-            Logout
           </CustomButton>
         </VStack>
       </VStack>

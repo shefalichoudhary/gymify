@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `fitness_goal` text DEFAULT 'lose fat';
