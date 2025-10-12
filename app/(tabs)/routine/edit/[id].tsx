@@ -233,7 +233,7 @@ export default function EditRoutineScreen() {
     try {
       await updateRoutineInDb(routineId, routineTitle, exerciseData);
       console.log("Saving sets:", JSON.stringify(exerciseData, null, 2));
-      router.back();
+      router.replace("/routine/[id]");
     } catch (err) {
       console.error("❌ Failed to update routine:", err);
     }

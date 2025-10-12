@@ -6,7 +6,7 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { db } from "@/db/db";
 import { eq } from "drizzle-orm";
-import CustomBottomSheet from "@/components/routine/bottomSheet/customBottomSheet";
+import CustomBottomSheet from "@/components/customBottomSheet";
 import { routineExercises, routines } from "@/db/schema";
 import ConfirmDialog from "@/components/confirmDialog"; // 👈 import confirm dialog
 

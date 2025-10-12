@@ -16,9 +16,7 @@ import { db } from "@/db/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import CustomButton from "@/components/customButton";
-import FitnessGoalSheet, {
-  FitnessGoalSheetRef,
-} from "../../components/routine/bottomSheet/profile/fitnessGoalSheet";
+import FitnessGoalSheet, { FitnessGoalSheetRef } from "@/components/profile/fitnessGoalSheet";
 
 export default function EditProfile() {
   const fitnessSheetRef = useRef<FitnessGoalSheetRef>(null);

@@ -9,7 +9,7 @@ import React, {
 import { Text, VStack, Pressable, HStack, FlatList, Box, ScrollView } from "@gluestack-ui/themed";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 
-import CustomBottomSheet from "@/components/routine/bottomSheet/customBottomSheet";
+import CustomBottomSheet from "@/components/customBottomSheet";
 import { db } from "@/db/db";
 import { exercises, muscles, Muscle, exerciseMuscles } from "@/db/schema";
 import { inArray } from "drizzle-orm";

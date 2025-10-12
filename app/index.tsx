@@ -1,14 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ImageBackground, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Box, VStack, HStack, Text, Image, Center } from "@gluestack-ui/themed";
-import {
-  useFonts,
-  Inter_400Regular,
-  Inter_700Bold,
-  Inter_900Black,
-} from "@expo-google-fonts/inter";
 import CustomButton from "@/components/customButton";
 
 export default function LandingPage() {
@@ -16,21 +10,9 @@ export default function LandingPage() {
   const { width } = useWindowDimensions();
   const isLargeScreen = width > 768;
 
-  // Load Inter font
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_700Bold,
-    Inter_900Black,
-    Inter: Inter_400Regular,
-    InterBold: Inter_700Bold,
-    InterBlack: Inter_900Black,
-  });
-  if (!fontsLoaded) return null;
-
   const fontSizeTitle = width > 1400 ? "$3xl" : width > 1200 ? "$2xl" : width > 900 ? "$xl" : "$xl";
 
   if (isLargeScreen) {
-    // SPLIT LAYOUT FOR LARGE SCREENS
     return (
       <HStack flex={1} w="100%" h="100%">
         {/* Left: Background Image */}

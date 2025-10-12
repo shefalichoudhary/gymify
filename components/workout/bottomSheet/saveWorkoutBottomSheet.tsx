@@ -1,6 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Box, Text, Pressable, VStack } from "@gluestack-ui/themed";
-import CustomBottomSheet from "../../routine/bottomSheet/customBottomSheet";
+import CustomBottomSheet from "../../customBottomSheet";
 
 export type SaveWorkoutSheetRef = {
   open: (

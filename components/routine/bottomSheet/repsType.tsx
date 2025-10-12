@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Text, Box, HStack, Pressable, VStack } from "@gluestack-ui/themed";
 import BottomSheet from "@gorhom/bottom-sheet";
-import CustomBottomSheet from "./customBottomSheet";
+import CustomBottomSheet from "../../customBottomSheet";
 import { useFocusEffect } from "expo-router";
 
 export type RepsTypeSheetRef = {
