@@ -29,7 +29,7 @@ export default function AddExercise() {
   const filterRef = useRef<ExerciseFilterDrawerRef>(null);
 
   const handleCreate = () => {
-    if (from === "logWorkout") {
+    if (from === "") {
       router.push({
         pathname: "/logWorkout",
         params: {

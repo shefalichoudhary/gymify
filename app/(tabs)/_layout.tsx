@@ -146,24 +146,32 @@ export default function Layout() {
 
         <Tabs.Screen
           name="createRoutine"
-          options={{ title: "CreateRoutine", href: null, headerShown: false }}
+          options={{
+            title: "CreateRoutine",
+            href: null,
+            headerShown: false,
+            tabBarStyle: { display: "none" },
+          }}
         />
         <Tabs.Screen
           name="addExercise"
-          options={{ title: "AddExercise", href: null, headerShown: false }}
+          options={{
+            title: "AddExercise",
+            href: null,
+            headerShown: false,
+            tabBarStyle: { display: "none" },
+          }}
         />
         <Tabs.Screen
           name="logWorkout"
-          options={{ title: "LogWorkout", href: null, headerShown: false }}
-        />
-        <Tabs.Screen
-          name="routine/[id]"
           options={{
+            title: "LogWorkout",
+            href: null,
             headerShown: false,
             tabBarStyle: { display: "none" },
-            href: null, // 👈 this makes sure it's not listed in tabs
           }}
         />
+
         <Tabs.Screen
           name="routine/edit/[id]"
           options={{
@@ -174,9 +182,17 @@ export default function Layout() {
         ></Tabs.Screen>
         <Tabs.Screen
           name="saveWorkout"
-          options={{ title: "SaveWorkout", href: null, headerShown: false }}
+          options={{
+            title: "SaveWorkout",
+            href: null,
+            headerShown: false,
+            tabBarStyle: { display: "none" },
+          }}
         />
-        <Tabs.Screen name="editProfile" options={{ title: "EditProfile", href: null }} />
+        <Tabs.Screen
+          name="editProfile"
+          options={{ title: "EditProfile", href: null, tabBarStyle: { display: "none" } }}
+        />
       </Tabs>
     </Box>
   );

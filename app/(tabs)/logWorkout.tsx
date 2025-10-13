@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, VStack, HStack, Text, Button, ScrollView, SafeAreaView } from "@gluestack-ui/themed";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Entypo } from "@expo/vector-icons";
@@ -14,7 +14,6 @@ import {
   routineExercises,
   workoutExercises,
   workoutSets,
-  routineSets,
   routines,
 } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
@@ -26,7 +25,7 @@ import * as Haptics from "expo-haptics";
 import RestCountdownTimer from "@/components/routine/restCountdownTimer";
 import { useExerciseOptionsManager } from "@/hooks/useExerciseOptionsManager";
 import cuid from "cuid";
-import CustomDialog from "@/components/logWorkoutDialog";
+import CustomDialog from "@/components/workout/logWorkoutDialog";
 
 type SetItem = {
   weight?: number;
