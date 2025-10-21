@@ -146,7 +146,7 @@ export default function Profile() {
         {/* Buttons */}
         <VStack space="md" w="100%">
           <CustomButton
-            onPress={() => router.replace("/(tabs)/(userProfile)/editProfile")}
+            onPress={() => router.replace("/editProfile")}
             bg="$blue600"
             borderColor="$textLight400"
             icon={<AntDesign name="edit" size={18} color="white" marginLeft={2} />}

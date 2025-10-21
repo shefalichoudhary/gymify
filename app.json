@@ -7,12 +7,11 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/adaptive-icon.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#000000"
-    },
+    "jsEngine": "hermes",
+    "icon": "./assets/images/app-icon.png",
+
     "ios": {
+      "icon": "./assets/images/app-icon.png",
       "supportsTablet": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -21,15 +20,18 @@
         "policy": "appVersion"
       }
     },
+
     "android": {
+      "icon": "./assets/images/app-icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#000000",
-        "foregroundImage": "./assets/images/background.png"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundImage": "./assets/images/adaptive-icon-background.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.shefali_choudhary.gymify"
     },
+
     "web": {
       "bundler": "metro",
       "output": "static"
@@ -40,6 +42,15 @@
       "expo-sqlite",
       "expo-font",
       "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/adaptive-icon.png",
+          "imageWidth": 300,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ],
       [
         "@react-native-google-signin/google-signin",
         {
